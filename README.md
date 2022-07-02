@@ -15,7 +15,7 @@
 ### Disclaimer: Robot is in early development.
 <br>
 
-The R.O.S. Robot project.
+The ROS Robot project.
 <br>
 
 ## Support :
