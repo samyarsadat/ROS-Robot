@@ -1,4 +1,5 @@
-<h1 align="center">The R.O.S. Robot project</h1>
+<h1 align="center">The ROS Robot project</h1>
+
 <p align="center">
 	<br>
 	<a href="https://www.ros.org"><img src="https://github.com/samyarsadat/ROS-Robot/raw/dev/Assets/Logos/ROS_logo.svg"></a><br>
