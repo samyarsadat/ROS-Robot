@@ -1,8 +1,9 @@
 <h1 align="center">The R.O.S. Robot project</h1>
-
-<img src="https://github.com/samyarsadat/ROS-Robot/raw/dev/Assets/Logos/ROS_logo.svg">
-
 <p align="center">
+	<br>
+	<a href="https://www.ros.org"><img src="https://github.com/samyarsadat/ROS-Robot/raw/dev/Assets/Logos/ROS_logo.svg"></a><br>
+	<br>
+	<br>
 	<a href="https://github.com/samyarsadat/ROS-Robot/blob/dev/LICENSE"><img src="https://img.shields.io/github/license/samyarsadat/ROS-Robot?color=blue"></a>
 	|
 	<a href="https://github.com/samyarsadat/ROS-Robot/issues"><img src="https://img.shields.io/github/issues/samyarsadat/ROS-Robot"></a>
