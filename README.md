@@ -17,6 +17,27 @@
 
 The ROS Robot project.
 <br>
+<br>
+
+### This project will be completed in stages.
+#### The project is currently at stage 1.
+<br>
+
+#### Stage 1:
+The robot will follow an object with image processing and a Raspberry Pi camera.
+<br>
+<br>
+
+#### Stage 2:
+A LIDAR sensor will be added.
+The robot will be able to map and navigate its environment.
+<br>
+<br>
+
+#### Stage 3:
+A robotic arm will be added for object manipulation.
+
+<br>
 
 ## Support :
 You can contact me via e-mail.<br>
