@@ -17,7 +17,8 @@
 
 The ROS Robot project.
 <br>
-<img src="https://github.com/samyarsadat/ROS-Robot/raw/dev/Assets/Renders/GitHub_Render_1.png">
+<img src="https://github.com/samyarsadat/ROS-Robot/raw/dev/Assets/Renders/GitHub_Render_1_Edited.png">
+This is a 3D render of the CAD designs.
 <br>
 <br>
 
