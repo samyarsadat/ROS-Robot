@@ -12,7 +12,7 @@
 </p>
 
 ----
-### Disclaimer: Robot is in early development.
+### Disclaimer: Robot is in development.
 The ROS Robot project.
 <br>
 <br>
