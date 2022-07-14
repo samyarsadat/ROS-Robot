@@ -17,6 +17,8 @@
 
 The ROS Robot project.
 <br>
+<img src="https://github.com/samyarsadat/ROS-Robot/raw/dev/Assets/Renders/GitHub_Render_1.png">
+<br>
 <br>
 
 ### This project will be completed in stages.
