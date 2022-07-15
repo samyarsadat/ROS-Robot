@@ -1,6 +1,6 @@
 ### 3D Printing details:
-    - `Main_Body`, `Top_Plate`, and `Mid_Plate` are designed to be split in half so that they can be printed on smaller printers.
-    - You can find already split, ready to print `STL` files in the `Ready To Print` folder.
+   - `Main_Body`, `Top_Plate`, and `Mid_Plate` are designed to be split in half so that they can be printed on smaller printers.
+   - You can find already split, ready to print `STL` files in the `Ready To Print` folder.
 
 <br>
 
