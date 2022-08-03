@@ -3,3 +3,5 @@ ROS-Robot.code-workspace
 /CAD files/G-Code
 /CAD files/~$*.sldprt
 /CAD files/~$*.sldasm
+/Source Code/Raspberry Pi Pico src/build
+/.vscode
