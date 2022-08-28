@@ -30,18 +30,27 @@ set(CMAKE_CXX_STANDARD 17)
 # Initialize the Pico SDK
 pico_sdk_init()
 
+# Micro-ROS
+link_directories($ENV{MICROROS_PATH}/libmicroros)
+
 
 # ---- Pico A ----
 
 # Add source files
-add_executable(${PROJECT_NAME}_PICO_A Pico_A.cpp)
+add_executable(${PROJECT_NAME}_PICO_A Pico_A.c++ lib/PID_lib/PID_v1.c++ $ENV{MICROROS_PATH}/pico_uart_transport.c)
 
 # Create map/bin/hex/uf2 files
 pico_add_extra_outputs(${PROJECT_NAME}_PICO_A)
 
 # Link to libraries
+target_link_libraries(${PROJECT_NAME}_PICO_A microros)
 target_link_libraries(${PROJECT_NAME}_PICO_A pico_stdlib)
 target_link_libraries(${PROJECT_NAME}_PICO_A pico_multicore)
+target_link_libraries(${PROJECT_NAME}_PICO_A hardware_pwm)
+
+# Link to include directories
+target_include_directories(${PROJECT_NAME}_PICO_A PUBLIC $ENV{MICROROS_PATH}/libmicroros/include)
+target_include_directories(${PROJECT_NAME}_PICO_A PUBLIC $ENV{MICROROS_PATH})
 
 # Enable USB, disable UART
 pico_enable_stdio_usb(${PROJECT_NAME}_PICO_A 1)
@@ -51,15 +60,32 @@ pico_enable_stdio_uart(${PROJECT_NAME}_PICO_A 0)
 # ---- Pico B ----
 
 # Add source files
-add_executable(${PROJECT_NAME}_PICO_B Pico_B.cpp)
+add_executable(${PROJECT_NAME}_PICO_B Pico_B.c++ $ENV{MICROROS_PATH}/pico_uart_transport.c)
 
 # Create map/bin/hex/uf2 files
 pico_add_extra_outputs(${PROJECT_NAME}_PICO_B)
 
 # Link to libraries
+target_link_libraries(${PROJECT_NAME}_PICO_B microros)
 target_link_libraries(${PROJECT_NAME}_PICO_B pico_stdlib)
 target_link_libraries(${PROJECT_NAME}_PICO_B pico_multicore)
+target_link_libraries(${PROJECT_NAME}_PICO_B hardware_pwm)
+
+# Link to include directories
+target_include_directories(${PROJECT_NAME}_PICO_B PUBLIC $ENV{MICROROS_PATH}/libmicroros/include)
+target_include_directories(${PROJECT_NAME}_PICO_B PUBLIC $ENV{MICROROS_PATH})
 
 # Enable USB, disable UART
 pico_enable_stdio_usb(${PROJECT_NAME}_PICO_B 1)
 pico_enable_stdio_uart(${PROJECT_NAME}_PICO_B 0)
+
+
+
+# CMake flags
+SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
+
+# Compile definitions
+add_compile_definitions(PICO_UART_ENABLE_CRLF_SUPPORT=0)
+add_compile_definitions(PICO_STDIO_ENABLE_CRLF_SUPPORT=0)
+add_compile_definitions(PICO_STDIO_DEFAULT_CRLF=0)
