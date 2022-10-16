@@ -3,5 +3,13 @@ ROS-Robot.code-workspace
 /CAD files/G-Code
 /CAD files/~$*.sldprt
 /CAD files/~$*.sldasm
-/Source Code/Raspberry Pi Pico src/build
 /.vscode
+/Source Code/Raspberry Pi Pico src/build/*
+!/Source Code/Raspberry Pi Pico src/build/*.uf2
+!/Source Code/Raspberry Pi Pico src/build/*.elf
+/Circuit diagrams & PCB files/**/__Previews
+/Circuit diagrams & PCB files/**/History
+/Circuit diagrams & PCB files/**/Project *
+/Circuit diagrams & PCB files/**/*.Cam
+/Circuit diagrams & PCB files/**/*.OutJob
+/Circuit diagrams & PCB files/**/*.PrjPcbStructure

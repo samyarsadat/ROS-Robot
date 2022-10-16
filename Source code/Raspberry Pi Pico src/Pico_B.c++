@@ -43,10 +43,12 @@ rcl_publisher_t e_stop_pub;
 std_msgs__msg__String e_stop_msg;
 
 // ---- Misc. ----
-bool rpi_ready = false;
 bool core_1_continue = false;
 bool core_1_setup_start = false;
 bool halt_core_0 = false;
+
+// ---- Loop time ----
+uint32_t loop_time, loop_1_time;
 
 
 // ------- Pin defines -------
@@ -56,9 +58,9 @@ bool halt_core_0 = false;
 #define ready_sig    2
 
 // ---- Settings switches ----
-#define speed_sw_1  22
+#define speed_sw_1  16
 #define speed_sw_2  17
-#define mode_sw     16
+#define mode_sw     22
 
 // ---- Raspberry Pi camera LEDs ----
 #define cam_led_1  18
@@ -73,18 +75,28 @@ bool halt_core_0 = false;
 #define ms_back_r   10
 
 
+// ------- Other defines -------
+
+// ---- Misc. ----
+#define loop_timeout    60000    // In microseconds
+#define loop_1_timeout  200000   // In microseconds
+
+
 // ------- Functions -------
 
-// ---- RC Check prototype ----
+// ---- RCL return checker prototype ----
 void check_rc(rcl_ret_t rctc);
 
 
 // ---- Error handler ----
 void handle_error(int core, const char * err_msg)
 {
-    sprintf(e_stop_msg.data.data, "E_STOP (PICO_B): %s", err_msg);
-    e_stop_msg.data.size = strlen(e_stop_msg.data.data);
-	check_rc(rcl_publish(&e_stop_pub, &e_stop_msg, NULL));
+    if (core_1_continue)
+    {
+        sprintf(e_stop_msg.data.data, "E_STOP (PICO_B): %s", err_msg);
+        e_stop_msg.data.size = strlen(e_stop_msg.data.data);
+        check_rc(rcl_publish(&e_stop_pub, &e_stop_msg, NULL));
+    }
 
     if (core == 0)
     {
@@ -150,7 +162,7 @@ void init_pins()
 }
 
 
-// ---- RC Checker ----
+// ---- RCL return checker ----
 void check_rc(rcl_ret_t rctc)
 {
     if (rctc != RCL_RET_OK)
@@ -201,20 +213,34 @@ void setup1()
 // ---- Main loop (Runs forever on core 0) ----
 void loop()
 {
+    loop_time = time_us_32();
+
     gpio_put(onboard_led, HIGH);
     sleep_ms(1000);
     gpio_put(onboard_led, LOW);
     sleep_ms(1000);
+
+    if (time_us_32() - loop_time > loop_timeout)
+    {
+        handle_error(0, "Loop timeout exceeded");
+    }
 }
 
 
 // ---- Main loop (Runs forever on core 1) ----
 void loop1()
 {
+    loop_1_time = time_us_32();
+
     gpio_put(ready_sig, HIGH);
     sleep_ms(500);
     gpio_put(ready_sig, LOW);
     sleep_ms(500);
+
+    if (time_us_32() - loop_1_time > loop_1_timeout)
+    {
+        handle_error(1, "Loop 1 timeout exceeded");
+    }
 }
 
 

@@ -36,11 +36,11 @@ class PID
         void SetMode(int Mode);                                        // * sets PID to either Manual (0) or Auto (non-0)
 
         bool Compute();                                                // * performs the PID calculation.  it should be
-                                                                       //   called every time loop() cycles. ON/OFF and
+                                                                       //   called every time the main program loop cycles. ON/OFF and
                                                                        //   calculation frequency can be set using SetMode
                                                                        //   SetSampleTime respectively
 
-        void SetOutputLimits(float, float);                            // * clamps the output to a specific range. 0-255 by default, but
+        void SetOutputLimits(float, float);                            // * clamps the output to a specific range. 0-65535 by default, but
                                                                        //   it's likely the user will want to change this depending on
                                                                        //   the application
 

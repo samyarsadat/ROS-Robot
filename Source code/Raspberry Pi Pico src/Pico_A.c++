@@ -21,11 +21,11 @@
 // ------- Libraries & Modules -------
 #include <std_msgs/msg/string.h>
 #include <geometry_msgs/msg/twist.h>
+#include <sensor_msgs/msg/range.h>
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <rcl/error_handling.h>
 #include <rclc/executor.h>
-#include <math.h>
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
 #include "lib/helpers.h"
@@ -51,11 +51,26 @@ geometry_msgs__msg__Twist cmd_vel_msg;
 rcl_publisher_t e_stop_pub;
 std_msgs__msg__String e_stop_msg;
 
+rcl_publisher_t front_ultra_pub;
+sensor_msgs__msg__Range front_ultra_msg;
+
+rcl_publisher_t back_ultra_pub;
+sensor_msgs__msg__Range back_ultra_msg;
+
+rcl_publisher_t right_ultra_pub;
+sensor_msgs__msg__Range right_ultra_msg;
+
+rcl_publisher_t left_ultra_pub;
+sensor_msgs__msg__Range left_ultra_msg;
+
 // ---- Misc. ----
 bool rpi_ready = false;
 bool core_1_continue = false;
 bool core_1_setup_start = false;
 bool halt_core_0 = false;
+
+// ---- Loop time ----
+uint32_t loop_time, loop_1_time;
 
 // ---- Motor PWM slice ----
 uint r_motor_slice_num;
@@ -133,6 +148,16 @@ PID l_motors(&l_motor_rpm, &motor_l_set, &motor_l_spd, lm_kp, lm_ki, lm_kd, DIRE
 
 // ------- Other defines -------
 
+// ---- Misc. ----
+#define loop_time_max    60000    // In microseconds
+#define loop_1_time_max  200000   // In microseconds
+#define PI               3.141592
+
+// ---- Ultrasonic sensor specs ----
+#define ultra_fov  30
+#define ultra_min_dist   1     // In cm
+#define ultra_max_dist   400   // In cm
+
 // ---- Motor specs ----
 #define enc_pulses_per_rotation  2
 #define motor_no_pulse_timeout   800000   // In microseconds
@@ -141,21 +166,23 @@ PID l_motors(&l_motor_rpm, &motor_l_set, &motor_l_spd, lm_kp, lm_ki, lm_kd, DIRE
 #define wheelbase                140.0    // In millimeters
 
 // ---- Wheel circumference calculation ----
-#define wheel_circumference  (M_PI * wheel_diameter) / 100
+#define wheel_circumference  (PI * wheel_diameter) / 100
 
 
-// ------- Functions -------
+// ------- Functions -------56560 
 
-// ---- RC Check prototype ----
+// ---- RCL return checker prototype ----
 void check_rc(rcl_ret_t rctc);
 
 
 // ---- Error handler ----
 void handle_error(int core, const char * err_msg)
 {
-    sprintf(e_stop_msg.data.data, "E_STOP (PICO_A): %s", err_msg);
-    e_stop_msg.data.size = strlen(e_stop_msg.data.data);
-	check_rc(rcl_publish(&e_stop_pub, &e_stop_msg, NULL));
+    if (rpi_ready)
+    {
+        sprintf(e_stop_msg.data.data, "E_STOP (PICO_A): %s", err_msg);
+        check_rc(rcl_publish(&e_stop_pub, &e_stop_msg, NULL));
+    }
 
     if (core == 0)
     {
@@ -417,7 +444,31 @@ void init_pins()
 }
 
 
-// ---- RC Checker ----
+// ---- Ultrasonic sensor distance calculator (In cm) ----
+float get_ultrasonic_dist(int pin)
+{
+    init_pin(pin, OUTPUT);
+    
+    gpio_put(pin, HIGH);
+    sleep_us(10);
+    gpio_put(pin, LOW);
+    sleep_us(10);
+
+    init_pin(pin, INPUT);
+
+    while (!gpio_get(pin));
+    uint32_t pulse_start = time_us_32();
+
+    while (gpio_get(pin));
+    uint32_t pulse_end = time_us_32();
+
+    uint16_t time_diff = pulse_end - pulse_start;
+
+    return (time_diff * 34.3) / 2;
+}
+
+
+// ---- RCL return checker ----
 void check_rc(rcl_ret_t rctc)
 {
     if (rctc != RCL_RET_OK)
@@ -460,6 +511,7 @@ void init_subs_pubs()
 {
     const rosidl_message_type_support_t * string_type = ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String);
     const rosidl_message_type_support_t * twist_type = ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist);
+    const rosidl_message_type_support_t * range_sens_type = ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Range);
 
     // ---- Raspberry Pi ready topic ----
     check_rc(rclc_subscription_init_default(&rpi_ready_sub, &rc_node, string_type, "/rpi_ready"));
@@ -472,6 +524,22 @@ void init_subs_pubs()
     // ---- E-stop topic ----
     check_rc(rclc_publisher_init_default(&e_stop_pub, &rc_node, string_type, "/e_stop"));
     std_msgs__msg__String__init(&e_stop_msg);
+
+    // ---- Front ultrasonic sensor topic ----
+    check_rc(rclc_publisher_init_default(&front_ultra_pub, &rc_node, range_sens_type, "/ultrasonic/front"));
+    sensor_msgs__msg__Range__init(&front_ultra_msg);
+
+    // ---- Back ultrasonic sensor topic ----
+    check_rc(rclc_publisher_init_default(&back_ultra_pub, &rc_node, range_sens_type, "/ultrasonic/back"));
+    sensor_msgs__msg__Range__init(&back_ultra_msg);
+
+    // ---- Right ultrasonic sensor topic ----
+    check_rc(rclc_publisher_init_default(&right_ultra_pub, &rc_node, range_sens_type, "/ultrasonic/right"));
+    sensor_msgs__msg__Range__init(&right_ultra_msg);
+
+    // ---- Left ultrasonic sensor topic ----
+    check_rc(rclc_publisher_init_default(&left_ultra_pub, &rc_node, range_sens_type, "/ultrasonic/left"));
+    sensor_msgs__msg__Range__init(&left_ultra_msg);
 }
 
 
@@ -529,6 +597,7 @@ void right_motor_con()
     float tor_ms = (motor_gear_ratio * (r_enc_1_time_diff * (enc_pulses_per_rotation / 2))) / 1000;
     float r_1_rpm = 60000 / tor_ms;
 
+    // Invert RPM if the direction variable is false (The motor is spinning backward)
     if (!r_motor_1_dir)
     {
         r_1_rpm = 0 - r_motor_1_dir;
@@ -559,6 +628,7 @@ void left_motor_con()
     float tor_ms = (motor_gear_ratio * (l_enc_1_time_diff * (enc_pulses_per_rotation / 2))) / 1000;
     float l_1_rpm = 60000 / tor_ms;
 
+    // Invert RPM if the direction variable is false (The motor is spinning backward)
     if (!l_motor_1_dir)
     {
         l_1_rpm = 0 - l_motor_1_dir;
@@ -579,6 +649,43 @@ void left_motor_con()
     l_motors.Compute();
     
     set_l_motor_output(motor_l_set);
+}
+
+
+// ---- Publish ultrasonic sensor data ----
+void publish_ultra()
+{
+    front_ultra_msg.range = get_ultrasonic_dist(front_ultra);
+    front_ultra_msg.field_of_view = ultra_fov;
+    front_ultra_msg.max_range = ultra_max_dist;
+    front_ultra_msg.min_range = ultra_min_dist;
+    front_ultra_msg.radiation_type = sensor_msgs__msg__Range__ULTRASOUND;
+    front_ultra_msg.header.stamp.sec = to_ms_since_boot(get_absolute_time()) / 1000;
+    check_rc(rcl_publish(&front_ultra_pub, &front_ultra_msg, NULL));
+
+    back_ultra_msg.range = get_ultrasonic_dist(front_ultra);
+    back_ultra_msg.field_of_view = ultra_fov;
+    back_ultra_msg.max_range = ultra_max_dist;
+    back_ultra_msg.min_range = ultra_min_dist;
+    back_ultra_msg.radiation_type = sensor_msgs__msg__Range__ULTRASOUND;
+    back_ultra_msg.header.stamp.sec = to_ms_since_boot(get_absolute_time()) / 1000;
+    check_rc(rcl_publish(&front_ultra_pub, &back_ultra_msg, NULL));
+
+    right_ultra_msg.range = get_ultrasonic_dist(front_ultra);
+    right_ultra_msg.field_of_view = ultra_fov;
+    right_ultra_msg.max_range = ultra_max_dist;
+    right_ultra_msg.min_range = ultra_min_dist;
+    right_ultra_msg.radiation_type = sensor_msgs__msg__Range__ULTRASOUND;
+    right_ultra_msg.header.stamp.sec = to_ms_since_boot(get_absolute_time()) / 1000;
+    check_rc(rcl_publish(&front_ultra_pub, &right_ultra_msg, NULL));
+
+    left_ultra_msg.range = get_ultrasonic_dist(front_ultra);
+    left_ultra_msg.field_of_view = ultra_fov;
+    left_ultra_msg.max_range = ultra_max_dist;
+    left_ultra_msg.min_range = ultra_min_dist;
+    left_ultra_msg.radiation_type = sensor_msgs__msg__Range__ULTRASOUND;
+    left_ultra_msg.header.stamp.sec = to_ms_since_boot(get_absolute_time()) / 1000;
+    check_rc(rcl_publish(&front_ultra_pub, &left_ultra_msg, NULL));
 }
 
 
@@ -610,6 +717,8 @@ void setup1()
 // ---- Main loop (Runs forever on core 0) ----
 void loop()
 {
+    loop_time = time_us_32();
+
     // ---- Calculate motor outputs ----
     right_motor_con();
     left_motor_con();
@@ -625,20 +734,31 @@ void loop()
     {
         handle_error(0, "Left motor encoder no pulse timout exceeded");
     }
+
+    if (time_us_32() - loop_time > loop_time_max)
+    {
+        handle_error(0, "(Loop) max loop time exceeded");
+    }
 }
 
 
 // ---- Main loop (Runs forever on core 1) ----
 void loop1()
 {
-    gpio_put(power_led, HIGH);
-    sleep_ms(500);
-    gpio_put(power_led, LOW);
-    sleep_ms(500);
+    loop_1_time = time_us_32();
+
+    // ---- Publish ultrasonic sensor data ----
+    publish_ultra();
+
+    if (time_us_32() - loop_1_time > loop_1_time_max)
+    {
+        handle_error(1, "(Loop 1) max loop time exceeded");
+    }
 }
 
 
-// ------- Init -------
+// **************** Init ****************
+// ********* END OF MAIN PROGRAM ********
 
 // ---- Core 1 loop init ----
 void init_core_1()
