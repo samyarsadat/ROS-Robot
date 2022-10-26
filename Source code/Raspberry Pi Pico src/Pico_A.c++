@@ -169,7 +169,7 @@ PID l_motors(&l_motor_rpm, &motor_l_set, &motor_l_spd, lm_kp, lm_ki, lm_kd, DIRE
 #define wheel_circumference  (PI * wheel_diameter) / 100
 
 
-// ------- Functions -------56560 
+// ------- Functions ------- 
 
 // ---- RCL return checker prototype ----
 void check_rc(rcl_ret_t rctc);

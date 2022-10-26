@@ -81,6 +81,24 @@ pico_enable_stdio_uart(${PROJECT_NAME}_PICO_B 0)
 
 
 
+# ---- TEST - REMOVE ----
+
+# Add source files
+add_executable(${PROJECT_NAME}_ENC_TEST Encoder_Test.c++)
+
+# Create map/bin/hex/uf2 files
+pico_add_extra_outputs(${PROJECT_NAME}_ENC_TEST)
+
+# Link to libraries
+target_link_libraries(${PROJECT_NAME}_ENC_TEST pico_stdlib)
+target_link_libraries(${PROJECT_NAME}_ENC_TEST hardware_pwm)
+
+# Enable USB, disable UART
+pico_enable_stdio_usb(${PROJECT_NAME}_ENC_TEST 1)
+pico_enable_stdio_uart(${PROJECT_NAME}_ENC_TEST 0)
+
+
+
 # CMake flags
 SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
