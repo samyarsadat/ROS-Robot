@@ -20,6 +20,7 @@
 
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
+#include <math.h>
 
 
 // ------- Defines -------
@@ -80,4 +81,11 @@ void init_pin(int pin, int mode)
 uint32_t map(uint32_t input, uint32_t in_min, uint32_t in_max, uint32_t out_min, uint32_t out_max)
 {
     return (((input - in_min) * (out_max - out_min)) / (in_max - in_min)) + out_min;
+}
+
+
+// ---- Adjustable truncate function ----
+double truncate_adj(double input, int trunc_amount)
+{
+    return round(input * pow(10, trunc_amount)) / pow(10, trunc_amount);
 }

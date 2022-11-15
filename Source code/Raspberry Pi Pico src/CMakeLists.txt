@@ -84,7 +84,7 @@ pico_enable_stdio_uart(${PROJECT_NAME}_PICO_B 0)
 # ---- TEST - REMOVE ----
 
 # Add source files
-add_executable(${PROJECT_NAME}_ENC_TEST Encoder_Test.c++)
+add_executable(${PROJECT_NAME}_ENC_TEST Encoder_System_Comb.c++)
 
 # Create map/bin/hex/uf2 files
 pico_add_extra_outputs(${PROJECT_NAME}_ENC_TEST)

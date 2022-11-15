@@ -57,8 +57,6 @@ void irq_call(uint pin, uint32_t events)
     {
         enc_other_pulse = true;
     }
-
-    break;
 }
 
 

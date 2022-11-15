@@ -28,7 +28,10 @@
 
 // ------- Global variables -------
 uint slice_num;
+struct repeating_timer calc_rt;
 volatile int pulses = 0;
+volatile float rpm;
+volatile uint32_t pulses_time;
 uint32_t last_pulses_reset = 1;
 char msg[50];
 
@@ -39,7 +42,7 @@ char msg[50];
 #define motor_enc_a              18
 #define enc_pulses_per_rotation  2
 #define motor_gear_ratio         80/1
-#define sample_time              1000000
+#define sample_time              100
 
 
 // ---- Irq callback ----
@@ -68,6 +71,25 @@ void init_pins()
 }
 
 
+// ---- Calculate RPM ----
+bool calc_rpm(struct repeating_timer *rt)
+{
+    pulses_time = time_us_32() - last_pulses_reset;
+    uint32_t time_per_rotation = (pulses_time / pulses) * enc_pulses_per_rotation;
+
+    if (pulses > 0)
+    {
+        pulses = 0;
+        last_pulses_reset = time_us_32();
+    }
+
+    float tor_ms = (motor_gear_ratio * time_per_rotation) / 1000;
+    rpm = 60000 / tor_ms;
+
+    return true;
+}
+
+
 // ------- Main program -------
 void setup()
 {
@@ -76,28 +98,17 @@ void setup()
     pwm_set_enabled(slice_num, true);
 
     stdio_init_all();
+
+    add_repeating_timer_ms(sample_time, calc_rpm, NULL, &calc_rt);
 }
 
 
 void loop()
 {
-    if ((time_us_32() - last_pulses_reset) > sample_time)
-    {
-        uint32_t pulses_time = time_us_32() - last_pulses_reset;
-        uint32_t time_per_rotation = (pulses_time / pulses) * enc_pulses_per_rotation;
+    sprintf(msg, "Motor RPM: %f\nPulses time: %i\n", rpm, pulses_time);
+    printf(msg);
 
-        if (pulses > 0)
-        {
-            pulses = 0;
-            last_pulses_reset = time_us_32();
-        }
-
-        float tor_ms = (motor_gear_ratio * time_per_rotation) / 1000;
-        float rpm = 60000 / tor_ms;
-
-        sprintf(msg, "Motor RPM: %f\nPulses time: %i\n", rpm, pulses_time);
-        printf(msg);
-    }
+    sleep_ms(100);
 }
 
 
