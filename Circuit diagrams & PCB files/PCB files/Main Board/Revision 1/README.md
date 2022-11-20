@@ -15,3 +15,4 @@
  - **4.**&nbsp; *Re-position decoupling capacitors to more optimal locations.*
  - **5.**&nbsp; *Add expansion connector that exposes unused ADC pins.*
  - **6.**&nbsp; *Connect fourth, 4-pin ultrasonic connector directly to mux so that it can be used as general analog I/O.*
+ - **7.**&nbsp; *Consistent connector pinouts.*
