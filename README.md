@@ -47,7 +47,7 @@ You can contact me via e-mail.<br>
 E-mail: samyarsadat@gigawhat.net
 <br>
 <br>
-If you think that you have found a bug please report it <a href="https://github.com/samyarsadat/ROS-Robot/issues">here</a>.
+If you think that you have found a bug or issue please report it <a href="https://github.com/samyarsadat/ROS-Robot/issues">here</a>.
 
 <br>
 
