@@ -1,6 +1,6 @@
 ## File Info:
 
-### .PcbDoc & .SchDoc &.PrjPcb:
+### .PcbDoc & .SchDoc & .PrjPcb:
 These files are for people that have access to Altium Designer.<br>
 These files are ideal for editing.<br>
 
