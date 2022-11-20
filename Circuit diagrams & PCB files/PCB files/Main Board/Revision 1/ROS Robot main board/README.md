@@ -1,4 +1,20 @@
-## Connector info:
+## File Info:
+
+### .PcbDoc & .SchDoc &.PrjPcb:
+These files are for people that have access to Altium Designer.<br>
+These files are ideal for editing.<br>
+
+<br>
+
+### Gerber Files:
+These are manufacturing files.<br>
+They were prepared according to JLCPCB's requirements.<br>
+If you are using another manufacturer, you might need to re-export them from Altium according to your manufacturer's requirements.<br>
+
+<br>
+<br>
+
+## PCB Connector Info:
 
 #### 5 Volt, 4 pin (Echo, Trigger) ultrasonic sensors:
     Pinout: 
