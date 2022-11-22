@@ -123,3 +123,29 @@ If you are using another manufacturer, you might need to re-export them from Alt
     5: Indicator LED Output (Through a 220ohm resistor)
 
     - H10
+   
+<br>
+<br>
+
+## Component value info:
+
+#### Resistors (All footprints are 1206 SMD):
+    R5, R7, R8, R10, R11, R12, R13, R16 = 4.7k
+    R1, R3, R4, R6 = 220ohm
+    R2 = 430ohm
+    R9 = 10k
+    R15 = 47ohm
+    R14 = Unpopulated
+    
+#### Capacitors (All footprints are 1206 SMD, Ceramic):
+    C1 = 100nf
+    C2, C3, C4 = 100nf (Not required)
+    
+#### Diodes & LEDs (All footprints are 1206 SMD):
+    D1 = 1N5822 (or any simillar Schottky diode)
+    D2 = Red LED (+5v indicator LED)
+    D3 = Green LED (+3v3 indicator LED)
+    D4 = Blue LED (Edge IR sensor mosfet active indicator LED)
+    
+   
+    
