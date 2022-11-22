@@ -127,7 +127,7 @@ If you are using another manufacturer, you might need to re-export them from Alt
 <br>
 <br>
 
-## Component value info:
+## Component values:
 
 #### Resistors (All footprints are 1206 SMD):
     R5, R7, R8, R10, R11, R12, R13, R16 = 4.7k
@@ -142,7 +142,7 @@ If you are using another manufacturer, you might need to re-export them from Alt
     C2, C3, C4 = 100nf (Not required)
     
 #### Diodes & LEDs (All footprints are 1206 SMD):
-    D1 = 1N5822 (or any simillar Schottky diode)
+    D1 = 1N5822 (or any similar Schottky diode)
     D2 = Red LED (+5v indicator LED)
     D3 = Green LED (+3v3 indicator LED)
     D4 = Blue LED (Edge IR sensor mosfet active indicator LED)
