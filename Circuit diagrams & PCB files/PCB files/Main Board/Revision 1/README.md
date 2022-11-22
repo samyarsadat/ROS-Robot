@@ -1,5 +1,5 @@
 ## Known Issue #1:
-*Due to a small design error, plugging in a normal USB cable into the Raspberry Pi Picos will back feed `5v` into the `3.3v` line of the board potentially damaging some components.*
+*Due to a small design error, plugging in a normal USB cable into the Raspberry Pi Picos will back feed `5v` into the `3.3v` line of the board, potentially damaging some components.*
 
 **Solutions:**<br>
  - **1. Option:**&nbsp; *Modify a normal USB cable by cutting the cable's red (`VCC`) wire, turning it into a data-only cable.*
