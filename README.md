@@ -32,13 +32,20 @@ The robot will follow an object with image processing and a Raspberry Pi camera.
 <br>
 
 #### Stage 2:
-A LIDAR sensor will be added.
+A LIDAR sensor will be added.<br>
 The robot will be able to map and navigate its environment.
 <br>
 <br>
 
 #### Stage 3:
-A robotic arm will be added for object manipulation.
+A robotic arm will be added for object manipulation.<br>
+(The main board PCB will also be slightly re-designed for this stage)
+<br>
+<br>
+
+#### Stage 3.5:
+After stage 3 is completed, I plan to re-design some parts of the robot chassis.<br>
+This will improve upon the current design and allow for future stages and expansions.
 <br>
 <br>
 
