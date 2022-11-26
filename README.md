@@ -2,7 +2,7 @@
 
 <p align="center">
 	<br>
-	<a href="https://www.ros.org"><img src="https://github.com/samyarsadat/ROS-Robot/raw/dev/Assets/Logos/ROS_logo.svg"></a><br>
+	<a href="https://www.ros.org"><img src="https://github.com/samyarsadat/ROS-Robot/raw/stage-1/Assets/Logos/ROS_logo.svg"></a><br>
 	<br>
 	<br>
 	<a href="https://github.com/samyarsadat/ROS-Robot/blob/dev/LICENSE"><img src="https://img.shields.io/github/license/samyarsadat/ROS-Robot?color=blue"></a>
@@ -17,7 +17,7 @@ The ROS Robot project.
 <br>
 <br>
 <br>
-<img src="https://github.com/samyarsadat/ROS-Robot/raw/dev/Assets/Renders/GitHub_Render_1_Edited.png">
+<img src="https://github.com/samyarsadat/ROS-Robot/raw/stage-1/Assets/Renders/GitHub_Render_1_Edited.png">
 This is a 3D render of the CAD designs.
 <br>
 <br>
