@@ -14,4 +14,10 @@ These are for people that want to edit the project but don't have Solidworks.<br
 
 ### .STL:
 These are non-editable files used for 3D printing.<br>
-They can be easily imported into all 3D printer slicer software.
+They can be easily imported into all 3D printer slicer software.<br>
+
+<br>
+<br>
+
+## Improvements for re-design (After stage 3):
+ - **1.**&nbsp; *To Be Written...*
