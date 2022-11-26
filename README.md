@@ -40,6 +40,9 @@ The robot will be able to map and navigate its environment.
 #### Stage 3:
 A robotic arm will be added for object manipulation.
 
+#### Future stages:
+More stages may be added as the project progresses.
+
 <br>
 
 ## Support :
