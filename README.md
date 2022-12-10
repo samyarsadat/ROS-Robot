@@ -38,7 +38,7 @@ The robot will be able to map and navigate its environment.
 <br>
 
 #### Stage 3 (Samyarm 1):
-A robotic arm will be added for object manipulation.<br>
+A robotic arm will be added for object manipulation.
 <br>
 <br>
 
