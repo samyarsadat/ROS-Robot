@@ -19,5 +19,5 @@ They can be easily imported into all 3D printer slicer software.<br>
 <br>
 <br>
 
-## Improvements for re-design (After stage 3):
+## Improvements for re-design (Stage 4):
  - **1.**&nbsp; *To Be Written...*
