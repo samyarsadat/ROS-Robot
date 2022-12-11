@@ -44,7 +44,9 @@ A robotic arm will be added for object manipulation.
 
 #### Stage 4 (Back To The Shipyard):
 After stage 3 is completed, I plan to re-design some parts of the robot chassis and PCB.<br>
-This will improve upon the current design and allow for future stages and expansions.
+This will improve upon the current design and allow for future stages and expansions.<br>
+Most of the wiring and general design will be kept the same.<br>
+This will only improve upon the current design.
 <br>
 <br>
 
