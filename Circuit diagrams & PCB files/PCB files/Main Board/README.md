@@ -25,3 +25,4 @@
  - **6.**&nbsp; *Connect fourth, 4-pin ultrasonic connector directly to mux so that it can be used as general analog I/O.*
  - **7.**&nbsp; *Consistent connector pinouts.*
  - **8.**&nbsp; *Replace power input terminal footprint with a 3-pin Molex KK-254 connector.*
+ - **9.**&nbsp; *Add battery voltage monitoring.*
