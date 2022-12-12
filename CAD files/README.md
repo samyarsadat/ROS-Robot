@@ -27,5 +27,9 @@ They can be easily imported into all 3D printer slicer software.<br>
  - **5.**&nbsp; *Remove the need for motor shaft attachments by integrating them into the design of the wheels. (Might be implemented earlier)*
  - **6.**&nbsp; *Add indents to the bottom of the robot for IR edge fall-off sensor mounting.*
  - **7.**&nbsp; *Add accommodation for mounting lights to the bottom of the robot.*
+ - **8.**&nbsp; *Increase hole tolerances.*
+ - **9.**&nbsp; *Add proper mounting holes for voltage regulators and main control board PCB.*
+ - **10.**&nbsp; *Fix motor driver mounting hole spacing.*
+ - **11.**&nbsp; *Add mounting for the battery.*
 
 
