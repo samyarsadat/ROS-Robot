@@ -74,7 +74,6 @@ void setup()
     gpio_set_irq_enabled_with_callback(motor_enc_a, GPIO_IRQ_EDGE_RISE, true, &irq_call);
 
     stdio_init_all();
-    //
     add_repeating_timer_ms(sample_time, calc_rpm_m2, NULL, &m2_calc_rt);
 }
 
