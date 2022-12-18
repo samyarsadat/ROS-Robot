@@ -14,6 +14,11 @@
  - **1. Option:**&nbsp; *Use Raspberry Pi Pico boards with chips that have `RP2-B2` (or higher) markings on them.*
 
 <br>
+
+## Important Note #1:
+*Because this revision of the PCB does not include a voltage divider for measuring the battery voltage, I have attached a wire to pin `ADC2` of Raspberry Pi Pico (B) and created a small prototype board with two resistors on it so that I can measure the voltage of the battery safely. This functionality will be incorporated onto the board itself for rev. 2.*
+
+<br>
 <br>
 
 ## Improvements for Rev. 2 (Stage 4):
