@@ -31,5 +31,7 @@ They can be easily imported into all 3D printer slicer software.<br>
  - **9.**&nbsp; *Add proper mounting holes for voltage regulators and main control board PCB.*
  - **10.**&nbsp; *Fix motor driver mounting hole spacing.*
  - **11.**&nbsp; *Add mounting for the battery.*
+ - **12.**&nbsp; *Add holes to the side of the robot to expose the Raspberry Pi's I/O ports.*
+ - **13.**&nbsp; *Add mounting for a screen. (Potentially)*
 
 
