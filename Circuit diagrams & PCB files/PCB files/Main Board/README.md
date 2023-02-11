@@ -31,3 +31,5 @@
  - **7.**&nbsp; *Consistent connector pinouts.*
  - **8.**&nbsp; *Replace power input terminal footprint with a 3-pin Molex KK-254 connector.*
  - **9.**&nbsp; *Add battery voltage monitoring.*
+ - **10.**&nbsp; *Add mosfet for fan control.*
+ - **11.**&nbsp; *Add 3-pin addressable LED connectors.*
