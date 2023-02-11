@@ -1,6 +1,7 @@
 ### 3D Printing details:
    - `Main_Body`, `Top_Plate`, and `Mid_Plate` are designed to be split in half so that they can be printed on smaller printers.
    - You can find already split, ready to print `STL` files in the `Ready To Print` folder.
+   - I recommend PLA filament, with 0.28mm layer height, and about 30% infill.
 
 <br>
 
