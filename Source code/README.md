@@ -4,4 +4,4 @@
 **ROS Package:** A ROS package containing all of the ROS nodes.<br>
 
 **ROS Version:** ROS 2 - Humble Hawksbill<br>
-**OS:** Ubuntu Server 20.04 LTS
+**OS:** Ubuntu Desktop 22.04.02 LTS
