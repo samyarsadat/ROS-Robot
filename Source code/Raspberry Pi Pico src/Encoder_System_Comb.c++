@@ -1,6 +1,6 @@
 /*
    The ROS robot project - Encoder system test program (Method 3 (Comb. M1, M2) - 0 RPM det., stable RPM readings)
-   Copyright 2022 Samyar Sadat Akhavi
+   Copyright 2022-2023 Samyar Sadat Akhavi
    Written by Samyar Sadat Akhavi, 2022.
  
    This program is free software: you can redistribute it and/or modify
@@ -36,7 +36,9 @@ float final_reading, rpm_m2, tor_ms_m2, rpm_m1, tor_ms_m1;
 
 
 // ------- Defines -------
-#define motor_enc_a              18
+#define motor_enc_a              12
+#define motor_drive_a            18
+#define motor_drive_b            19
 #define enc_pulses_per_rotation  2
 #define motor_gear_ratio         80/1
 #define sample_time              50
@@ -71,7 +73,13 @@ bool calc_rpm_m2(struct repeating_timer *rt)
 void setup()
 {
     init_pin(motor_enc_a, INPUT);
-    gpio_set_irq_enabled_with_callback(motor_enc_a, GPIO_IRQ_EDGE_RISE, true, &irq_call);
+    gpio_set_irq_enabled_with_callback(motor_enc_a, GPIO_IRQ_EDGE_FALL, true, &irq_call);
+
+    // Activate motor at full speed
+    init_pin(motor_drive_a, OUTPUT);
+    init_pin(motor_drive_b, OUTPUT);
+    gpio_put(motor_drive_a, HIGH);
+    gpio_put(motor_drive_b, LOW);
 
     stdio_init_all();
     add_repeating_timer_ms(sample_time, calc_rpm_m2, NULL, &m2_calc_rt);
@@ -101,6 +109,9 @@ void loop()
 	}
 
 	// Display measurements
+    sprintf(msg, "ENC Logic Level: %s - ", gpio_get(motor_enc_a)?"HIGH":"LOW");
+    printf(msg);
+
     sprintf(msg, "Motor RPM M1: %.2f - ", rpm_m1);
     printf(msg);
     
