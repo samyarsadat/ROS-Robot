@@ -34,5 +34,7 @@
  - **7.**&nbsp; *Consistent connector pinouts.*
  - **8.**&nbsp; *Replace power input terminal footprint with a 3-pin Molex KK-254 connector.*
  - **9.**&nbsp; *Add battery voltage monitoring.*
+ - **10.**&nbsp; *Add mosfet for fan control.*
+ - **11.**&nbsp; *Add 3-pin addressable LED connectors.*
  - **10.**&nbsp; *Change encoder connectors from two five-pins to four four-pins (individual connector for each encoder).*
  - **11.**&nbsp; *Add individual current limiting resistors and connectors for motor encoders.*

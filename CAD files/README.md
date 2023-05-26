@@ -31,5 +31,10 @@ They can be easily imported into all 3D printer slicer software.<br>
  - **9.**&nbsp; *Add proper mounting holes for voltage regulators and main control board PCB.*
  - **10.**&nbsp; *Fix motor driver mounting hole spacing.*
  - **11.**&nbsp; *Add mounting for the battery.*
-
-
+ - **12.**&nbsp; *Add holes to the side of the robot to expose the Raspberry Pi's I/O ports.*
+ - **13.**&nbsp; *Add mounting for a screen. (Potentially)*
+ - **14.**&nbsp; *Add mounting for a cooling fan in the electronics (top) bay.*
+ - **15.**&nbsp; *Add a hole for the resettable fuse(s).*
+ - **16.**&nbsp; *Change camera mounting to fit the Raspberry Pi Camera Module 3.*
+ - **17.**&nbsp; *Add small vent holes around the robot.*
+ - **18.**&nbsp; *Add mounting in the front for an 8-led SK6812 module.*
