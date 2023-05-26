@@ -36,5 +36,5 @@
  - **9.**&nbsp; *Add battery voltage monitoring.*
  - **10.**&nbsp; *Add mosfet for fan control.*
  - **11.**&nbsp; *Add 3-pin addressable LED connectors.*
- - **10.**&nbsp; *Change encoder connectors from two five-pins to four four-pins (individual connector for each encoder).*
- - **11.**&nbsp; *Add individual current limiting resistors and connectors for motor encoders.*
+ - **12.**&nbsp; *Change encoder connectors from two five-pins to four four-pins (individual connector for each encoder).*
+ - **13.**&nbsp; *Add individual current limiting resistors and connectors for motor encoders.*
