@@ -2,7 +2,7 @@
 *Due to a small design error, plugging in a normal USB cable into the Raspberry Pi Picos will back feed `5v` into the `3.3v` line of the board, potentially damaging some components.*
 
 **Solutions:**<br>
- - **1. Option:**&nbsp; *Modify a normal USB cable by cutting the cable's red (`VCC`) wire, turning it into a data-only cable.*
+ - **1. Option:**&nbsp; *Modify a normal USB cable by cutting its red (`VCC`) wire, turning it into a data-only cable.*
  - **2. Option:**&nbsp; *Purchase and use a data-only USB cable.*
 
 <br>
@@ -16,7 +16,7 @@
 <br>
 
 ## Important Note #1:
-*Because this revision of the PCB does not include a voltage divider for measuring the battery voltage, I have attached a wire to pin `ADC2` of Raspberry Pi Pico (B) and created a small proto board with two resistors on it so that I can measure the voltage of the battery safely. This functionality will be incorporated onto the board itself for rev. 2.*
+*Because this revision of the PCB does not include a voltage divider for measuring the battery voltage, I have attached a wire to pin `ADC2` of Raspberry Pi Pico (B) and created a small protoboard with two resistors on it so that I can measure the voltage of the battery safely. This functionality will be incorporated onto the board itself for rev. 2.*
 
 ## Important Note #2:
 *On this revision of the PCB, there are two five-pin connectors for the motor encoders. I had initially planned to have one common current limiting resistor for all the encoders, however, this did not work. As a result, I have added a small proto board that splits the two five-pin connectors into four four-pin connectors (one connector per encoder) and adds individual current limiting resistors for each encoder. These extra resistors and the four-pin connectors will be incorporated onto the board itself for rev. 2.*
@@ -34,7 +34,9 @@
  - **7.**&nbsp; *Consistent connector pinouts.*
  - **8.**&nbsp; *Replace power input terminal footprint with a 3-pin Molex KK-254 connector.*
  - **9.**&nbsp; *Add battery voltage monitoring.*
- - **10.**&nbsp; *Add mosfet for fan control.*
+ - **10.**&nbsp; *Add Mosfet for fan control.*
  - **11.**&nbsp; *Add 3-pin addressable LED connectors.*
  - **12.**&nbsp; *Change encoder connectors from two five-pins to four four-pins (individual connector for each encoder).*
  - **13.**&nbsp; *Add individual current limiting resistors and connectors for motor encoders.*
+ - **14.**&nbsp; *Motor encoder IR transmitter current limiting resistors should be connected to `5v` instead of `3.3v`.*
+ - **15.**&nbsp; *Consider connecting motor encoder pull-up resistors to `5v` instead of `3.3v` or reducing their resistance.*
