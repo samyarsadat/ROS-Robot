@@ -7,9 +7,9 @@
 	<br>
 	<a href="https://github.com/samyarsadat/ROS-Robot/blob/dev/LICENSE"><img src="https://img.shields.io/github/license/samyarsadat/ROS-Robot?color=blue"></a>
 	|
-	<a href="https://github.com/samyarsadat/ROS-Robot/issues"><img src="https://img.shields.io/badge/Current_Stage-One-red"></a>
+	<a href="https://github.com/samyarsadat/ROS-Robot/tree/stage-1#this-project-will-be-completed-in-stages"><img src="https://img.shields.io/badge/Current_Stage-One-red"></a>
 	|
-	<a href="https://github.com/samyarsadat/ROS-Robot/tree/stage-1#this-project-will-be-completed-in-stages"><img src="https://img.shields.io/github/issues/samyarsadat/ROS-Robot"></a>
+	<a href="https://github.com/samyarsadat/ROS-Robot/issues"><img src="https://img.shields.io/github/issues/samyarsadat/ROS-Robot"></a>
 	<br><br>
 </p>
 
