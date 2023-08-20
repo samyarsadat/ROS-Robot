@@ -7,7 +7,9 @@
 	<br>
 	<a href="https://github.com/samyarsadat/ROS-Robot/blob/dev/LICENSE"><img src="https://img.shields.io/github/license/samyarsadat/ROS-Robot?color=blue"></a>
 	|
-	<a href="https://github.com/samyarsadat/ROS-Robot/issues"><img src="https://img.shields.io/github/issues/samyarsadat/ROS-Robot"></a>
+	<a href="https://github.com/samyarsadat/ROS-Robot/issues"><img src="https://img.shields.io/badge/Current_Stage-One-red"></a>
+	|
+	<a href="https://github.com/samyarsadat/ROS-Robot/tree/stage-1#this-project-will-be-completed-in-stages"><img src="https://img.shields.io/github/issues/samyarsadat/ROS-Robot"></a>
 	<br><br>
 </p>
 
@@ -22,27 +24,30 @@ This is a 3D render of the CAD designs.
 <br>
 <br>
 
-### This project will be completed in stages.
-#### The project is currently at stage 1.
+## Overview
+#### This project will be completed in stages.
+*The project is currently at stage 1.*
+<br>
+<br>
 <br>
 
-#### Stage 1 (Humble Beginnings / Follow Me):
+#### Stage 1 (Humble Beginnings / Follow Me)
 The robot will follow an object with image processing and a Raspberry Pi camera.
 <br>
 <br>
 
-#### Stage 2 (S.L.A.M. It Shut):
+#### Stage 2 (S.L.A.M. It Shut)
 A LIDAR sensor will be added.<br>
 The robot will be able to map and navigate its environment.
 <br>
 <br>
 
-#### Stage 3 (Samyarm 1):
+#### Stage 3 (Samyarm 1)
 A robotic arm will be added for object manipulation.
 <br>
 <br>
 
-#### Stage 4 (Back To The Shipyard):
+#### Stage 4 (Back To The Shipyard)
 After stage 3 is completed, I plan to re-design some parts of the robot chassis and PCB.<br>
 This will improve upon the current design and allow for future stages and expansions.<br>
 Most of the wiring and general design will be kept the same.<br>
@@ -50,12 +55,12 @@ This will only improve upon the current design.
 <br>
 <br>
 
-#### Future stages:
+#### Future stages
 More stages may be added as the project progresses.
 
 <br>
 
-## Support :
+## Contact
 You can contact me via e-mail.<br>
 E-mail: samyarsadat@gigawhat.net
 <br>
@@ -64,12 +69,12 @@ If you think that you have found a bug or issue please report it <a href="https:
 
 <br>
 
-## Contributing :
+## Contributing
 Please take a look at <a href="https://github.com/samyarsadat/ROS-Robot/blob/dev/CONTRIBUTING.md">CONTRIBUTING.md</a> for contributing.
 
 <br>
 
-## Credits :
+## Credits
 | Role           | Name                                                             |
 | -------------- | ---------------------------------------------------------------- |
 | Lead Developer | <a href="https://github.com/samyarsadat">Samyar Sadat Akhavi</a> |
