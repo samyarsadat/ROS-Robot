@@ -134,7 +134,7 @@ If you are using another manufacturer, you might need to re-export them from Alt
     R1, R3, R4, R6 = 220ohm
     R2 = 430ohm
     R9 = 10k
-    R15 = 47ohm
+    R15 = 0ohm (Shorted)
     R14 = Unpopulated
     
 #### Capacitors (All footprints are 1206 SMD, Ceramic):
