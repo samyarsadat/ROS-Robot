@@ -70,118 +70,118 @@ PID r_motors(&final_reading, &motor_r_set, &motor_r_spd, rm_kp, rm_ki, rm_kd, DI
 // ---- Irq callback ----
 void irq_call(uint pin, uint32_t events)
 {
-	enc_time_old = enc_time;
-	enc_time = time_us_32();
-	pulses ++;
+    enc_time_old = enc_time;
+    enc_time = time_us_32();
+    pulses ++;
 }
 
 
 // ---- Method 2 RPM calc function ----
 bool calc_rpm_m2(struct repeating_timer *rt)
 {
-	pulses_time = time_us_32() - last_pulses_reset;
-	time_per_rotation = (pulses_time / pulses) * enc_pulses_per_rotation;
+    pulses_time = time_us_32() - last_pulses_reset;
+    time_per_rotation = (pulses_time / pulses) * enc_pulses_per_rotation;
 
-	if (pulses > 0)
-	{
-		pulses = 0;
-		last_pulses_reset = time_us_32();
-	}
+    if (pulses > 0)
+    {
+        pulses = 0;
+        last_pulses_reset = time_us_32();
+    }
 
-	return true;
+    return true;
 }
 
 
 // ------- Main program -------
 void setup()
 {
-	init_pin(l_motor_1_enc_b, INPUT);
-	init_pin(l_motor_1_enc_a, INPUT);
-	init_pin(l_motor_2_enc_b, INPUT);
-	init_pin(l_motor_2_enc_a, INPUT);
-	init_pin(r_motor_1_enc_b, INPUT);
-	init_pin(r_motor_1_enc_a, INPUT);
-	init_pin(r_motor_2_enc_b, INPUT);
+    init_pin(l_motor_1_enc_b, INPUT);
+    init_pin(l_motor_1_enc_a, INPUT);
+    init_pin(l_motor_2_enc_b, INPUT);
+    init_pin(l_motor_2_enc_a, INPUT);
+    init_pin(r_motor_1_enc_b, INPUT);
+    init_pin(r_motor_1_enc_a, INPUT);
+    init_pin(r_motor_2_enc_b, INPUT);
 
-	init_pin(motor_enc_a, INPUT);
-	gpio_set_irq_enabled_with_callback(motor_enc_a, GPIO_IRQ_EDGE_RISE, true, &irq_call);
+    init_pin(motor_enc_a, INPUT);
+    gpio_set_irq_enabled_with_callback(motor_enc_a, GPIO_IRQ_EDGE_RISE, true, &irq_call);
 
-	// Activate motor at full speed
-	init_pin(motor_drive_ra, OUTPUT_PWM);
-	init_pin(motor_drive_rb, OUTPUT_PWM);
-	init_pin(motor_drive_la, OUTPUT_PWM);
-	init_pin(motor_drive_lb, OUTPUT_PWM);
+    // Activate motor at full speed
+    init_pin(motor_drive_ra, OUTPUT_PWM);
+    init_pin(motor_drive_rb, OUTPUT_PWM);
+    init_pin(motor_drive_la, OUTPUT_PWM);
+    init_pin(motor_drive_lb, OUTPUT_PWM);
 
-	r_motor_slice_num = pwm_gpio_to_slice_num(motor_drive_la);
-	pwm_set_enabled(r_motor_slice_num, true);
+    r_motor_slice_num = pwm_gpio_to_slice_num(motor_drive_la);
+    pwm_set_enabled(r_motor_slice_num, true);
 
-	stdio_init_all();
-	add_repeating_timer_ms(sample_time, calc_rpm_m2, NULL, &m2_calc_rt);
-	
-	r_motors.SetMode(AUTOMATIC);
-	r_motors.SetSampleTime(80);
+    stdio_init_all();
+    add_repeating_timer_ms(sample_time, calc_rpm_m2, NULL, &m2_calc_rt);
+    
+    r_motors.SetMode(AUTOMATIC);
+    r_motors.SetSampleTime(80);
 }
 
 // ---- Set right motor PWM output ----
 void set_r_motor_output(int spd)
 {
-	if (spd >= 0)
-	{
-		pwm_set_chan_level(r_motor_slice_num, PWM_CHAN_B, spd);
-		pwm_set_chan_level(r_motor_slice_num, PWM_CHAN_A, 0);
-	}
+    if (spd >= 0)
+    {
+        pwm_set_chan_level(r_motor_slice_num, PWM_CHAN_B, spd);
+        pwm_set_chan_level(r_motor_slice_num, PWM_CHAN_A, 0);
+    }
 
-	else
-	{
-		pwm_set_chan_level(r_motor_slice_num, PWM_CHAN_B, 0);
-		pwm_set_chan_level(r_motor_slice_num, PWM_CHAN_A, spd);  
-	}
+    else
+    {
+        pwm_set_chan_level(r_motor_slice_num, PWM_CHAN_B, 0);
+        pwm_set_chan_level(r_motor_slice_num, PWM_CHAN_A, spd);  
+    }
 }
 
 void loop()
 {
-	// Method 1 RPM calc
-	tor_ms_m1 = (motor_gear_ratio * ((enc_time - enc_time_old) * (enc_pulses_per_rotation))) / 1000;
-	rpm_m1 = 60000 / tor_ms_m1;
+    // Method 1 RPM calc
+    tor_ms_m1 = (motor_gear_ratio * ((enc_time - enc_time_old) * (enc_pulses_per_rotation))) / 1000;
+    rpm_m1 = 60000 / tor_ms_m1;
 
-	// Method 2 RPM calc
-	tor_ms_m2 = (motor_gear_ratio * time_per_rotation) / 1000;
-	rpm_m2 = 60000 / tor_ms_m2;
+    // Method 2 RPM calc
+    tor_ms_m2 = (motor_gear_ratio * time_per_rotation) / 1000;
+    rpm_m2 = 60000 / tor_ms_m2;
 
-	// Reduce accuracy
-	rpm_m1 = truncate_adj(rpm_m1, 2);
-	rpm_m2 = truncate_adj(rpm_m2, 2);
+    // Reduce accuracy
+    rpm_m1 = truncate_adj(rpm_m1, 2);
+    rpm_m2 = truncate_adj(rpm_m2, 2);
 
-	// Use readings from both methods to determine RPM
-	final_reading = rpm_m1;
+    // Use readings from both methods to determine RPM
+    final_reading = rpm_m1;
 
-	if (rpm_m1 < 20)
-	{
-		final_reading = rpm_m2;
-	}
+    if (rpm_m1 < 20)
+    {
+        final_reading = rpm_m2;
+    }
 
-	if (final_reading < 0.5)
-	{
-		final_reading = 0;
-	}
+    if (final_reading < 0.5)
+    {
+        final_reading = 0;
+    }
 
-	r_motors.Compute();
-	set_r_motor_output(motor_r_set);
+    r_motors.Compute();
+    set_r_motor_output(motor_r_set);
 
-	// Display measurements
-	sprintf(msg, "Final Reading: %.2f\n", final_reading);
-	printf(msg);
+    // Display measurements
+    sprintf(msg, "Final Reading: %.2f\n", final_reading);
+    printf(msg);
 
-	sleep_ms(80);
+    sleep_ms(80);
 }
 
 
 int main() 
 {
-	setup();
+    setup();
 
-	while (true)
-	{
-		loop();
-	}
+    while (true)
+    {
+        loop();
+    }
 }
