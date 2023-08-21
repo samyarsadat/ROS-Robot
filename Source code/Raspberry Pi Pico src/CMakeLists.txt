@@ -1,6 +1,6 @@
 #  The ROS robot project - CMake config
 #  Copyright 2022-2023 Samyar Sadat Akhavi
-#  Written by Samyar Sadat Akhavi, 2022.
+#  Written by Samyar Sadat Akhavi, 2022-2023.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -81,10 +81,10 @@ pico_enable_stdio_uart(${PROJECT_NAME}_PICO_B 0)
 
 
 
-# ---- TEST - REMOVE ----
+# ---- ENCODER TEST ----
 
 # Add source files
-add_executable(${PROJECT_NAME}_ENC_TEST Encoder_System_Comb.c++)
+add_executable(${PROJECT_NAME}_ENC_TEST Enc_Systest.c++)
 
 # Create map/bin/hex/uf2 files
 pico_add_extra_outputs(${PROJECT_NAME}_ENC_TEST)
@@ -96,6 +96,24 @@ target_link_libraries(${PROJECT_NAME}_ENC_TEST hardware_pwm)
 # Enable USB, disable UART
 pico_enable_stdio_usb(${PROJECT_NAME}_ENC_TEST 1)
 pico_enable_stdio_uart(${PROJECT_NAME}_ENC_TEST 0)
+
+
+
+# ---- ENCODER TEST WITH MOTOR CONTROL ----
+
+# Add source files
+add_executable(${PROJECT_NAME}_ENC_TEST_MOTOR Enc_Systest_Motor.c++)
+
+# Create map/bin/hex/uf2 files
+pico_add_extra_outputs(${PROJECT_NAME}_ENC_TEST_MOTOR)
+
+# Link to libraries
+target_link_libraries(${PROJECT_NAME}_ENC_TEST_MOTOR pico_stdlib)
+target_link_libraries(${PROJECT_NAME}_ENC_TEST_MOTOR hardware_pwm)
+
+# Enable USB, disable UART
+pico_enable_stdio_usb(${PROJECT_NAME}_ENC_TEST_MOTOR 1)
+pico_enable_stdio_uart(${PROJECT_NAME}_ENC_TEST_MOTOR 0)
 
 
 
