@@ -51,60 +51,60 @@ uint32_t enc_time_l1_old, enc_time_l2_old, enc_time_r1_old, enc_time_r2_old;
 // ---- Irq callback ----
 void irq_call(uint pin, uint32_t events)
 {
-    uint32_t current_time = time_us_32();
+	uint32_t current_time = time_us_32();
 
-    switch (pin)
-    {
-        case l_motor_1_enc_a:
-            enc_time_l1_old = enc_time_l1;
-            enc_time_l1 = current_time;
-	        pulses_l1 ++;
-            break;
+	switch (pin)
+	{
+		case l_motor_1_enc_a:
+			enc_time_l1_old = enc_time_l1;
+			enc_time_l1 = current_time;
+			pulses_l1 ++;
+			break;
 
-        case l_motor_2_enc_a:
-            enc_time_l2_old = enc_time_l2;
-            enc_time_l2 = current_time;
-	        pulses_l2 ++;
-            break;
+		case l_motor_2_enc_a:
+			enc_time_l2_old = enc_time_l2;
+			enc_time_l2 = current_time;
+			pulses_l2 ++;
+			break;
 
-        case r_motor_1_enc_a:
-            enc_time_r1_old = enc_time_r1;
-            enc_time_r1 = current_time;
-	        pulses_r1 ++;
-            break;
+		case r_motor_1_enc_a:
+			enc_time_r1_old = enc_time_r1;
+			enc_time_r1 = current_time;
+			pulses_r1 ++;
+			break;
 
-        case r_motor_2_enc_a:
-            enc_time_r2_old = enc_time_r2;
-            enc_time_r2 = current_time;
-	        pulses_r2 ++;
-            break;
-    }
+		case r_motor_2_enc_a:
+			enc_time_r2_old = enc_time_r2;
+			enc_time_r2 = current_time;
+			pulses_r2 ++;
+			break;
+	}
 }
 
 
 // ---- Method 2 RPM calc function ----
 void method_2_tpr_calc(uint32_t* pulse_time, uint32_t* last_pulse_rst, uint32_t* time_per_rot, int* pulses)
 {
-    uint32_t current_time = time_us_32();
-    
-    *pulse_time = current_time - *last_pulse_rst;
-    *time_per_rot = (*pulse_time / *pulses) * enc_pulses_per_rotation;
+	uint32_t current_time = time_us_32();
+	
+	*pulse_time = current_time - *last_pulse_rst;
+	*time_per_rot = (*pulse_time / *pulses) * enc_pulses_per_rotation;
 
-    if (*pulses > 0)
-    {
-        *pulses = 0;
-        *last_pulse_rst = current_time;
-    }
+	if (*pulses > 0)
+	{
+		*pulses = 0;
+		*last_pulse_rst = current_time;
+	}
 }
 
 
 // ---- Calculate all motor RPMs using the method 2 calc function ----
 bool method_2_all_tpr_calc(struct repeating_timer *rt)
 {
-    method_2_tpr_calc(&pulse_l1_time, &last_pulse_l1_rst, &time_per_rot_l1, &pulses_l1);
-    method_2_tpr_calc(&pulse_l2_time, &last_pulse_l2_rst, &time_per_rot_l2, &pulses_l2);
-    method_2_tpr_calc(&pulse_r1_time, &last_pulse_r1_rst, &time_per_rot_r1, &pulses_r1);
-    method_2_tpr_calc(&pulse_r2_time, &last_pulse_r2_rst, &time_per_rot_r2, &pulses_r2);
+	method_2_tpr_calc(&pulse_l1_time, &last_pulse_l1_rst, &time_per_rot_l1, &pulses_l1);
+	method_2_tpr_calc(&pulse_l2_time, &last_pulse_l2_rst, &time_per_rot_l2, &pulses_l2);
+	method_2_tpr_calc(&pulse_r1_time, &last_pulse_r1_rst, &time_per_rot_r1, &pulses_r1);
+	method_2_tpr_calc(&pulse_r2_time, &last_pulse_r2_rst, &time_per_rot_r2, &pulses_r2);
 
 	return true;
 }
@@ -113,66 +113,66 @@ bool method_2_all_tpr_calc(struct repeating_timer *rt)
 // ------- Main program -------
 void setup()
 {
-    init_pin(l_motor_1_enc_a, INPUT);
-    init_pin(l_motor_2_enc_a, INPUT);
-    init_pin(r_motor_1_enc_a, INPUT);
-    init_pin(r_motor_2_enc_a, INPUT);
+	init_pin(l_motor_1_enc_a, INPUT);
+	init_pin(l_motor_2_enc_a, INPUT);
+	init_pin(r_motor_1_enc_a, INPUT);
+	init_pin(r_motor_2_enc_a, INPUT);
 
-    gpio_set_irq_enabled_with_callback(l_motor_1_enc_a, GPIO_IRQ_EDGE_FALL, true, &irq_call);
-    gpio_set_irq_enabled(l_motor_2_enc_a, GPIO_IRQ_EDGE_FALL, true);
-    gpio_set_irq_enabled(r_motor_1_enc_a, GPIO_IRQ_EDGE_FALL, true);
-    gpio_set_irq_enabled(r_motor_2_enc_a, GPIO_IRQ_EDGE_FALL, true);
+	gpio_set_irq_enabled_with_callback(l_motor_1_enc_a, GPIO_IRQ_EDGE_FALL, true, &irq_call);
+	gpio_set_irq_enabled(l_motor_2_enc_a, GPIO_IRQ_EDGE_FALL, true);
+	gpio_set_irq_enabled(r_motor_1_enc_a, GPIO_IRQ_EDGE_FALL, true);
+	gpio_set_irq_enabled(r_motor_2_enc_a, GPIO_IRQ_EDGE_FALL, true);
 
-    stdio_init_all();
-    add_repeating_timer_ms(sample_time, method_2_all_tpr_calc, NULL, &method_2_tpr_calc_rt);
+	stdio_init_all();
+	add_repeating_timer_ms(sample_time, method_2_all_tpr_calc, NULL, &method_2_tpr_calc_rt);
 }
 
 
 // ---- Final motor RPM calc ----
 float motor_rpm_calc(uint32_t m1_enc_time, uint32_t m1_enc_time_old, uint32_t m2_time_per_rot)
 {
-    // Method 1 RPM calc
+	// Method 1 RPM calc
 	double tor_ms_m1 = (motor_gear_ratio * ((m1_enc_time - m1_enc_time_old) * (enc_pulses_per_rotation))) / 1000;
-    float rpm_m1 = 60000 / tor_ms_m1;
+	float rpm_m1 = 60000 / tor_ms_m1;
 
-    // Method 2 RPM calc
-    double tor_ms_m2 = (motor_gear_ratio * m2_time_per_rot) / 1000;
-    float rpm_m2 = 60000 / tor_ms_m2;
+	// Method 2 RPM calc
+	double tor_ms_m2 = (motor_gear_ratio * m2_time_per_rot) / 1000;
+	float rpm_m2 = 60000 / tor_ms_m2;
 
 	// Reduce accuracy
 	rpm_m1 = truncate_adj(rpm_m1, 2);
 	rpm_m2 = truncate_adj(rpm_m2, 2);
 
 	// Use readings from both methods to determine RPM
-    float final_reading = rpm_m1;
+	float final_reading = rpm_m1;
 
 	if (rpm_m2 < method_1_cutoff_rpm)
 	{
 		final_reading = rpm_m2;
 	} 
-    
+	
 
-    if (final_reading < 0.5) 
-    { 
-        final_reading = 0;
-    }
+	if (final_reading < 0.5) 
+	{ 
+		final_reading = 0;
+	}
 
-    return final_reading;
+	return final_reading;
 }
 
 
 void loop()
 {
-    // Calculate RPMs
-    float l1_rpm = motor_rpm_calc(enc_time_l1, enc_time_l1_old, time_per_rot_l1);
-    float l2_rpm = motor_rpm_calc(enc_time_l2, enc_time_l2_old, time_per_rot_l2);
-    float r1_rpm = motor_rpm_calc(enc_time_r1, enc_time_r1_old, time_per_rot_r1);
-    float r2_rpm = motor_rpm_calc(enc_time_r2, enc_time_r2_old, time_per_rot_r2);
+	// Calculate RPMs
+	float l1_rpm = motor_rpm_calc(enc_time_l1, enc_time_l1_old, time_per_rot_l1);
+	float l2_rpm = motor_rpm_calc(enc_time_l2, enc_time_l2_old, time_per_rot_l2);
+	float r1_rpm = motor_rpm_calc(enc_time_r1, enc_time_r1_old, time_per_rot_r1);
+	float r2_rpm = motor_rpm_calc(enc_time_r2, enc_time_r2_old, time_per_rot_r2);
 
-    // Display calculations
-    char msg[50];
-    sprintf(msg, "L1M: %.2f - L2M: %.2f - R1M: %.2f - R2M: %.2f\n", l1_rpm, l2_rpm, r1_rpm, r2_rpm);
-    printf(msg);
+	// Display calculations
+	char msg[50];
+	sprintf(msg, "L1M: %.2f - L2M: %.2f - R1M: %.2f - R2M: %.2f\n", l1_rpm, l2_rpm, r1_rpm, r2_rpm);
+	printf(msg);
 
 	sleep_ms(100);
 }
@@ -180,10 +180,10 @@ void loop()
 
 int main()
 {
-    setup();
+	setup();
 
-    while (true)
-    {
-        loop();
-    }
+	while (true)
+	{
+		loop();
+	}
 }

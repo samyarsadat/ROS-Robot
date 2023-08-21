@@ -44,69 +44,69 @@ char msg[50];
 // ---- Irq callback ----
 void irq_call(uint pin, uint32_t events)
 {
-    if (enc_other_pulse)
-    {
-        enc_time_old = enc_time;
-        enc_time = time_us_32();
-        enc_time_diff = enc_time - enc_time_old;
+	if (enc_other_pulse)
+	{
+		enc_time_old = enc_time;
+		enc_time = time_us_32();
+		enc_time_diff = enc_time - enc_time_old;
 
-        enc_other_pulse = false;
-    }
+		enc_other_pulse = false;
+	}
 
-    else
-    {
-        enc_other_pulse = true;
-    }
+	else
+	{
+		enc_other_pulse = true;
+	}
 }
 
 
 // ---- Pin init ----
 void init_pins()
 {
-    // ---- Inputs ----
-    init_pin(motor_enc_a, INPUT);
+	// ---- Inputs ----
+	init_pin(motor_enc_a, INPUT);
 
-    // ---- Outputs ----
-    init_pin(motor_1, OUTPUT_PWM);
-    init_pin(motor_2, OUTPUT_PWM);
+	// ---- Outputs ----
+	init_pin(motor_1, OUTPUT_PWM);
+	init_pin(motor_2, OUTPUT_PWM);
 
-    // ---- PWM ----
-    pwm_set_wrap(slice_num, 65535);
-    slice_num = pwm_gpio_to_slice_num(motor_1);
+	// ---- PWM ----
+	pwm_set_wrap(slice_num, 65535);
+	slice_num = pwm_gpio_to_slice_num(motor_1);
 
-    // ---- Interrupts ----
-    gpio_set_irq_enabled_with_callback(motor_enc_a, GPIO_IRQ_EDGE_RISE, true, &irq_call);
+	// ---- Interrupts ----
+	gpio_set_irq_enabled_with_callback(motor_enc_a, GPIO_IRQ_EDGE_RISE, true, &irq_call);
 }
 
 
 // ------- Main program -------
 void setup()
 {
-    // --- Set motor to max ---
-    pwm_set_chan_level(slice_num, PWM_CHAN_B, 65535);
-    pwm_set_enabled(slice_num, true);
-    
-    stdio_init_all();
+	// --- Set motor to max ---
+	pwm_set_chan_level(slice_num, PWM_CHAN_B, 65535);
+	pwm_set_enabled(slice_num, true);
+	
+	stdio_init_all();
 }
 
 
 void loop()
 {
-    float tor_ms = (motor_gear_ratio * (enc_time_diff * (enc_pulses_per_rotation / 2))) / 1000;
-    float rpm = 60000 / tor_ms;
+	float tor_ms = (motor_gear_ratio * (enc_time_diff * (enc_pulses_per_rotation / 2))) / 1000;
+	float rpm = 60000 / tor_ms;
 
-    sprintf(msg, "Motor RPM: %f\nEncoder time diff: %i\n", rpm, enc_time_diff);
-    printf(msg);
+	sprintf(msg, "Motor RPM: %f\nEncoder time diff: %i\n", rpm, enc_time_diff);
+	printf(msg);
 }
 
 
 int main() 
 {
-    init_pins();
-    setup();
+	init_pins();
+	setup();
 
-    while (true)
-    {
-        loop();
-    }
+	while (true)
+	{
+		loop();
+	}
 }

@@ -57,8 +57,8 @@ double final_reading, rpm_m2, tor_ms_m2, rpm_m1, tor_ms_m1;
 // ---- Irq callback ----
 void irq_call(uint pin, uint32_t events)
 {
-    enc_time_old = enc_time;
-    enc_time = time_us_32();
+	enc_time_old = enc_time;
+	enc_time = time_us_32();
 	pulses ++;
 }
 
@@ -67,13 +67,13 @@ void irq_call(uint pin, uint32_t events)
 bool calc_rpm_m2(struct repeating_timer *rt)
 {
 	pulses_time = time_us_32() - last_pulses_reset;
-    time_per_rotation = (pulses_time / pulses) * enc_pulses_per_rotation;
+	time_per_rotation = (pulses_time / pulses) * enc_pulses_per_rotation;
 
-    if (pulses > 0)
-    {
-        pulses = 0;
-        last_pulses_reset = time_us_32();
-    }
+	if (pulses > 0)
+	{
+		pulses = 0;
+		last_pulses_reset = time_us_32();
+	}
 
 	return true;
 }
@@ -82,30 +82,30 @@ bool calc_rpm_m2(struct repeating_timer *rt)
 // ------- Main program -------
 void setup()
 {
-    init_pin(l_motor_1_enc_b, INPUT);
-    init_pin(l_motor_1_enc_a, INPUT);
-    init_pin(l_motor_2_enc_b, INPUT);
-    init_pin(l_motor_2_enc_a, INPUT);
-    init_pin(r_motor_1_enc_b, INPUT);
-    init_pin(r_motor_1_enc_a, INPUT);
-    init_pin(r_motor_2_enc_b, INPUT);
+	init_pin(l_motor_1_enc_b, INPUT);
+	init_pin(l_motor_1_enc_a, INPUT);
+	init_pin(l_motor_2_enc_b, INPUT);
+	init_pin(l_motor_2_enc_a, INPUT);
+	init_pin(r_motor_1_enc_b, INPUT);
+	init_pin(r_motor_1_enc_a, INPUT);
+	init_pin(r_motor_2_enc_b, INPUT);
 
-    init_pin(motor_enc_a, INPUT);
-    gpio_set_irq_enabled_with_callback(motor_enc_a, GPIO_IRQ_EDGE_RISE, true, &irq_call);
+	init_pin(motor_enc_a, INPUT);
+	gpio_set_irq_enabled_with_callback(motor_enc_a, GPIO_IRQ_EDGE_RISE, true, &irq_call);
 
-    // Activate motor at full speed
-    init_pin(motor_drive_a, OUTPUT);
-    init_pin(motor_drive_b, OUTPUT);
-    init_pin(motor_drive_aa, OUTPUT);
-    init_pin(motor_drive_bb, OUTPUT);
+	// Activate motor at full speed
+	init_pin(motor_drive_a, OUTPUT);
+	init_pin(motor_drive_b, OUTPUT);
+	init_pin(motor_drive_aa, OUTPUT);
+	init_pin(motor_drive_bb, OUTPUT);
 
-    gpio_put(motor_drive_a, HIGH);
-    gpio_put(motor_drive_b, LOW);
-    gpio_put(motor_drive_aa, HIGH);
-    gpio_put(motor_drive_bb, LOW);
+	gpio_put(motor_drive_a, HIGH);
+	gpio_put(motor_drive_b, LOW);
+	gpio_put(motor_drive_aa, HIGH);
+	gpio_put(motor_drive_bb, LOW);
 
-    stdio_init_all();
-    add_repeating_timer_ms(sample_time, calc_rpm_m2, NULL, &m2_calc_rt);
+	stdio_init_all();
+	add_repeating_timer_ms(sample_time, calc_rpm_m2, NULL, &m2_calc_rt);
 }
 
 
@@ -113,32 +113,32 @@ void loop()
 {
 	// Method 1 RPM calc
 	tor_ms_m1 = (motor_gear_ratio * ((enc_time - enc_time_old) * (enc_pulses_per_rotation))) / 1000;
-    rpm_m1 = 60000 / tor_ms_m1;
+	rpm_m1 = 60000 / tor_ms_m1;
 
-    // Method 2 RPM calc
-    tor_ms_m2 = (motor_gear_ratio * time_per_rotation) / 1000;
-    rpm_m2 = 60000 / tor_ms_m2;
+	// Method 2 RPM calc
+	tor_ms_m2 = (motor_gear_ratio * time_per_rotation) / 1000;
+	rpm_m2 = 60000 / tor_ms_m2;
 
 	// Reduce accuracy
 	rpm_m1 = truncate_adj(rpm_m1, 2);
 	rpm_m2 = truncate_adj(rpm_m2, 2);
 
 	// Use readings from both methods to determine RPM
-    final_reading = rpm_m1;
+	final_reading = rpm_m1;
 
 	if (rpm_m1 < 500)
 	{
 		final_reading = rpm_m2;
 	}
 
-    if (final_reading < 0.5)
-    {
-        final_reading = 0;
-    }
+	if (final_reading < 0.5)
+	{
+		final_reading = 0;
+	}
 
 	// Display measurements
-    sprintf(msg, "Final Reading: %.2f\n", final_reading);
-    printf(msg);
+	sprintf(msg, "Final Reading: %.2f\n", final_reading);
+	printf(msg);
 
 	sleep_ms(100);
 }
@@ -146,10 +146,10 @@ void loop()
 
 int main() 
 {
-    setup();
+	setup();
 
-    while (true)
-    {
-        loop();
-    }
+	while (true)
+	{
+		loop();
+	}
 }
