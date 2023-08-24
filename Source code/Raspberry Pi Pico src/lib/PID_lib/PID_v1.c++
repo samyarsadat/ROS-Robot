@@ -167,8 +167,8 @@ void PID::SetSampleTime(int NewSampleTime)
 
 /** SetOutputLimits(...) **********************************************************
  *  This function will be used far more often than SetInputLimits.  while
- *  the input to the controller will generally be in the 0-65535 range (which is
- *  the default already,)  the output will be a little different.  maybe they'll
+ *  the input to the controller will generally be in the 0-65535 range
+ *  the output will be a little different.  maybe they'll
  *  be doing a time window and will need 0-8000 or something.  or maybe they'll
  *  want to clamp it from 0-125.  who knows.  at any rate, that can all be done
  *  here.
