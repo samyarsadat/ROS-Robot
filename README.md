@@ -70,7 +70,7 @@ More details regarding the electronics design <a href="https://github.com/samyar
 
 #### Mechanical Design Overview
 The mechanical design of the robot is quite simple. 
-The chassis of the robot is 3D printed in two halves using PLA filament (more details regarding 3D printing <a href="https://github.com/samyarsadat/ROS-Robot/tree/stage-1/CAD%20files/STL%20files">here</a>) and robot uses four geared DC motors (Namiki 22CL-3501PG) in a differential drive configuration.<be>
+The chassis of the robot is 3D printed in two halves using PLA filament (more details regarding 3D printing <a href="https://github.com/samyarsadat/ROS-Robot/tree/stage-1/CAD%20files/STL%20files">here</a>) and the robot uses four geared DC motors (Namiki 22CL-3501PG) in a differential drive configuration.<be>
 
 <br>
 
