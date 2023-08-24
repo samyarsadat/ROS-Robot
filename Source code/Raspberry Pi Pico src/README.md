@@ -12,9 +12,8 @@ Two different methods are utilized when measuring motor speed:<br>_
 
 #### First Method
 _This method measures the time between each encoder pulse to determine the RPM.<br>
-The problem with this method is that when the motor stops, so does RPM calculation (I explain why this is a problem below).
-This is because the variables that contain the time at which the last and current pulses were received are only updated when a pulse is received from the encoder,
-or rather, they can **only** be updated when an encoder pulse is received.<br>
+The problem with this method is that when the motor stops, so do RPM calculations (I explain why this is a problem below).
+This is because the variables that contain the time at which the last and current pulses were received are only updated when a pulse is received from the encoder (they can **only** be updated when an encoder pulse is received).<br>
 <br>
 This method produces very accurate and stable RPM readings even with a low-resolution encoder (such as the ones found on the Namiki 22CL-3501PG motors that only send 160 pulses per gearbox shaft rotation);<br>
 **However, since RPM calculations stop when the encoders stop sending pulses, RPM readings get stuck at a low value (5~18) even though the motor isn't rotating.**<br>
