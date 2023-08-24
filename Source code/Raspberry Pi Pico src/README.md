@@ -30,7 +30,7 @@ This is because there might not be enough pulses sent by the encoder during a si
 So if no pulses are received during a sample period, the measured RPM will drop to zero, or at least very close to zero (we can round to zero as it will never go down to absolute zero)._<br>
 <br>
 
-#### The Implementation
+#### Implementation
 _Usually, I would only use the second method for measuring motor speed; However, because the Namiki 22CL-3501PG motors that I'm using have low-resolution encoders, I cannot reliably
 and accurately measure motor speeds by only using the second method.<br>
 <br>
