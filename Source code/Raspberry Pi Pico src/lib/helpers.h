@@ -20,6 +20,8 @@
 
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
+#include "hardware/gpio.h"
+#include "hardware/adc.h"
 #include <math.h>
 
 
@@ -31,13 +33,14 @@
 #define INPUT           3
 #define INPUT_PULLUP    4
 #define INPUT_PULLDOWN  5
+#define INPUT_ADC       6
 
 // ---- Pin state ----
 #define HIGH  1
 #define LOW   0
 
 // ---- Check flag ----
-#define FLAG 1687
+#define FIFO_FLAG  1687
 
 
 // ------- Functions -------
@@ -54,6 +57,7 @@ void init_pin(int pin, int mode)
 
         case 2:
             gpio_init(pin);
+            gpio_set_dir(pin, true);
             gpio_set_function(pin, GPIO_FUNC_PWM);
             break;
 
@@ -73,14 +77,19 @@ void init_pin(int pin, int mode)
             gpio_set_dir(pin, false);
             gpio_pull_down(pin);
             break;
+
+        case 6:
+            adc_gpio_init(pin);
+            gpio_set_dir(pin, false);
+            break;
     }
 }
 
 
 // ---- Arduino map-like function ----
-uint32_t map(uint32_t input, uint32_t in_min, uint32_t in_max, uint32_t out_min, uint32_t out_max)
+float map(float input, int in_min, int in_max, int out_min, int out_max)
 {
-    return (((input - in_min) * (out_max - out_min)) / (in_max - in_min)) + out_min;
+    return (float) (((input - in_min) * (out_max - out_min)) / (in_max - in_min)) + out_min;
 }
 
 

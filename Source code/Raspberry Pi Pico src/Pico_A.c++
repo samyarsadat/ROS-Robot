@@ -763,10 +763,10 @@ void loop1()
 // ---- Core 1 loop init ----
 void init_core_1()
 {
-    multicore_fifo_push_blocking(FLAG);
+    multicore_fifo_push_blocking(FIFO_FLAG);
     uint32_t flag_r = multicore_fifo_pop_blocking();
     
-    if (flag_r != FLAG)
+    if (flag_r != FIFO_FLAG)
     {
         init_pins();
         handle_error(1, "Core 1 FIFO receive failure");
@@ -857,10 +857,10 @@ int main()
     multicore_reset_core1();
     multicore_launch_core1(init_core_1);
 
-    multicore_fifo_push_blocking(FLAG);
+    multicore_fifo_push_blocking(FIFO_FLAG);
     uint32_t flag_r = multicore_fifo_pop_blocking();
     
-    if (flag_r != FLAG)
+    if (flag_r != FIFO_FLAG)
     {
         init_pins();
         handle_error(0, "Core 0 FIFO receive failure");
