@@ -28,7 +28,7 @@
 #include <rclc/executor.h>
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
-#include "lib/helpers.h"
+#include "lib/Helper_lib/Helpers.h"
 #include "lib/PID_lib/PID_v1.h"
 #include "hardware/pwm.h"
 
@@ -106,7 +106,7 @@ PID r_motors(&r_motor_rpm, &motor_r_set, &motor_r_spd, rm_kp, rm_ki, rm_kd, DIRE
 PID l_motors(&l_motor_rpm, &motor_l_set, &motor_l_spd, lm_kp, lm_ki, lm_kd, DIRECT);
 
 
-// ------- Pin defines -------
+// ------- Pin definitions -------
 
 // ---- Misc. ----
 #define power_led       1
@@ -146,12 +146,13 @@ PID l_motors(&l_motor_rpm, &motor_l_set, &motor_l_spd, lm_kp, lm_ki, lm_kd, DIRE
 #define i2c_scl  17
 
 
-// ------- Other defines -------
+// ------- Other definitions -------
 
 // ---- Misc. ----
 #define loop_time_max    60000    // In microseconds
 #define loop_1_time_max  200000   // In microseconds
 #define PI               3.141592
+#define CHECK_FLAG       1687
 
 // ---- Ultrasonic sensor specs ----
 #define ultra_fov        30
@@ -763,10 +764,10 @@ void loop1()
 // ---- Core 1 loop init ----
 void init_core_1()
 {
-    multicore_fifo_push_blocking(FIFO_FLAG);
+    multicore_fifo_push_blocking(CHECK_FLAG);
     uint32_t flag_r = multicore_fifo_pop_blocking();
     
-    if (flag_r != FIFO_FLAG)
+    if (flag_r != CHECK_FLAG)
     {
         init_pins();
         handle_error(1, "Core 1 FIFO receive failure");
@@ -857,10 +858,10 @@ int main()
     multicore_reset_core1();
     multicore_launch_core1(init_core_1);
 
-    multicore_fifo_push_blocking(FIFO_FLAG);
+    multicore_fifo_push_blocking(CHECK_FLAG);
     uint32_t flag_r = multicore_fifo_pop_blocking();
     
-    if (flag_r != FIFO_FLAG)
+    if (flag_r != CHECK_FLAG)
     {
         init_pins();
         handle_error(0, "Core 0 FIFO receive failure");
@@ -877,4 +878,6 @@ int main()
             loop();
         }
     }
+
+    return 0;
 }

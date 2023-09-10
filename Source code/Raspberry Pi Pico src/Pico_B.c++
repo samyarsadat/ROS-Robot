@@ -26,7 +26,7 @@
 #include <rclc/executor.h>
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
-#include "lib/helpers.h"
+#include "lib/Helper_lib/Helpers.h"
 #include "hardware/pwm.h"
 
 
@@ -51,7 +51,7 @@ bool halt_core_0 = false;
 uint32_t loop_time, loop_1_time;
 
 
-// ------- Pin defines -------
+// ------- Pin definitions -------
 
 // ---- Misc. ----
 #define onboard_led  25
@@ -75,11 +75,12 @@ uint32_t loop_time, loop_1_time;
 #define ms_back_r   10
 
 
-// ------- Other defines -------
+// ------- Other definitions -------
 
 // ---- Misc. ----
 #define loop_timeout    60000    // In microseconds
 #define loop_1_timeout  200000   // In microseconds
+#define CHECK_FLAG      1687
 
 
 // ------- Functions -------
@@ -249,10 +250,10 @@ void loop1()
 // ---- Core 1 loop init ----
 void init_core_1()
 {
-    multicore_fifo_push_blocking(FIFO_FLAG);
+    multicore_fifo_push_blocking(CHECK_FLAG);
     uint32_t flag_r = multicore_fifo_pop_blocking();
     
-    if (flag_r != FIFO_FLAG)
+    if (flag_r != CHECK_FLAG)
     {
         init_pins();
         handle_error(1, "Core 1 FIFO receive failure");
@@ -327,10 +328,10 @@ int main()
     multicore_reset_core1();
     multicore_launch_core1(init_core_1);
 
-    multicore_fifo_push_blocking(FIFO_FLAG);
+    multicore_fifo_push_blocking(CHECK_FLAG);
     uint32_t flag_r = multicore_fifo_pop_blocking();
     
-    if (flag_r != FIFO_FLAG)
+    if (flag_r != CHECK_FLAG)
     {
         init_pins();
         handle_error(0, "Core 0 FIFO receive failure");
@@ -346,4 +347,6 @@ int main()
             loop();
         }
     }
+
+    return 0;
 }

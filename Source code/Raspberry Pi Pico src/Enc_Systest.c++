@@ -21,7 +21,7 @@
 // ------- Libraries & Modules -------
 #include <stdio.h>
 #include "pico/stdlib.h"
-#include "lib/helpers.h"
+#include "lib/Helper_lib/Helpers.h"
 
 
 // ------- Global variables -------
@@ -186,4 +186,6 @@ int main()
     {
         loop();
     }
+
+    return 0;
 }

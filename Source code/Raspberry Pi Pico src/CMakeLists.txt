@@ -34,10 +34,16 @@ pico_sdk_init()
 link_directories($ENV{MICROROS_PATH}/libmicroros)
 
 
+# Custom library subdirectories
+add_subdirectory(lib/Motor_lib)
+add_subdirectory(lib/Helper_lib)
+add_subdirectory(lib/PID_lib)
+
+
 # ---- Pico A ----
 
 # Add source files
-add_executable(${PROJECT_NAME}_PICO_A Pico_A.c++ lib/PID_lib/PID_v1.c++ $ENV{MICROROS_PATH}/pico_uart_transport.c)
+add_executable(${PROJECT_NAME}_PICO_A Pico_A.c++ $ENV{MICROROS_PATH}/pico_uart_transport.c)
 
 # Create map/bin/hex/uf2 files
 pico_add_extra_outputs(${PROJECT_NAME}_PICO_A)
@@ -49,6 +55,9 @@ target_link_libraries(${PROJECT_NAME}_PICO_A pico_multicore)
 target_link_libraries(${PROJECT_NAME}_PICO_A hardware_pwm)
 target_link_libraries(${PROJECT_NAME}_PICO_A hardware_adc)
 target_link_libraries(${PROJECT_NAME}_PICO_A hardware_gpio)
+target_link_libraries(${PROJECT_NAME}_PICO_A helpers_lib)
+target_link_libraries(${PROJECT_NAME}_PICO_A pid_v1_lib)
+target_link_libraries(${PROJECT_NAME}_PICO_A motor_control_lib)
 
 # Link to include directories
 target_include_directories(${PROJECT_NAME}_PICO_A PUBLIC $ENV{MICROROS_PATH}/libmicroros/include)
@@ -74,6 +83,7 @@ target_link_libraries(${PROJECT_NAME}_PICO_B pico_multicore)
 target_link_libraries(${PROJECT_NAME}_PICO_B hardware_pwm)
 target_link_libraries(${PROJECT_NAME}_PICO_B hardware_adc)
 target_link_libraries(${PROJECT_NAME}_PICO_B hardware_gpio)
+target_link_libraries(${PROJECT_NAME}_PICO_B helpers_lib)
 
 # Link to include directories
 target_include_directories(${PROJECT_NAME}_PICO_B PUBLIC $ENV{MICROROS_PATH}/libmicroros/include)
@@ -95,9 +105,7 @@ pico_add_extra_outputs(${PROJECT_NAME}_ENC_TEST)
 
 # Link to libraries
 target_link_libraries(${PROJECT_NAME}_ENC_TEST pico_stdlib)
-target_link_libraries(${PROJECT_NAME}_ENC_TEST hardware_pwm)
-target_link_libraries(${PROJECT_NAME}_ENC_TEST hardware_adc)
-target_link_libraries(${PROJECT_NAME}_ENC_TEST hardware_gpio)
+target_link_libraries(${PROJECT_NAME}_ENC_TEST helpers_lib)
 
 # Enable USB, disable UART
 pico_enable_stdio_usb(${PROJECT_NAME}_ENC_TEST 1)
@@ -105,30 +113,10 @@ pico_enable_stdio_uart(${PROJECT_NAME}_ENC_TEST 0)
 
 
 
-# ---- ENCODER TEST WITH MOTOR CONTROL ----
-
-# Add source files
-add_executable(${PROJECT_NAME}_ENC_TEST_MOTOR Enc_Systest_Motor.c++)
-
-# Create map/bin/hex/uf2 files
-pico_add_extra_outputs(${PROJECT_NAME}_ENC_TEST_MOTOR)
-
-# Link to libraries
-target_link_libraries(${PROJECT_NAME}_ENC_TEST_MOTOR pico_stdlib)
-target_link_libraries(${PROJECT_NAME}_ENC_TEST_MOTOR hardware_pwm)
-target_link_libraries(${PROJECT_NAME}_ENC_TEST_MOTOR hardware_adc)
-target_link_libraries(${PROJECT_NAME}_ENC_TEST_MOTOR hardware_gpio)
-
-# Enable USB, disable UART
-pico_enable_stdio_usb(${PROJECT_NAME}_ENC_TEST_MOTOR 1)
-pico_enable_stdio_uart(${PROJECT_NAME}_ENC_TEST_MOTOR 0)
-
-
-
 # ---- ENCODER TEST WITH MOTOR AND PID ----
 
 # Add source files
-add_executable(${PROJECT_NAME}_ENC_TEST_MOTOR_PID Enc_Systest_Motor_PID.c++ lib/PID_lib/PID_v1.c++)
+add_executable(${PROJECT_NAME}_ENC_TEST_MOTOR_PID Enc_Systest_Motor_PID.c++)
 
 # Create map/bin/hex/uf2 files
 pico_add_extra_outputs(${PROJECT_NAME}_ENC_TEST_MOTOR_PID)
@@ -138,10 +126,31 @@ target_link_libraries(${PROJECT_NAME}_ENC_TEST_MOTOR_PID pico_stdlib)
 target_link_libraries(${PROJECT_NAME}_ENC_TEST_MOTOR_PID hardware_pwm)
 target_link_libraries(${PROJECT_NAME}_ENC_TEST_MOTOR_PID hardware_adc)
 target_link_libraries(${PROJECT_NAME}_ENC_TEST_MOTOR_PID hardware_gpio)
+target_link_libraries(${PROJECT_NAME}_ENC_TEST_MOTOR_PID helpers_lib)
+target_link_libraries(${PROJECT_NAME}_ENC_TEST_MOTOR_PID pid_v1_lib)
 
 # Enable USB, disable UART
 pico_enable_stdio_usb(${PROJECT_NAME}_ENC_TEST_MOTOR_PID 1)
 pico_enable_stdio_uart(${PROJECT_NAME}_ENC_TEST_MOTOR_PID 0)
+
+
+
+# ---- TESTING SANDBOX ----
+
+# Add source files
+add_executable(${PROJECT_NAME}_TEST_SANDBOX Test_Sandbox.c++)
+
+# Create map/bin/hex/uf2 files
+pico_add_extra_outputs(${PROJECT_NAME}_TEST_SANDBOX)
+
+# Link to libraries
+target_link_libraries(${PROJECT_NAME}_TEST_SANDBOX pico_stdlib)
+target_link_libraries(${PROJECT_NAME}_TEST_SANDBOX helpers_lib)
+target_link_libraries(${PROJECT_NAME}_TEST_SANDBOX motor_control_lib)
+
+# Enable USB, disable UART
+pico_enable_stdio_usb(${PROJECT_NAME}_TEST_SANDBOX 1)
+pico_enable_stdio_uart(${PROJECT_NAME}_TEST_SANDBOX 0)
 
 
 

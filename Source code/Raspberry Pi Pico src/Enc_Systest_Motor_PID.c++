@@ -20,11 +20,12 @@
 
 // ------- Libraries & Modules -------
 #include <stdio.h>
+#include <math.h>
 #include "pico/stdlib.h"
-#include "lib/helpers.h"
 #include "hardware/pwm.h"
 #include "hardware/adc.h"
 #include "lib/PID_lib/PID_v1.h"
+#include "lib/Helper_lib/Helpers.h"
 
 
 // ------- Global variables -------
@@ -231,8 +232,6 @@ void setup()
 
     r_motor_pwm_slice = pwm_gpio_to_slice_num(r_motor_1_drive);
     l_motor_pwm_slice = pwm_gpio_to_slice_num(l_motor_1_drive);
-    pwm_set_enabled(r_motor_pwm_slice, true);
-    pwm_set_enabled(l_motor_pwm_slice, true);
 
     // Multiplexer pins
     init_pin(mux_add_0, OUTPUT);
@@ -283,17 +282,17 @@ float motor_rpm_calc(uint32_t m1_enc_time, uint32_t m1_enc_time_old, uint32_t m2
     } 
     
 
-    /*if (final_reading < 0.5) 
+    if (final_reading < 0.5) 
     { 
         final_reading = 0;
-    }*/
+    }
 
     return final_reading;
 }
 
 
-// ---- Get and set PID Kp, Ki, Kd, and set target values from multiplexer inputs 0-3 ----
-/*void get_set_pid_vals()
+/*// ---- Get and set PID Kp, Ki, Kd, and set target values from multiplexer inputs 0-3 ----
+void get_set_pid_vals()
 {
     gpio_deinit(mux_io);
     init_pin(mux_io, INPUT_ADC);
@@ -373,4 +372,6 @@ int main()
     {
         loop();
     }
+
+    return 0;
 }
