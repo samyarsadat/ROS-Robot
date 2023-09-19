@@ -128,7 +128,11 @@ void Motor::compute_outputs()
     {
         if (ctrl_mode == control_mode::PID)
         {
-            // TOOD: Implement PID control.
+            // TOOD: Implement direction control.
+            // TODO: Implement safety checks.
+            average_rpm = Motor::get_avg_rpm();
+            pid->Compute();
+            driver->set_speed(pid_output);
         }
 
         else if (ctrl_mode == control_mode::BLIND)

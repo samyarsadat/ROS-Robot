@@ -240,7 +240,7 @@ float MotorEncoder::get_rpm()
 
     if (final_reading < rpm_zero_threshold)
     {
-        final_reading = 0;
+        final_reading = 0.0f;
     }
 
     return final_reading;
