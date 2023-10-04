@@ -128,11 +128,48 @@ void Motor::compute_outputs()
     {
         if (ctrl_mode == control_mode::PID)
         {
-            // TOOD: Implement direction control.
             // TODO: Implement safety checks.
+            if (motor_dir == motor_direction::FORWARD || (motor_dir == motor_direction::BACKWARD && dir_reversed))
+            {
+                driver->set_direction(MotorDriver::direction::FORWARD);
+            }
+
+            else if (motor_dir == motor_direction::BACKWARD || (motor_dir == motor_direction::FORWARD && dir_reversed))
+            {
+                driver->set_direction(MotorDriver::direction::BACKWARD);
+            }
+
             average_rpm = Motor::get_avg_rpm();
             pid->Compute();
             driver->set_speed(pid_output);
+
+            if (!(motor_dir == motor_direction::FORWARD && encoders[0]->get_direction() == MotorEncoder::enc_direction::FORWARD))
+            {
+                dir_reversed_loop_count ++;
+            }
+
+            else if (!(motor_dir == motor_direction::BACKWARD && encoders[0]->get_direction() == MotorEncoder::enc_direction::BACKWARD))
+            {
+                dir_reversed_loop_count ++;
+            }
+
+            else 
+            {
+                dir_reversed_loop_count = 0;
+            }
+
+            if (dir_reversed_loop_count > max_dir_reversed_loop_count)
+            {
+                if (dir_reversed)
+                {
+                    dir_reversed = false;
+                }
+
+                else 
+                {
+                    dir_reversed = true;
+                }
+            }
         }
 
         else if (ctrl_mode == control_mode::BLIND)

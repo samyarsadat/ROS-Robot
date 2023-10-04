@@ -30,7 +30,8 @@
 
 
 // ---- Static config ----
-#define max_number_of_encoders  2
+#define max_number_of_encoders       2
+#define max_dir_reversed_loop_count  10
 
 // Default tunings for Namiki 22CL-3501PG
 #define default_pid_Kp              21.2f
@@ -92,6 +93,8 @@ class Motor
         motor_direction motor_dir;
         control_mode ctrl_mode;
         int pid_output;
+        int dir_reversed_loop_count;
+        bool dir_reversed;
 
         struct repeating_timer rpm_method_2_tpr_calc_rt;
         uint rpm_method_2_sample_time;
