@@ -98,6 +98,9 @@ class MotorDriver
         direction input_direction;   // Currently set driver direction
         bool driver_enabled;
 
+
+        // ---- Internal Functions ----
+
         // Initializes the driver.
         // This function handles driver-specific initialization requirements.
         void init_driver();

@@ -68,9 +68,9 @@ void Motor::set_pid_ctrl_speed(float rpm)
     set_speed_pid = rpm;
 }
 
-void Motor::set_pwm_ctrl_speed(int speed)
+void Motor::set_pwm_ctrl_speed(int pwm_out)
 {
-    set_speed = speed;
+    set_speed = pwm_out;
 }
 
 void Motor::set_motor_direction(motor_direction dir)
@@ -93,6 +93,8 @@ void Motor::disable_controller()
 {
     controller_enabled = false;
     driver->disable();
+    Motor::set_pid_ctrl_speed(0);
+    Motor::set_pwm_ctrl_speed(0);
 }
 
 float Motor::get_avg_rpm()
@@ -128,47 +130,54 @@ void Motor::compute_outputs()
     {
         if (ctrl_mode == control_mode::PID)
         {
-            // TODO: Implement safety checks.
-            if (motor_dir == motor_direction::FORWARD || (motor_dir == motor_direction::BACKWARD && dir_reversed))
+            if (set_speed_pid != 0)
             {
-                driver->set_direction(MotorDriver::direction::FORWARD);
-            }
-
-            else if (motor_dir == motor_direction::BACKWARD || (motor_dir == motor_direction::FORWARD && dir_reversed))
-            {
-                driver->set_direction(MotorDriver::direction::BACKWARD);
-            }
-
-            average_rpm = Motor::get_avg_rpm();
-            pid->Compute();
-            driver->set_speed(pid_output);
-
-            if (!(motor_dir == motor_direction::FORWARD && encoders[0]->get_direction() == MotorEncoder::enc_direction::FORWARD))
-            {
-                dir_reversed_loop_count ++;
-            }
-
-            else if (!(motor_dir == motor_direction::BACKWARD && encoders[0]->get_direction() == MotorEncoder::enc_direction::BACKWARD))
-            {
-                dir_reversed_loop_count ++;
-            }
-
-            else 
-            {
-                dir_reversed_loop_count = 0;
-            }
-
-            if (dir_reversed_loop_count > max_dir_reversed_loop_count)
-            {
-                if (dir_reversed)
+                if (motor_dir == motor_direction::FORWARD || (motor_dir == motor_direction::BACKWARD && dir_reversed))
                 {
-                    dir_reversed = false;
+                    driver->set_direction(MotorDriver::direction::FORWARD);
+                }
+
+                else if (motor_dir == motor_direction::BACKWARD || (motor_dir == motor_direction::FORWARD && dir_reversed))
+                {
+                    driver->set_direction(MotorDriver::direction::BACKWARD);
+                }
+
+                average_rpm = Motor::get_avg_rpm();
+                pid->Compute();
+                driver->set_speed((int) pid_output);
+
+                if (!(motor_dir == motor_direction::FORWARD && encoders[0]->get_direction() == MotorEncoder::enc_direction::FORWARD))
+                {
+                    dir_reversed_loop_count ++;
+                }
+
+                else if (!(motor_dir == motor_direction::BACKWARD && encoders[0]->get_direction() == MotorEncoder::enc_direction::BACKWARD))
+                {
+                    dir_reversed_loop_count ++;
                 }
 
                 else 
                 {
-                    dir_reversed = true;
+                    dir_reversed_loop_count = 0;
                 }
+
+                if (dir_reversed_loop_count > max_dir_reversed_loop_count)
+                {
+                    if (dir_reversed)
+                    {
+                        dir_reversed = false;
+                    }
+
+                    else 
+                    {
+                        dir_reversed = true;
+                    }
+                }
+            }
+
+            else
+            {
+                driver->set_speed(0);
             }
         }
 

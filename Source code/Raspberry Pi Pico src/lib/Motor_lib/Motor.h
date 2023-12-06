@@ -31,7 +31,7 @@
 
 // ---- Static config ----
 #define max_number_of_encoders       2
-#define max_dir_reversed_loop_count  10
+#define max_dir_reversed_loop_count  20
 
 // Default tunings for Namiki 22CL-3501PG
 #define default_pid_Kp              21.2f
@@ -65,19 +65,49 @@ class Motor
 
 
         // ---- Functions ----
-
-        // TODO: Comments
+        
+        // Set control mode (PID / blind PWM).
         void set_control_mode(control_mode mode);
+
+        // Set target RPM for PID control.
         void set_pid_ctrl_speed(float rpm);
-        void set_pwm_ctrl_speed(int speed);
+
+        // Set PWM output for blind PWM control.
+        void set_pwm_ctrl_speed(int pwm_out);
+
+        // Set motor direction.
+        // The actual direction in which the motor is 
+        // spinning is only checked when in PID mode.
         void set_motor_direction(motor_direction dir);
+
+        // Trigger the emergency braking.
+        // (Stops and then momentarily drives the motors backward)
         void motor_emergency_brake();
+
+        // Enable the controller.
+        // This function also calls the enable() function
+        // of the motor driver.
         void enable_controller();
+
+        // Disable the controller.
+        // This function also calls the disable() function
+        // of the motor driver, which stops the motors.
         void disable_controller();
+
+        // Returns the averaged RPM of all of the defined encoders.
         float get_avg_rpm();
+
+        // Returns the currently set PID RPM target.
         float get_pid_ctrl_speed();
+
+        // Returns the currently set blind PWM output.
         int get_pwm_ctrl_speed();
+
+        // Returns the current control mode.
         control_mode get_control_mode();
+
+        // Computes and sets motor outputs based on the
+        // currently set control mode.
         void compute_outputs();
         
 
@@ -92,10 +122,7 @@ class Motor
         float set_speed;
         motor_direction motor_dir;
         control_mode ctrl_mode;
-        int pid_output;
-        int dir_reversed_loop_count;
-        bool dir_reversed;
-
-        struct repeating_timer rpm_method_2_tpr_calc_rt;
-        uint rpm_method_2_sample_time;
+        float pid_output;
+        int dir_reversed_loop_count;   // The number of loops during which the motors have been turning in the opposite direction of what they should be turning in.
+        bool dir_reversed;             // Whether the motor outputs should be reversed for the them to turn in the correct direction.
 };

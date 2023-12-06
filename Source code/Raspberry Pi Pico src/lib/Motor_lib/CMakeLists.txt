@@ -32,7 +32,7 @@ pico_sdk_init()
 
 
 # Add source files
-add_library(${PROJECT_NAME} Motor.c++ Motor_Driver.c++ Motor_Encoder.c++)
+add_library(${PROJECT_NAME} Motor.c++ Motor_Driver.c++ Motor_Encoder.c++ Motor_Safety.c++)
 
 # Link to libraries
 target_link_libraries(${PROJECT_NAME} pico_stdlib)
