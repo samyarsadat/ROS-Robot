@@ -40,3 +40,4 @@
  - **13.**&nbsp; *Add individual current limiting resistors and connectors for motor encoders.*
  - **14.**&nbsp; *Motor encoder IR transmitter current limiting resistors should be connected to `5v` instead of `3.3v`.*
  - **15.**&nbsp; *Consider connecting motor encoder pull-up resistors to `5v` instead of `3.3v` or reducing their resistance.*
+ - **16.**&nbsp; *Expose the `UART0` pins of the Picos for debugging.*
