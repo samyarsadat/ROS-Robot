@@ -46,12 +46,13 @@ MotorSafety::MotorSafety(Motor* ctrl, MotorEncoder* encs[], int number_of_encode
 void MotorSafety::configure_safety(bool enable_enc_devi_check, int enc_max_deviation, bool enable_set_vs_actual_devi_check, int set_vs_actual_max_deviation, int check_fail_trig_timeout, safety_trigger_callback trig_callback)
 {
     safety_configured = true;
-    enc_diff_check_enabled = enable_enc_devi_check;
-    enc_diff_trigger_tolerance = enc_max_deviation;
-    set_actual_spd_diff_check_enabled = enable_set_vs_actual_devi_check;
-    set_actual_spd_diff_tolerance = set_vs_actual_max_deviation;
-    checks_fail_trigger_timout_ms = check_fail_trig_timeout;
     trigger_callback = trig_callback;
+    MotorSafety::encoder_diff_check_enabled(enable_enc_devi_check);
+    MotorSafety::set_enc_diff_tolerance(enc_max_deviation);
+    MotorSafety::set_vs_actual_spd_diff_check_enabled(enable_set_vs_actual_devi_check);
+    MotorSafety::set_set_vs_actual_spd_tolerance(set_vs_actual_max_deviation);
+    MotorSafety::set_fail_trigger_timeout(check_fail_trig_timeout);
+    MotorSafety::set_set_vs_actual_spd_time_tolerance(0);
 }
 
 void MotorSafety::enable_safety()
@@ -82,6 +83,11 @@ void MotorSafety::set_set_vs_actual_spd_tolerance(int tolerance)
     set_actual_spd_diff_tolerance = tolerance;
 }
 
+void MotorSafety::set_set_vs_actual_spd_time_tolerance(int milliseconds)
+{
+    set_vs_actual_spd_check_timeout_extra_ms = milliseconds;
+}
+
 void MotorSafety::set_enc_diff_tolerance(int tolerance)
 {
     enc_diff_trigger_tolerance = tolerance;
@@ -96,26 +102,27 @@ void MotorSafety::safety_check_timer_callback()
 {
     if (safety_enabled)
     {
-        if (!check_encoder_difference() && !check_set_vs_actual_speed_difference())
-        {
-            trigger_callback(safety_trigger_conditions::ENC_DIFF_EXCEED, id);
-            trigger_callback(safety_trigger_conditions::SET_VS_ACTUAL_SPD_EXCEED, id);
-        }
-
-        else if (!check_encoder_difference())
+        if (!check_encoder_difference())
         {
             trigger_callback(safety_trigger_conditions::ENC_DIFF_EXCEED, id);
         }
 
-        else if (!check_set_vs_actual_speed_difference())
+        if (!check_set_vs_actual_speed_difference())
         {
             trigger_callback(safety_trigger_conditions::SET_VS_ACTUAL_SPD_EXCEED, id);
+        }
+
+        if (!check_encoder_dir_difference())
+        {
+            trigger_callback(safety_trigger_conditions::ENC_DIR_DIFF_DET, id);
         }
     }
 }
 
 
 // --------- Private Functions ---------
+// TODO: Comments.
+
 bool MotorSafety::check_encoder_difference()
 {
     if (number_of_encoders_defined > 1)
@@ -179,7 +186,7 @@ bool MotorSafety::check_set_vs_actual_speed_difference()
 
             else
             {
-                if (((time_us_32() - last_set_speed_trigger) / 1000) > checks_fail_trigger_timout_ms)
+                if (((time_us_32() - last_set_speed_trigger) / 1000) > checks_fail_trigger_timout_ms + set_vs_actual_spd_check_timeout_extra_ms)
                 {
                     return false;
                 }
@@ -192,6 +199,45 @@ bool MotorSafety::check_set_vs_actual_speed_difference()
             {
                 last_set_speed_trigger = 0;
             }
+        }
+    }
+
+    return true;
+}
+
+bool MotorSafety::check_encoder_dir_difference()
+{
+    if (number_of_encoders_defined > 1)
+    {
+        MotorEncoder::enc_direction last_direction = encoders[0]->get_direction();
+
+        for (int i = 1; i < number_of_encoders_defined; i++)
+        {
+            if (encoders[i]->get_direction() != last_direction)
+            {
+                if (last_enc_dir_diff_trigger == 0)
+                {
+                    last_enc_dir_diff_trigger = time_us_32();
+                }
+
+                else
+                {
+                    if (((time_us_32() - last_enc_dir_diff_trigger) / 1000) > checks_fail_trigger_timout_ms + set_vs_actual_spd_check_timeout_extra_ms)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            else
+            {
+                if (last_enc_dir_diff_trigger != 0)
+                {
+                    last_enc_dir_diff_trigger = 0;
+                }
+            }
+
+            last_direction = encoders[i]->get_direction();
         }
     }
 

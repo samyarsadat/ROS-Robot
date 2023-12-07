@@ -58,6 +58,7 @@ Motor::Motor(MotorDriver* drv, MotorEncoder* encs[], int number_of_encoders)
 
 // --------- Public functions ---------
 // TODO: Comments.
+
 void Motor::set_control_mode(control_mode mode)
 {
     ctrl_mode = mode;

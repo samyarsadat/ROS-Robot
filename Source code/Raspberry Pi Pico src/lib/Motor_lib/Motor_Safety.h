@@ -38,11 +38,13 @@ class MotorSafety
         enum safety_trigger_conditions
         {
             ENC_DIFF_EXCEED = 0,
-            SET_VS_ACTUAL_SPD_EXCEED = 1
+            SET_VS_ACTUAL_SPD_EXCEED = 1,
+            ENC_DIR_DIFF_DET = 2
         };
 
         // Safety trigger function callback type definition.
         typedef void (*safety_trigger_callback)(safety_trigger_conditions condition, int id);
+
 
         // ---- Functions ----
         
@@ -65,6 +67,9 @@ class MotorSafety
 
         // Set actual vs. set speed monitoring tolerance.
         void set_set_vs_actual_spd_tolerance(int tolerance);
+
+        // Set actual vs. set speed monitoring extra timeout tolerance.
+        void set_set_vs_actual_spd_time_tolerance(int milliseconds);
 
         // Set encoder difference speed monitoring tolerance.
         void set_enc_diff_tolerance(int tolerance);
@@ -97,6 +102,9 @@ class MotorSafety
         int checks_fail_trigger_timout_ms;
         uint32_t last_enc_diff_trigger;
         uint32_t last_set_speed_trigger;
+        uint32_t last_enc_dir_diff_trigger;
+        int set_vs_actual_spd_check_timeout_extra_ms;   // How many milliseconds should be added to checks_fail_trigger_timout_ms when checking for set vs. actual speed difference. 
+                                                        // Essentially how much extra tolerance should be allowed for this check.
 
 
         // ---- Internal Functions ----
@@ -111,5 +119,8 @@ class MotorSafety
         // the configured tolerance.
         bool check_set_vs_actual_speed_difference();
 
-        // TODO: Encoder direction difference check.
+        // Checks the measured direction of all of the defined encoders
+        // and returns false if any of the encoders are spinning in the
+        // opposite direction compared to the other ones.
+        bool check_encoder_dir_difference();
 };

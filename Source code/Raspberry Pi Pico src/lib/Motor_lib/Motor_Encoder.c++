@@ -49,6 +49,7 @@ MotorEncoder::MotorEncoder(uint encoder_chan_a_pin, uint encoder_chan_b_pin, flo
     init_pin(channel_b_pin, INPUT);
     
     gpio_set_irq_enabled_with_callback(channel_a_pin, GPIO_IRQ_EDGE_FALL, true, gpio_irq_callback_func);
+    gpio_set_irq_enabled(channel_b_pin, GPIO_IRQ_EDGE_FALL, true);
 }
 
 
