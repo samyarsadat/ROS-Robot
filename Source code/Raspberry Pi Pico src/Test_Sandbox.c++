@@ -1,4 +1,4 @@
-// Testing sandbox (UNTESTED)
+// Testing sandbox
 // Written by Samyar Sadat Akhavi, 2023
 // Motor_lib testing
 
