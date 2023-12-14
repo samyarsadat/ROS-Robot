@@ -25,6 +25,7 @@
 #include "Motor.h"           // Motor controller
 #include "pico/stdlib.h"
 #include <cstdlib>
+#include <stdio.h>
 
 
 // Constructor
@@ -32,6 +33,7 @@ MotorSafety::MotorSafety(Motor* ctrl, MotorEncoder* encs[], int number_of_encode
 {
     controller = ctrl;
     number_of_encoders_defined = number_of_encoders;
+    MotorSafety::disable_safety();
 
     // Copies all of encs' items over to encoders.
     for (int i = 0; i < number_of_encoders; i++)
@@ -43,16 +45,17 @@ MotorSafety::MotorSafety(Motor* ctrl, MotorEncoder* encs[], int number_of_encode
 
 // --------- Public Functions ---------
 // TODO: Comments.
-void MotorSafety::configure_safety(bool enable_enc_devi_check, int enc_max_deviation, bool enable_set_vs_actual_devi_check, int set_vs_actual_max_deviation, int check_fail_trig_timeout, safety_trigger_callback trig_callback)
+void MotorSafety::configure_safety(int enc_max_deviation, int set_vs_actual_max_deviation, int check_fail_trig_timeout, safety_trigger_callback trig_callback)
 {
     safety_configured = true;
     trigger_callback = trig_callback;
-    MotorSafety::encoder_diff_check_enabled(enable_enc_devi_check);
     MotorSafety::set_enc_diff_tolerance(enc_max_deviation);
-    MotorSafety::set_vs_actual_spd_diff_check_enabled(enable_set_vs_actual_devi_check);
     MotorSafety::set_set_vs_actual_spd_tolerance(set_vs_actual_max_deviation);
     MotorSafety::set_fail_trigger_timeout(check_fail_trig_timeout);
     MotorSafety::set_set_vs_actual_spd_time_tolerance(0);
+    MotorSafety::encoder_dir_diff_check_enabled(true);
+    MotorSafety::encoder_diff_check_enabled(true);
+    MotorSafety::set_vs_actual_spd_diff_check_enabled(true);
 }
 
 void MotorSafety::enable_safety()
@@ -75,7 +78,12 @@ void MotorSafety::encoder_diff_check_enabled(bool is_enabled)
 
 void MotorSafety::set_vs_actual_spd_diff_check_enabled(bool is_enabled)
 {
-    enc_diff_trigger_tolerance = is_enabled;
+    set_actual_spd_diff_check_enabled = is_enabled;
+}
+
+void MotorSafety::encoder_dir_diff_check_enabled(bool is_enabled)
+{
+    enc_dir_diff_check_enabled = is_enabled;
 }
 
 void MotorSafety::set_set_vs_actual_spd_tolerance(int tolerance)
@@ -125,7 +133,7 @@ void MotorSafety::safety_check_timer_callback()
 
 bool MotorSafety::check_encoder_difference()
 {
-    if (number_of_encoders_defined > 1)
+    if (number_of_encoders_defined > 1 && enc_diff_check_enabled)
     {
         float enc_val_max = encoders[0]->get_rpm();
         float enc_val_min = encoders[0]->get_rpm();
@@ -175,7 +183,7 @@ bool MotorSafety::check_encoder_difference()
 
 bool MotorSafety::check_set_vs_actual_speed_difference()
 {
-    if (controller->get_control_mode() == Motor::control_mode::PID)
+    if (controller->get_control_mode() == Motor::control_mode::PID && set_actual_spd_diff_check_enabled)
     {
         if (abs((int) (controller->get_pid_ctrl_speed() - controller->get_avg_rpm())) > set_actual_spd_diff_tolerance)
         {
@@ -207,7 +215,7 @@ bool MotorSafety::check_set_vs_actual_speed_difference()
 
 bool MotorSafety::check_encoder_dir_difference()
 {
-    if (number_of_encoders_defined > 1)
+    if (number_of_encoders_defined > 1 && controller->get_avg_rpm() > 0 && enc_dir_diff_check_enabled)
     {
         MotorEncoder::enc_direction last_direction = encoders[0]->get_direction();
 

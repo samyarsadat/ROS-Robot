@@ -48,6 +48,7 @@ Motor::Motor(MotorDriver* drv, MotorEncoder* encs[], int number_of_encoders)
         pid = std::make_unique<PID_v1_h::PID>(&average_rpm, &pid_output, &set_speed_pid, default_pid_Kp, default_pid_Ki, default_pid_Kd, DIRECT);
         pid->SetOutputLimits(driver->get_input_limit_min(), driver->get_input_limit_max());
         pid->SetSampleTime(default_pid_sample_time_ms);
+        pid->SetMode(AUTOMATIC);
 
         // Disabled by default to prevent erroneous motor control output until
         // the program is ready and explicitly enables the controller.
@@ -76,13 +77,16 @@ void Motor::set_pwm_ctrl_speed(int pwm_out)
 
 void Motor::set_motor_direction(motor_direction dir)
 {
+    dir_change_required = true;
     motor_dir = dir;
 }
 
-void Motor::motor_emergency_brake()
+void Motor::set_direction_reversed(bool reversed)
 {
-    // TODO: Implement emergency break.
+    dir_change_required = true;
+    dir_reversed = reversed;
 }
+
 
 void Motor::enable_controller()
 {
@@ -129,51 +133,30 @@ void Motor::compute_outputs()
 {
     if (controller_enabled)
     {
+        // Motor direction
+        if (dir_change_required)
+        {
+            if (motor_dir == motor_direction::FORWARD || (motor_dir == motor_direction::BACKWARD && dir_reversed))
+            {
+                driver->set_direction(MotorDriver::direction::FORWARD);
+            }
+
+            else if (motor_dir == motor_direction::BACKWARD || (motor_dir == motor_direction::FORWARD && dir_reversed))
+            {
+                driver->set_direction(MotorDriver::direction::BACKWARD);
+            }
+
+            dir_change_required = false;
+        }
+
+        // Motor speed
         if (ctrl_mode == control_mode::PID)
         {
             if (set_speed_pid != 0)
             {
-                if (motor_dir == motor_direction::FORWARD || (motor_dir == motor_direction::BACKWARD && dir_reversed))
-                {
-                    driver->set_direction(MotorDriver::direction::FORWARD);
-                }
-
-                else if (motor_dir == motor_direction::BACKWARD || (motor_dir == motor_direction::FORWARD && dir_reversed))
-                {
-                    driver->set_direction(MotorDriver::direction::BACKWARD);
-                }
-
                 average_rpm = Motor::get_avg_rpm();
                 pid->Compute();
                 driver->set_speed((int) pid_output);
-
-                if (!(motor_dir == motor_direction::FORWARD && encoders[0]->get_direction() == MotorEncoder::enc_direction::FORWARD))
-                {
-                    dir_reversed_loop_count ++;
-                }
-
-                else if (!(motor_dir == motor_direction::BACKWARD && encoders[0]->get_direction() == MotorEncoder::enc_direction::BACKWARD))
-                {
-                    dir_reversed_loop_count ++;
-                }
-
-                else 
-                {
-                    dir_reversed_loop_count = 0;
-                }
-
-                if (dir_reversed_loop_count > max_dir_reversed_loop_count)
-                {
-                    if (dir_reversed)
-                    {
-                        dir_reversed = false;
-                    }
-
-                    else 
-                    {
-                        dir_reversed = true;
-                    }
-                }
             }
 
             else
@@ -184,16 +167,6 @@ void Motor::compute_outputs()
 
         else if (ctrl_mode == control_mode::BLIND)
         {
-            if (motor_dir == motor_direction::FORWARD)
-            {
-                driver->set_direction(MotorDriver::direction::FORWARD);
-            }
-
-            else if (motor_dir == motor_direction::BACKWARD)
-            {
-                driver->set_direction(MotorDriver::direction::BACKWARD);
-            }
-
             driver->set_speed(set_speed);
         }
     }

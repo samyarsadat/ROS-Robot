@@ -26,7 +26,7 @@
 
 
 // ---- Static config ----
-#define rpm_zero_threshold  0.5f
+#define rpm_zero_threshold  1
 
 
 // ---- Main Encoder object ----

@@ -49,7 +49,7 @@ class MotorSafety
         // ---- Functions ----
         
         // Set initial configuration for the module.
-        void configure_safety(bool enable_enc_devi_check, int enc_max_deviation, bool enable_set_vs_actual_devi_check, int set_vs_actual_max_deviation, int check_fail_trig_timeout, safety_trigger_callback trig_callback);
+        void configure_safety(int enc_max_deviation, int set_vs_actual_max_deviation, int check_fail_trig_timeout, safety_trigger_callback trig_callback);
         
         // Enable safety monitoring.
         void enable_safety();
@@ -64,6 +64,10 @@ class MotorSafety
         // Configure whether actual vs. set speed
         // monitoring should be enabled.
         void set_vs_actual_spd_diff_check_enabled(bool is_enabled);
+
+        // Configure whether encoder direction difference
+        // monitoring should be enabled.
+        void encoder_dir_diff_check_enabled(bool is_enabled);
 
         // Set actual vs. set speed monitoring tolerance.
         void set_set_vs_actual_spd_tolerance(int tolerance);
@@ -96,6 +100,7 @@ class MotorSafety
         bool safety_enabled;
         bool enc_diff_check_enabled;
         bool set_actual_spd_diff_check_enabled;
+        bool enc_dir_diff_check_enabled;
         safety_trigger_callback trigger_callback;
         int enc_diff_trigger_tolerance;
         int set_actual_spd_diff_tolerance;

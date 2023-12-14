@@ -31,7 +31,7 @@
 
 // ---- Static config ----
 #define max_number_of_encoders       2
-#define max_dir_reversed_loop_count  20
+#define max_dir_reversed_loop_count  500
 
 // Default tunings for Namiki 22CL-3501PG
 #define default_pid_Kp              21.2f
@@ -80,9 +80,10 @@ class Motor
         // spinning is only checked when in PID mode.
         void set_motor_direction(motor_direction dir);
 
-        // Trigger the emergency braking.
-        // (Stops and then momentarily drives the motors backward)
-        void motor_emergency_brake();
+        // Configures whether the motor control direction
+        // should be reversed. Useful for when motor
+        // wiring is reversed.
+        void set_direction_reversed(bool reversed);
 
         // Enable the controller.
         // This function also calls the enable() function
@@ -121,8 +122,8 @@ class Motor
         float set_speed_pid;
         float set_speed;
         motor_direction motor_dir;
+        bool dir_change_required;
         control_mode ctrl_mode;
         float pid_output;
-        int dir_reversed_loop_count;   // The number of loops during which the motors have been turning in the opposite direction of what they should be turning in.
         bool dir_reversed;             // Whether the motor outputs should be reversed for the them to turn in the correct direction.
 };

@@ -43,7 +43,7 @@ MotorEncoder::MotorEncoder(uint encoder_chan_a_pin, uint encoder_chan_b_pin, flo
     MotorEncoder::set_gear_ratio(mtr_gear_ratio);
     MotorEncoder::set_enc_pulses_per_rotation(enc_pulses_per_rotation);
     MotorEncoder::set_enc_direction_reversed(false);
-    MotorEncoder::set_method_1_cutoff(12);
+    MotorEncoder::set_method_1_cutoff(15);
 
     init_pin(channel_a_pin, INPUT);
     init_pin(channel_b_pin, INPUT);
@@ -68,7 +68,7 @@ MotorEncoder::MotorEncoder(uint encoder_pin, float mtr_gear_ratio, uint enc_puls
     MotorEncoder::set_gear_ratio(mtr_gear_ratio);
     MotorEncoder::set_enc_pulses_per_rotation(enc_pulses_per_rotation);
     MotorEncoder::set_enc_direction_reversed(false);
-    MotorEncoder::set_method_1_cutoff(12);
+    MotorEncoder::set_method_1_cutoff(15);
 
     init_pin(channel_a_pin, INPUT);
     
