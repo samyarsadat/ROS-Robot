@@ -28,7 +28,13 @@
 #include "Motor.h"
 
 
-// Constructor
+/*  Constructor
+ *  
+ *  Arguments:
+ *    MotorDriver* drv: the motor driver object that is to be used by this controller.
+ *    MotorEncoder* encs[]: a MotorEncoder array containing all of the encoders that are to be used by this controller.
+ *    int number_of_encoders: the number of MotorEncoder objects that have been passed in the encs array.
+ */
 Motor::Motor(MotorDriver* drv, MotorEncoder* encs[], int number_of_encoders)
 {
     Motor::set_control_mode(control_mode::BLIND);
@@ -58,29 +64,76 @@ Motor::Motor(MotorDriver* drv, MotorEncoder* encs[], int number_of_encoders)
 
 
 // --------- Public functions ---------
-// TODO: Comments.
 
+/*  Sets the control mode of the controller.
+ *  
+ *  Arguments:
+ *    control_mode mode: the control mode that should be used. (PID/Blind PWM)
+ * 
+ *  Returns:
+ *    void
+ */
 void Motor::set_control_mode(control_mode mode)
 {
     ctrl_mode = mode;
 }
 
+
+/*  Sets the target speed for the PID controller.
+ *  Only used when the controller is in PID mode.
+ *  
+ *  Arguments:
+ *    float rpm: target RPM.
+ * 
+ *  Returns:
+ *    void
+ */
 void Motor::set_pid_ctrl_speed(float rpm)
 {
     set_speed_pid = rpm;
 }
 
+
+/*  Sets the PWM output for when the controller is in PWM (blind) mode.
+ *  The requested PWM value must be within the driver's input_limits.
+ *  
+ *  Arguments:
+ *    int pwm_out: requested PWM output. (Must be within driver's input_limits)
+ * 
+ *  Returns:
+ *    void
+ */
 void Motor::set_pwm_ctrl_speed(int pwm_out)
 {
     set_speed = pwm_out;
 }
 
+
+/*  Sets the motor's rotation direction.
+ *  This is not verified (open-loop control), neither in PID or PWM mode.
+ *  
+ *  Arguments:
+ *    motor_direction dir: requested direction.
+ * 
+ *  Returns:
+ *    void
+ */
 void Motor::set_motor_direction(motor_direction dir)
 {
     dir_change_required = true;
     motor_dir = dir;
 }
 
+
+/*  Configures whether the rotation direction of the motor should be reversed.
+ *  This is useful for when the wiring of the driver is backwards, for example.
+ *  
+ *  Arguments:
+ *    bool reversed: true to reverse, false to not reverse.
+ * 
+ *  Returns:
+ *    void
+ */
 void Motor::set_direction_reversed(bool reversed)
 {
     dir_change_required = true;
@@ -88,12 +141,29 @@ void Motor::set_direction_reversed(bool reversed)
 }
 
 
+/*  Enables the controller and the driver.
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    void
+ */
 void Motor::enable_controller()
 {
     controller_enabled = true;
     driver->enable();
 }
 
+
+/*  Disables the controller, disables the driver, and sets both PWM and PID target speeds to 0.
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    void
+ */
 void Motor::disable_controller()
 {
     controller_enabled = false;
@@ -102,6 +172,15 @@ void Motor::disable_controller()
     Motor::set_pwm_ctrl_speed(0);
 }
 
+
+/*  Returns the average RPM of all of the defined encoders.
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    float
+ */
 float Motor::get_avg_rpm()
 {
     float speed_total;
@@ -114,26 +193,72 @@ float Motor::get_avg_rpm()
     return speed_total / number_of_encoders_defined;
 }
 
+
+/*  Returns the set RPM target for PID control.
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    float
+ */
 float Motor::get_pid_ctrl_speed()
 {
     return set_speed_pid;
 }
 
+
+/*  Returns the set PWM output for blind control.
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    int
+ */
 int Motor::get_pwm_ctrl_speed()
 {
     return set_speed;
 }
 
+
+/*  Returns the set motor rotation direction.
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    motor_direction
+ */
 Motor::motor_direction Motor::get_set_motor_direction()
 {
     return motor_dir;
 }
 
+
+/*  Returns the set control mode of the controller.
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    control_mode
+ */
 Motor::control_mode Motor::get_control_mode()
 {
     return ctrl_mode;
 }
 
+
+/*  Calculates and sets motor outputs depending on the control mode and set direction.
+ *  How often this function is called determines how often the driver outputs are set.
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    void
+ */
 void Motor::compute_outputs()
 {
     if (controller_enabled)
