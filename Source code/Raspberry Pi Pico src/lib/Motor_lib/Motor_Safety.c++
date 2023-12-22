@@ -25,7 +25,6 @@
 #include "Motor.h"           // Motor controller
 #include "pico/stdlib.h"
 #include <cstdlib>
-#include <stdio.h>
 
 
 // Constructor

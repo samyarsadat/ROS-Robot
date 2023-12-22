@@ -150,8 +150,9 @@ void MotorEncoder::enc_hardware_irq_trigger(uint pin)
         enc_current_pulse_time = time_us_32();;
         enc_pulses ++;
 
-        // Set the measured direction to BACKWARD IF channel_b_pin is logic HIGH OR IF channel_b_pin is logic LOW but encoder direction is REVERSED.
-        if (is_dual_channel_encoder && (gpio_get(channel_b_pin) || (!gpio_get(channel_b_pin) && direction_reversed)))
+        // Set the measured direction to BACKWARD IF channel_b_pin is logic HIGH AND encoder direction IS NOT REVERSED OR 
+        // IF channel_b_pin is logic LOW but encoder direction is REVERSED.
+        if (is_dual_channel_encoder && ((gpio_get(channel_b_pin) && !direction_reversed) || (!gpio_get(channel_b_pin) && direction_reversed)))
         {
             measured_direction = enc_direction::BACKWARD;
         }

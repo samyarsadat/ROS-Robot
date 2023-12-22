@@ -31,7 +31,6 @@
 
 // ---- Static config ----
 #define max_number_of_encoders       2
-#define max_dir_reversed_loop_count  500
 
 // Default tunings for Namiki 22CL-3501PG
 #define default_pid_Kp              21.2f
@@ -103,6 +102,9 @@ class Motor
 
         // Returns the currently set blind PWM output.
         int get_pwm_ctrl_speed();
+
+        // Returns the currently set motor direction.
+        motor_direction get_set_motor_direction();
 
         // Returns the current control mode.
         control_mode get_control_mode();

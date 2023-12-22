@@ -124,6 +124,11 @@ int Motor::get_pwm_ctrl_speed()
     return set_speed;
 }
 
+Motor::motor_direction Motor::get_set_motor_direction()
+{
+    return motor_dir;
+}
+
 Motor::control_mode Motor::get_control_mode()
 {
     return ctrl_mode;
@@ -136,12 +141,12 @@ void Motor::compute_outputs()
         // Motor direction
         if (dir_change_required)
         {
-            if (motor_dir == motor_direction::FORWARD || (motor_dir == motor_direction::BACKWARD && dir_reversed))
+            if ((motor_dir == motor_direction::FORWARD && !dir_reversed) || (motor_dir == motor_direction::BACKWARD && dir_reversed))
             {
                 driver->set_direction(MotorDriver::direction::FORWARD);
             }
 
-            else if (motor_dir == motor_direction::BACKWARD || (motor_dir == motor_direction::FORWARD && dir_reversed))
+            else
             {
                 driver->set_direction(MotorDriver::direction::BACKWARD);
             }
