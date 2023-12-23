@@ -112,6 +112,15 @@ class Motor
         // Computes and sets motor outputs based on the
         // currently set control mode.
         void compute_outputs();
+
+        // Returns the encoder object pointers array.
+        // This is used by the MotorSafety module.
+        MotorEncoder** get_encs_array();
+
+        // Returns the number of defined encoders. 
+        // (i.e. number of encoder object pointers in the encoders array)
+        // This is used by the MotorSafety module.
+        int get_num_defined_encs();
         
 
     private:

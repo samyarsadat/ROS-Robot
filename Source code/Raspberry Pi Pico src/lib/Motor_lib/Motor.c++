@@ -31,9 +31,9 @@
 /*  Constructor
  *  
  *  Arguments:
- *    MotorDriver* drv: the motor driver object that is to be used by this controller.
- *    MotorEncoder* encs[]: a MotorEncoder array containing all of the encoders that are to be used by this controller.
- *    int number_of_encoders: the number of MotorEncoder objects that have been passed in the encs array.
+ *    MotorDriver* drv: a pointer to the motor driver object that is to be used by this controller.
+ *    MotorEncoder* encs[]: an array containing pointers to all of the MotorEncoder objects that are to be used by this controller.
+ *    int number_of_encoders: the number of MotorEncoder object pointers that have been passed in the encs array.
  */
 Motor::Motor(MotorDriver* drv, MotorEncoder* encs[], int number_of_encoders)
 {
@@ -179,7 +179,7 @@ void Motor::disable_controller()
  *    None
  * 
  *  Returns:
- *    float
+ *    float: average RPM
  */
 float Motor::get_avg_rpm()
 {
@@ -200,7 +200,7 @@ float Motor::get_avg_rpm()
  *    None
  * 
  *  Returns:
- *    float
+ *    float: set PID target RPM
  */
 float Motor::get_pid_ctrl_speed()
 {
@@ -214,7 +214,7 @@ float Motor::get_pid_ctrl_speed()
  *    None
  * 
  *  Returns:
- *    int
+ *    int: set PWM output
  */
 int Motor::get_pwm_ctrl_speed()
 {
@@ -228,7 +228,7 @@ int Motor::get_pwm_ctrl_speed()
  *    None
  * 
  *  Returns:
- *    motor_direction
+ *    motor_direction: set rotation direction
  */
 Motor::motor_direction Motor::get_set_motor_direction()
 {
@@ -242,7 +242,7 @@ Motor::motor_direction Motor::get_set_motor_direction()
  *    None
  * 
  *  Returns:
- *    control_mode
+ *    control_mode: set control mode
  */
 Motor::control_mode Motor::get_control_mode()
 {
@@ -251,7 +251,8 @@ Motor::control_mode Motor::get_control_mode()
 
 
 /*  Calculates and sets motor outputs depending on the control mode and set direction.
- *  How often this function is called determines how often the driver outputs are set.
+ *  How often this function is called determines how often the driver outputs are set,
+ *  and how often the PID Compute() function is called.
  *  
  *  Arguments:
  *    None
@@ -300,4 +301,35 @@ void Motor::compute_outputs()
             driver->set_speed(set_speed);
         }
     }
+}
+
+
+/*  Returns the encoder object pointers array.
+ *  This is used by the MotorSafety module.
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    MotorEncoder**: encoder object pointers array
+ */
+MotorEncoder** Motor::get_encs_array()
+{
+    return encoders;
+}
+
+
+/*  Returns the number of defined encoders. 
+ *  (i.e. number of encoder object pointers in the encoders array)
+ *  This is used by the MotorSafety module.
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    int: number of defined encoders
+ */
+int Motor::get_num_defined_encs()
+{
+    return number_of_encoders_defined;
 }

@@ -121,6 +121,7 @@ void MotorEncoder::set_enc_pulses_per_rotation(int pulses)
 
 
 /*  Configures whether the motor encoder measured direction should be reversed.
+ *  Useful for when encoder wiring is reversed.
  *  
  *  Arguments:
  *    bool is_reversed: true to reverse, false to not reverse

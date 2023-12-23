@@ -27,23 +27,41 @@
 #include <cstdlib>
 
 
-// Constructor
-MotorSafety::MotorSafety(Motor* ctrl, MotorEncoder* encs[], int number_of_encoders, int safety_object_id)
+/*  Constructor
+ *  
+ *  Arguments:
+ *    Motor* ctrl: the motor controller object that is to be monitored.
+ *    int safety_object_id: the ID of this monitoring object. This is passed to the trigger_callback so that the callback can 
+ *                          identify which object is triggered if the same callback is used for multiple monitoring objects.
+ */
+MotorSafety::MotorSafety(Motor* ctrl, int safety_object_id)
 {
     controller = ctrl;
-    number_of_encoders_defined = number_of_encoders;
-    MotorSafety::disable_safety();
+    number_of_encoders_defined = ctrl->get_num_defined_encs();
 
-    // Copies all of encs' items over to encoders.
-    for (int i = 0; i < number_of_encoders; i++)
+    // Copies all of the items in the returned array from get_encs_array() to encoders.
+    for (int i = 0; i < number_of_encoders_defined; i++)
     {
-        encoders[i] = encs[i];
+        encoders[i] = ctrl->get_encs_array()[i];
     }
+
+    MotorSafety::disable_safety();
 }
 
 
 // --------- Public Functions ---------
-// TODO: Comments.
+
+/*  Sets initial configuration for the module.
+ *  
+ *  Arguments:
+ *    int enc_max_deviation: the maximum allowed RPM deviation between all of the encoders.
+ *    int set_vs_actual_max_deviation: the maximum allowed deviation between the set PID target RPM and the measured RPM (rpm_avg).
+ *    int check_fail_trig_timeout: the amount of time (in milliseconds) for which a test has to fail for the callback to be called.
+ *    safety_trigger_callback trig_callback: the safety trigger callback function.
+ * 
+ *  Returns:
+ *    void
+ */
 void MotorSafety::configure_safety(int enc_max_deviation, int set_vs_actual_max_deviation, int check_fail_trig_timeout, safety_trigger_callback trig_callback)
 {
     safety_configured = true;
@@ -57,6 +75,16 @@ void MotorSafety::configure_safety(int enc_max_deviation, int set_vs_actual_max_
     MotorSafety::set_vs_actual_spd_diff_check_enabled(true);
 }
 
+
+/*  Enables safety monitoring.
+ *  Only enables safety if the module is configured. (call configure_safety())
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    void
+ */
 void MotorSafety::enable_safety()
 {
     if (safety_configured)
@@ -65,46 +93,130 @@ void MotorSafety::enable_safety()
     }
 }
 
+
+/*  Disables safety monitoring.
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    void
+ */
 void MotorSafety::disable_safety()
 {
     safety_enabled = false;
 }
 
+
+/*  Configures whether the encoder speed difference check
+ *  should be enabled or not.
+ *  
+ *  Arguments:
+ *    bool enabled: true to enable, false to disable
+ * 
+ *  Returns:
+ *    void
+ */
 void MotorSafety::encoder_diff_check_enabled(bool is_enabled)
 {
     enc_diff_check_enabled = is_enabled;
 }
 
+
+/*  Configures whether the set vs. measured RPM difference 
+ *  check should be enabled or not.
+ *  
+ *  Arguments:
+ *    bool enabled: true to enable, false to disable
+ * 
+ *  Returns:
+ *    void
+ */
 void MotorSafety::set_vs_actual_spd_diff_check_enabled(bool is_enabled)
 {
     set_actual_spd_diff_check_enabled = is_enabled;
 }
 
+
+/*  Configures whether the encoder measured direction difference
+ *  check should be enabled or not.
+ *  
+ *  Arguments:
+ *    bool enabled: true to enable, false to disable
+ * 
+ *  Returns:
+ *    void
+ */
 void MotorSafety::encoder_dir_diff_check_enabled(bool is_enabled)
 {
     enc_dir_diff_check_enabled = is_enabled;
 }
 
+
+/*  TODO
+ *  
+ *  Arguments:
+ *    int tolerance: TODO
+ * 
+ *  Returns:
+ *    void
+ */
 void MotorSafety::set_set_vs_actual_spd_tolerance(int tolerance)
 {
     set_actual_spd_diff_tolerance = tolerance;
 }
 
+
+/*  TODO
+ *  
+ *  Arguments:
+ *    int milliseconds: TODO
+ * 
+ *  Returns:
+ *    void
+ */
 void MotorSafety::set_set_vs_actual_spd_time_tolerance(int milliseconds)
 {
     set_vs_actual_spd_check_timeout_extra_ms = milliseconds;
 }
 
+
+/*  TODO
+ *  
+ *  Arguments:
+ *    int tolerance: TODO
+ * 
+ *  Returns:
+ *    void
+ */
 void MotorSafety::set_enc_diff_tolerance(int tolerance)
 {
     enc_diff_trigger_tolerance = tolerance;
 }
 
+
+/*  TODO
+ *  
+ *  Arguments:
+ *    int timeout: TODO
+ * 
+ *  Returns:
+ *    void
+ */
 void MotorSafety::set_fail_trigger_timeout(int timeout)
 {
     checks_fail_trigger_timout_ms = timeout;
 }
 
+
+/*  TODO
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    void
+ */
 void MotorSafety::safety_check_timer_callback()
 {
     if (safety_enabled)
@@ -128,8 +240,15 @@ void MotorSafety::safety_check_timer_callback()
 
 
 // --------- Private Functions ---------
-// TODO: Comments.
 
+/*  TODO
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    bool: TODO
+ */
 bool MotorSafety::check_encoder_difference()
 {
     if (number_of_encoders_defined > 1 && enc_diff_check_enabled)
@@ -180,6 +299,15 @@ bool MotorSafety::check_encoder_difference()
     return true;
 }
 
+
+/*  TODO
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    bool: TODO
+ */
 bool MotorSafety::check_set_vs_actual_speed_difference()
 {
     if (controller->get_control_mode() == Motor::control_mode::PID && set_actual_spd_diff_check_enabled)
@@ -212,6 +340,15 @@ bool MotorSafety::check_set_vs_actual_speed_difference()
     return true;
 }
 
+
+/*  TODO
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    bool: TODO
+ */
 bool MotorSafety::check_encoder_dir_difference()
 {
     if (number_of_encoders_defined > 1 && controller->get_avg_rpm() > 0 && enc_dir_diff_check_enabled)

@@ -29,6 +29,7 @@
 
 // ------- Functions -------
 // TODO: Better usage information
+// TODO: Use enums instead of definitions for init_pin()
 
 // ---- Arduino pinMode-like function ----
 void init_pin(uint pin, int mode)
@@ -76,7 +77,7 @@ void init_pin(uint pin, int mode)
 void gpio_put_pwm(uint pin, uint16_t level)
 {
     // All A channel PWM pins' pin numbers are even so we can easily check to see whether
-    // the pin we are setting is channel A or channel B.
+    // the pin we are setting is on channel A or channel B.
     if (pin % 2 == 0)
     {
         pwm_set_chan_level(pwm_gpio_to_slice_num(pin), PWM_CHAN_A, level);

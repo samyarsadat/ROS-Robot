@@ -51,7 +51,7 @@ MotorEncoder encb(l_motor_1_enc_b, l_motor_2_enc_b, motor_gear_ratio, enc_pulses
 MotorEncoder* encs[] = {&enca, &encb};
 
 Motor motor(&driver, encs, 2);
-MotorSafety motor_safety(&motor, encs, 2, 0);
+MotorSafety motor_safety(&motor, 0);
 
 
 void irq_call(uint pin, uint32_t events)
@@ -216,7 +216,7 @@ void setup()
     motor.set_direction_reversed(true);
     motor.set_motor_direction(Motor::motor_direction::BACKWARD);
     motor_safety.configure_safety(20, 70, 4000, &safety_call_func);
-    motor_safety.disable_safety();
+    motor_safety.enable_safety();
 
     while (!stdio_usb_connected());
     sleep_ms(1000);

@@ -32,7 +32,7 @@ class MotorSafety
 {
     public:
         // Constructor
-        MotorSafety(Motor* controller, MotorEncoder* encs[], int number_of_encoders, int safety_object_id);
+        MotorSafety(Motor* controller, int safety_object_id);
 
         // Safety trigger conditions that will be passed to the trigger callback function.
         enum safety_trigger_conditions
@@ -94,7 +94,7 @@ class MotorSafety
         MotorEncoder* encoders[max_number_of_encoders];
         int number_of_encoders_defined;
 
-        int id;   // The ID of this monitoring object. This is passed to the trigger callback so that the callback can 
+        int id;   // The ID of this monitoring object. This is passed to the trigger_callback so that the callback can 
                   // identify which object is triggered if the same callback is used for multiple monitoring objects.
         bool safety_configured;
         bool safety_enabled;
