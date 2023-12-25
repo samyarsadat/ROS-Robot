@@ -13,3 +13,4 @@ ROS-Robot.code-workspace
 /Circuit diagrams & PCB files/**/*.Cam
 /Circuit diagrams & PCB files/**/*.OutJob
 /Circuit diagrams & PCB files/**/*.PrjPcbStructure
+/Testing Data

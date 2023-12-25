@@ -153,10 +153,11 @@ void MotorSafety::encoder_dir_diff_check_enabled(bool is_enabled)
 }
 
 
-/*  TODO
+/*  Sets the maximum allowed RPM difference between the set
+ *  and measured RPMs.
  *  
  *  Arguments:
- *    int tolerance: TODO
+ *    int tolerance: maximum allowed RPM difference
  * 
  *  Returns:
  *    void
@@ -167,10 +168,19 @@ void MotorSafety::set_set_vs_actual_spd_tolerance(int tolerance)
 }
 
 
-/*  TODO
+/*  Sets how much extra time tolerance there should be for the
+ *  set vs. measured speed check.
+ *
+ *  The set vs. measured speed check has to fail for
+ *  checks_fail_trigger_timout_ms + the amount set by this function 
+ *  before the trigger callback is called.
+ * 
+ *  This extra tolerance only exists for this check because
+ *  it can take the PID controller longer than checks_fail_trigger_timout_ms
+ *  to fully speed up the motors; depending on the tunings, of course.
  *  
  *  Arguments:
- *    int milliseconds: TODO
+ *    int milliseconds: extra time tolerance in milliseconds
  * 
  *  Returns:
  *    void
@@ -181,10 +191,11 @@ void MotorSafety::set_set_vs_actual_spd_time_tolerance(int milliseconds)
 }
 
 
-/*  TODO
+/*  Sets the maximum allowed RPM difference between all of
+ *  the encoders' measured RPMs.
  *  
  *  Arguments:
- *    int tolerance: TODO
+ *    int tolerance: maximum allowed RPM difference
  * 
  *  Returns:
  *    void
@@ -195,10 +206,11 @@ void MotorSafety::set_enc_diff_tolerance(int tolerance)
 }
 
 
-/*  TODO
+/*  Sets the amount of time (in milliseconds) for which
+ *  a check has to fail before the trigger callback is called.
  *  
  *  Arguments:
- *    int timeout: TODO
+ *    int timeout: timeout in milliseconds 
  * 
  *  Returns:
  *    void
@@ -209,7 +221,12 @@ void MotorSafety::set_fail_trigger_timeout(int timeout)
 }
 
 
-/*  TODO
+/*  When called, this function calls all of the
+ *  check functions and calls the trigger callback
+ *  if one or more of the checks fail.
+ * 
+ *  How often this function is called determines
+ *  how often the safety conditions are checked.
  *  
  *  Arguments:
  *    None
@@ -241,13 +258,15 @@ void MotorSafety::safety_check_timer_callback()
 
 // --------- Private Functions ---------
 
-/*  TODO
+/*  Checks the measured speed difference between all of the defined
+ *  encoders and returns false if the difference between the largest
+ *  and smallest reading exceeds the configured tolerance.
  *  
  *  Arguments:
  *    None
  * 
  *  Returns:
- *    bool: TODO
+ *    bool: true if the check passed, false if it failed
  */
 bool MotorSafety::check_encoder_difference()
 {
@@ -300,13 +319,15 @@ bool MotorSafety::check_encoder_difference()
 }
 
 
-/*  TODO
+/*  Checks the set PID target speed vs. the measured speed
+ *  and returns false if the difference exceeds
+ *  the configured tolerance.
  *  
  *  Arguments:
  *    None
  * 
  *  Returns:
- *    bool: TODO
+ *    bool: true if the check passed, false if it failed
  */
 bool MotorSafety::check_set_vs_actual_speed_difference()
 {
@@ -341,13 +362,15 @@ bool MotorSafety::check_set_vs_actual_speed_difference()
 }
 
 
-/*  TODO
+/*  Checks the measured direction of all of the defined encoders
+ *  and returns false if any of the encoders are spinning in the
+ *  opposite direction compared to the other ones.
  *  
  *  Arguments:
  *    None
  * 
  *  Returns:
- *    bool: TODO
+ *    bool: true if the check passed, false if it failed
  */
 bool MotorSafety::check_encoder_dir_difference()
 {
