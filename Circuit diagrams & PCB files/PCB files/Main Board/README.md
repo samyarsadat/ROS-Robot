@@ -19,7 +19,18 @@
 *Because this revision of the PCB does not include a voltage divider for measuring the battery voltage, I have attached a wire to pin `ADC2` of Raspberry Pi Pico (B) and created a small protoboard with two resistors on it so that I can measure the voltage of the battery safely. This functionality will be incorporated onto the board itself for rev. 2.*
 
 ## Important Note #2:
-*On this revision of the PCB, there are two five-pin connectors for the motor encoders. I had initially planned to have one common current limiting resistor for all the encoders, however, this did not work. As a result, I have added a small proto board that splits the two five-pin connectors into four four-pin connectors (one connector per encoder) and adds individual current limiting resistors for each encoder. These extra resistors and the four-pin connectors will be incorporated onto the board itself for rev. 2.*
+*On this revision of the PCB, there are two five-pin connectors for the motor encoders. I had initially planned to have one common current limiting resistor for all the encoders, however, this did not work. As a result, I have added a small proto board that splits the two five-pin connectors into four four-pin connectors (one connector per encoder) and adds individual 120ohm current limiting resistors for each encoder. These extra resistors and the four-pin connectors will be incorporated onto the board itself for rev. 2.*
+
+<br>
+
+## Board Modification #1:
+*The `VCC` pin of the motor encoder connector (`H24`, pin 1) has been rewired to `+5V` (no inline resistors) instead of `+3v3`. <br>
+This has been done to improve encoder signal strength.*
+
+## Board Modification #2:
+*The `SDA` and `SCL` pins of the `MPU6050` have been rewired to `GP14` and `GP15` respectively (Pico A). <br>
+This is so that `GP17` and `GP16` can be used as UART pins for debugging. <br>
+For Pico B, `GP8` and `GP9` can be used for UART, as they are already free.*
 
 <br>
 <br>
@@ -33,11 +44,11 @@
  - **6.**&nbsp; *Connect fourth, 4-pin ultrasonic connector directly to mux so that it can be used as general analog I/O.*
  - **7.**&nbsp; *Consistent connector pinouts.*
  - **8.**&nbsp; *Replace power input terminal footprint with a 3-pin Molex KK-254 connector.*
- - **9.**&nbsp; *Add battery voltage monitoring.*
+ - **9.**&nbsp; *Add battery voltage, current, and temperature monitoring.*
  - **10.**&nbsp; *Add Mosfet for fan control.*
  - **11.**&nbsp; *Add 3-pin addressable LED connectors.*
  - **12.**&nbsp; *Change encoder connectors from two five-pins to four four-pins (individual connector for each encoder).*
  - **13.**&nbsp; *Add individual current limiting resistors and connectors for motor encoders.*
  - **14.**&nbsp; *Motor encoder IR transmitter current limiting resistors should be connected to `5v` instead of `3.3v`.*
  - **15.**&nbsp; *Consider connecting motor encoder pull-up resistors to `5v` instead of `3.3v` or reducing their resistance.*
- - **16.**&nbsp; *Expose the `UART0` pins of the Picos for debugging.*
+ - **16.**&nbsp; *Expose one set of `UART` pins of each Pico for debugging.*
