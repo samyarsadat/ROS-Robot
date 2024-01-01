@@ -50,5 +50,5 @@ For Pico B, `GP8` and `GP9` can be used for UART, as they are already free.*
  - **12.**&nbsp; *Change encoder connectors from two five-pins to four four-pins (individual connector for each encoder).*
  - **13.**&nbsp; *Add individual current limiting resistors and connectors for motor encoders.*
  - **14.**&nbsp; *Motor encoder IR transmitter current limiting resistors should be connected to `5v` instead of `3.3v`.*
- - **15.**&nbsp; *Consider connecting motor encoder pull-up resistors to `5v` instead of `3.3v` or reducing their resistance.*
+ - **15.**&nbsp; *Consider connecting motor encoder pull-up resistors to `5v` instead of `3.3v` or increasing their resistance.*
  - **16.**&nbsp; *Expose one set of `UART` pins of each Pico for debugging.*
