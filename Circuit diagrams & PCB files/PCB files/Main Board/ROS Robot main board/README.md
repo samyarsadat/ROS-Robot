@@ -73,7 +73,7 @@ If you are using another manufacturer, you might need to re-export them from Alt
     5: Front Left Encoder Input (Channel B)
     
     Pinout (H19): 
-    1: +3v3,
+    1: +3v3 (Rewired to +5v),
     2: GND, 
     3: Back Right Encoder Input (Channel A), 
     4: Back Right Encoder Input (Channel B),
