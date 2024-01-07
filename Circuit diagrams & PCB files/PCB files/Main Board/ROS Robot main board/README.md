@@ -66,18 +66,18 @@ If you are using another manufacturer, you might need to re-export them from Alt
 
 #### Motor encoders:
     Pinout (H24): 
-    1: Front Right Encoder Input (Channel B)
-    2: Back Left Encoder Input (Channel A) 
-    3: Back Left Encoder Input (Channel B) 
-    4: Front Left Encoder Input (Channel A)
-    5: Front Left Encoder Input (Channel B)
-    
-    Pinout (H19): 
     1: +3v3 (Rewired to +5v)
     2: GND 
     3: Back Right Encoder Input (Channel A) 
     4: Back Right Encoder Input (Channel B)
     5: Front Right Encoder Input (Channel A)
+
+    Pinout (H19): 
+    1: Front Right Encoder Input (Channel B)
+    2: Back Left Encoder Input (Channel A) 
+    3: Back Left Encoder Input (Channel B) 
+    4: Front Left Encoder Input (Channel A)
+    5: Front Left Encoder Input (Channel B)
     
     Note: All encoder inputs are pulled-up to 3.3v by 4.7k resistors.
 
