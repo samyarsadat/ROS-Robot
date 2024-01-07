@@ -31,6 +31,9 @@
 #include "lib/Helper_lib/Helpers.h"
 #include "lib/PID_lib/PID_v1.h"
 #include "hardware/pwm.h"
+#include "lib/Motor_lib/Motor.h"
+#include "lib/Motor_lib/Motor_Safety.h"
+
 
 
 // ------- Global variables -------
@@ -72,38 +75,6 @@ bool halt_core_0 = false;
 // ---- Loop time ----
 uint32_t loop_time, loop_1_time;
 
-// ---- Motor PWM slice ----
-uint r_motor_slice_num;
-uint l_motor_slice_num;
-
-// ---- Left motor encoders ----
-uint32_t l_enc_1_time, l_enc_1_time_old, l_enc_1_time_diff = 5000000;
-uint32_t l_enc_2_time, l_enc_2_time_old, l_enc_2_time_diff = 5000000;
-bool l_motor_1_dir, l_motor_2_dir;        // true = Forward, false = Backward
-bool l_enc_1_check_dir, l_enc_2_check_dir;
-bool l_enc_1_other_pulse = true;
-bool l_enc_2_other_pulse = true;
-
-// ---- Right motor encoders ----
-uint32_t r_enc_1_time, r_enc_1_time_old, r_enc_1_time_diff = 5000000;
-uint32_t r_enc_2_time, r_enc_2_time_old, r_enc_2_time_diff = 5000000;
-bool r_motor_1_dir, r_motor_2_dir;        // true = Forward, false = Backward
-bool r_enc_1_check_dir, r_enc_2_check_dir;
-bool r_enc_1_other_pulse = true;
-bool r_enc_2_other_pulse = true;
-
-// ---- Right motor PID ----
-float motor_r_spd, r_motor_rpm, motor_r_set;
-float rm_kp=35, rm_ki=16, rm_kd=11;
-
-// ---- Left motor PID ----
-float motor_l_spd, l_motor_rpm, motor_l_set;
-float lm_kp=35, lm_ki=16, lm_kd=11;
-
-
-// ------- PID init -------
-PID r_motors(&r_motor_rpm, &motor_r_set, &motor_r_spd, rm_kp, rm_ki, rm_kd, DIRECT);
-PID l_motors(&l_motor_rpm, &motor_l_set, &motor_l_spd, lm_kp, lm_ki, lm_kd, DIRECT);
 
 
 // ------- Pin definitions -------
@@ -151,7 +122,7 @@ PID l_motors(&l_motor_rpm, &motor_l_set, &motor_l_spd, lm_kp, lm_ki, lm_kd, DIRE
 // ---- Misc. ----
 #define loop_time_max    60000    // In microseconds
 #define loop_1_time_max  200000   // In microseconds
-#define PI               3.141592
+#define PI               3.1415
 #define CHECK_FLAG       1687
 
 // ---- Ultrasonic sensor specs ----
@@ -170,6 +141,32 @@ PID l_motors(&l_motor_rpm, &motor_l_set, &motor_l_spd, lm_kp, lm_ki, lm_kd, DIRE
 #define wheel_circumference  (PI * wheel_diameter) / 100
 
 
+
+// ------- Library object inits -------
+
+// ---- Motor Controller ----
+uint r_motors_drv_pins[2] = {r_motor_drive_1, r_motor_drive_2};
+uint l_motors_drv_pins[2] = {l_motor_drive_1, l_motor_drive_2};
+MotorDriver r_motors_driver(r_motors_drv_pins, 2, MotorDriver::driver_type::GENERIC_PWM);
+MotorDriver l_motors_driver(l_motors_drv_pins, 2, MotorDriver::driver_type::GENERIC_PWM);
+
+// IRQ callback prototype
+void irq_call(uint pin, uint32_t events);
+
+MotorEncoder r_motor_1_enc(r_motor_1_enc_a, r_motor_1_enc_b, motor_gear_ratio, enc_pulses_per_rotation, &irq_call);
+MotorEncoder r_motor_2_enc(r_motor_2_enc_a, r_motor_2_enc_b, motor_gear_ratio, enc_pulses_per_rotation, &irq_call);
+MotorEncoder l_motor_1_enc(l_motor_1_enc_a, l_motor_1_enc_b, motor_gear_ratio, enc_pulses_per_rotation, &irq_call);
+MotorEncoder l_motor_2_enc(l_motor_2_enc_a, l_motor_2_enc_b, motor_gear_ratio, enc_pulses_per_rotation, &irq_call);
+MotorEncoder* r_motor_encs[] = {&r_motor_1_enc, &r_motor_2_enc};
+MotorEncoder* l_motor_encs[] = {&l_motor_1_enc, &l_motor_2_enc};
+
+Motor r_motors(&r_motors_driver, r_motor_encs, 2);
+Motor l_motors(&l_motors_driver, l_motor_encs, 2);
+MotorSafety r_motors_safety(&r_motors, 0);
+MotorSafety l_motors_safety(&l_motors, 1);
+
+
+
 // ------- Functions ------- 
 
 // ---- RCL return checker prototype ----
@@ -179,62 +176,52 @@ void check_rc(rcl_ret_t rctc);
 // ---- Error handler ----
 void handle_error(int core, const char * err_msg)
 {
+    // Publish E_STOP message if the Raspberry Pi computer is active.
     if (rpi_ready)
     {
         sprintf(e_stop_msg.data.data, "E_STOP (PICO_A): %s", err_msg);
         check_rc(rcl_publish(&e_stop_pub, &e_stop_msg, NULL));
     }
 
+
+    // IO cleanup
+    init_pin(power_led, OUTPUT);
+    init_pin(onboard_led, OUTPUT);
+    gpio_put(power_led, LOW);
+    gpio_put(onboard_led, LOW);
+        
+    l_motors.disable_controller();
+    r_motors.disable_controller();
+        
+    gpio_put(edge_sens_mux_s2, LOW);
+    gpio_put(edge_sens_mux_s1, LOW);
+    gpio_put(edge_sens_mux_s0, LOW);
+    gpio_put(edge_sens_en, LOW);
+
+    // Micro ROS cleanup
+    check_rc(rcl_subscription_fini(&rpi_ready_sub, &rc_node));
+    check_rc(rcl_subscription_fini(&cmd_vel_sub, &rc_node));
+    check_rc(rcl_publisher_fini(&e_stop_pub, &rc_node));
+    check_rc(rcl_node_fini(&rc_node));
+
+
+    // Stop core 0 (only effective when this function is called from core 1)
+    halt_core_0 = true;
+
+    // Stop core 1 if this function is being called from core 0.
     if (core == 0)
     {
         multicore_reset_core1();
-
-        gpio_put(power_led, LOW);
-        gpio_put(onboard_led, LOW);
-        gpio_put(l_motor_drive_1, LOW);
-        gpio_put(l_motor_drive_2, LOW);
-        gpio_put(r_motor_drive_1, LOW);
-        gpio_put(r_motor_drive_2, LOW);
-        gpio_put(edge_sens_mux_s2, LOW);
-        gpio_put(edge_sens_mux_s1, LOW);
-        gpio_put(edge_sens_mux_s0, LOW);
-        gpio_put(edge_sens_en, LOW);
-
-        while (true)
-        {
-            gpio_put(power_led, LOW);
-            gpio_put(onboard_led, LOW);
-            sleep_ms(100);
-            gpio_put(power_led, HIGH);
-            gpio_put(onboard_led, HIGH);
-            sleep_ms(100);
-        }
     }
 
-    else
+    while (true)
     {
-        halt_core_0 = true;
-
         gpio_put(power_led, LOW);
         gpio_put(onboard_led, LOW);
-        gpio_put(l_motor_drive_1, LOW);
-        gpio_put(l_motor_drive_2, LOW);
-        gpio_put(r_motor_drive_1, LOW);
-        gpio_put(r_motor_drive_2, LOW);
-        gpio_put(edge_sens_mux_s2, LOW);
-        gpio_put(edge_sens_mux_s1, LOW);
-        gpio_put(edge_sens_mux_s0, LOW);
-        gpio_put(edge_sens_en, LOW);
-
-        while (true)
-        {
-            gpio_put(power_led, LOW);
-            gpio_put(onboard_led, LOW);
-            sleep_ms(100);
-            gpio_put(power_led, HIGH);
-            gpio_put(onboard_led, HIGH);
-            sleep_ms(100);
-        }
+        sleep_ms(100);
+        gpio_put(power_led, HIGH);
+        gpio_put(onboard_led, HIGH);
+        sleep_ms(100);
     }
 }
 
@@ -242,206 +229,10 @@ void handle_error(int core, const char * err_msg)
 // ---- Irq callback ----
 void irq_call(uint pin, uint32_t events)
 {
-    switch (pin)
-    {
-        case l_motor_1_enc_a:
-            if (l_enc_1_check_dir)
-            {
-                l_motor_1_dir = false;
-                l_enc_1_check_dir = false;
-            }
-
-            if (!gpio_get(l_motor_1_enc_b))
-            {
-                l_enc_1_check_dir = true;
-            }
-
-            if (l_enc_1_other_pulse)
-            {
-                l_enc_1_time_old = l_enc_1_time;
-                l_enc_1_time = time_us_32();
-                l_enc_1_time_diff = l_enc_1_time - l_enc_1_time_old;
-
-                l_enc_1_other_pulse = false;
-            }
-
-            else
-            {
-                l_enc_1_other_pulse = true;
-            }
-
-            break;
-
-        case l_motor_1_enc_b:
-            if (l_enc_1_check_dir)
-            {
-                l_motor_1_dir = true;
-                l_enc_1_check_dir = false;
-            }
-
-            break;
-
-
-        case l_motor_2_enc_a:
-            if (l_enc_2_check_dir)
-            {
-                l_motor_2_dir = false;
-                l_enc_2_check_dir = false;
-            }
-
-            if (!gpio_get(l_motor_2_enc_b))
-            {
-                l_enc_2_check_dir = true;
-            }
-
-            if (l_enc_2_other_pulse)
-            {
-                l_enc_2_time_old = l_enc_2_time;
-                l_enc_2_time = time_us_32();
-                l_enc_2_time_diff = l_enc_2_time - l_enc_2_time_old;
-
-                l_enc_2_other_pulse = false;
-            }
-
-            else
-            {
-                l_enc_2_other_pulse = true;
-            }
-
-            break;
-
-        case l_motor_2_enc_b:
-            if (l_enc_2_check_dir)
-            {
-                l_motor_2_dir = true;
-                l_enc_2_check_dir = false;
-            }
-
-            break;
-
-
-        case r_motor_1_enc_a:
-            if (r_enc_1_check_dir)
-            {
-                r_motor_1_dir = true;
-                r_enc_1_check_dir = false;
-            }
-
-            if (!gpio_get(r_motor_1_enc_b))
-            {
-                r_enc_1_check_dir = true;
-            }
-
-            if (r_enc_1_other_pulse)
-            {
-                r_enc_1_time_old = r_enc_1_time;
-                r_enc_1_time = time_us_32();
-                r_enc_1_time_diff = r_enc_1_time - r_enc_1_time_old;
-
-                r_enc_1_other_pulse = false;
-            }
-
-            else
-            {
-                r_enc_1_other_pulse = true;
-            }
-
-            break;
-
-        case r_motor_1_enc_b:
-            if (r_enc_1_check_dir)
-            {
-                r_motor_1_dir = false;
-                r_enc_1_check_dir = false;
-            }
-
-            break;
-
-
-        case r_motor_2_enc_a:
-            if (r_enc_2_check_dir)
-            {
-                r_motor_2_dir = true;
-                r_enc_2_check_dir = false;
-            }
-
-            if (!gpio_get(r_motor_2_enc_b))
-            {
-                r_enc_2_check_dir = true;
-            }
-
-            if (r_enc_2_other_pulse)
-            {
-                r_enc_2_time_old = r_enc_2_time;
-                r_enc_2_time = time_us_32();
-                r_enc_2_time_diff = r_enc_2_time - r_enc_2_time_old;
-
-                r_enc_2_other_pulse = false;
-            }
-
-            else
-            {
-                r_enc_2_other_pulse = true;
-            }
-
-            break;
-
-        case r_motor_2_enc_b:
-            if (r_enc_2_check_dir)
-            {
-                r_motor_2_dir = false;
-                r_enc_2_check_dir = false;
-            }
-
-            break;
-    }
-}
-
-
-// ---- Pin init ----
-void init_pins()
-{
-    // ---- Inputs ----
-    init_pin(ready_sig, INPUT);
-    init_pin(edge_sens_mux_sig, INPUT);
-    init_pin(l_motor_1_enc_b, INPUT);
-    init_pin(l_motor_1_enc_a, INPUT);
-    init_pin(l_motor_2_enc_b, INPUT);
-    init_pin(l_motor_2_enc_a, INPUT);
-    init_pin(r_motor_1_enc_b, INPUT);
-    init_pin(r_motor_1_enc_a, INPUT);
-    init_pin(r_motor_2_enc_b, INPUT);
-    init_pin(r_motor_2_enc_a, INPUT);
-
-    // ---- Outputs ----
-    init_pin(power_led, OUTPUT);
-    init_pin(onboard_led, OUTPUT);
-    init_pin(pi_power_relay, OUTPUT);
-    init_pin(l_motor_drive_1, OUTPUT);
-    init_pin(l_motor_drive_2, OUTPUT);
-    init_pin(r_motor_drive_1, OUTPUT);
-    init_pin(r_motor_drive_2, OUTPUT);
-    init_pin(edge_sens_mux_s2, OUTPUT);
-    init_pin(edge_sens_mux_s1, OUTPUT);
-    init_pin(edge_sens_mux_s0, OUTPUT);
-    init_pin(edge_sens_en, OUTPUT);
-
-    // ---- PWM ----
-    l_motor_slice_num = pwm_gpio_to_slice_num(l_motor_drive_1);
-    pwm_set_enabled(l_motor_slice_num, true);
-
-    r_motor_slice_num = pwm_gpio_to_slice_num(r_motor_drive_1);
-    pwm_set_enabled(r_motor_slice_num, true);
-
-    // ---- Interrupts ----
-    gpio_set_irq_enabled_with_callback(r_motor_1_enc_a, GPIO_IRQ_EDGE_FALL, true, &irq_call);
-    gpio_set_irq_enabled(r_motor_2_enc_a, GPIO_IRQ_EDGE_FALL, true);
-    gpio_set_irq_enabled(l_motor_1_enc_a, GPIO_IRQ_EDGE_FALL, true);
-    gpio_set_irq_enabled(l_motor_2_enc_a, GPIO_IRQ_EDGE_FALL, true);
-    gpio_set_irq_enabled(l_motor_1_enc_b, GPIO_IRQ_EDGE_FALL, true);
-    gpio_set_irq_enabled(l_motor_2_enc_b, GPIO_IRQ_EDGE_FALL, true);
-    gpio_set_irq_enabled(r_motor_1_enc_b, GPIO_IRQ_EDGE_FALL, true);
-    gpio_set_irq_enabled(r_motor_2_enc_b, GPIO_IRQ_EDGE_FALL, true);
+    r_motor_1_enc.enc_hardware_irq_trigger(pin);
+    r_motor_2_enc.enc_hardware_irq_trigger(pin);
+    l_motor_1_enc.enc_hardware_irq_trigger(pin);
+    l_motor_2_enc.enc_hardware_irq_trigger(pin);
 }
 
 
@@ -499,11 +290,11 @@ void cmd_vel_call(const void * msgin)
     float angular = msg -> angular.z;     // rad/s
     float linear = msg -> linear.x;       // m/s
 
-    float motor_l_speed_ms = linear - (angular * ((wheelbase / 1000) / 2));  // Calculate motor speeds in m/s
+    float motor_l_speed_ms = linear - (angular * ((wheelbase / 1000) / 2));      // Calculate motor speeds in m/s
     float motor_r_speed_ms = linear + (angular * ((wheelbase / 1000) / 2));
 
-    motor_r_spd = (motor_r_speed_ms / wheel_circumference) * 60;             // Convert motor speeds from m/s to RPM
-    motor_l_spd = (motor_l_speed_ms / wheel_circumference) * 60;           
+    r_motors.set_pid_ctrl_speed((motor_r_speed_ms / wheel_circumference) * 60);  // Convert motor speeds from m/s to RPM
+    l_motors.set_pid_ctrl_speed((motor_l_speed_ms / wheel_circumference) * 60);           
 }
 
 
@@ -557,102 +348,6 @@ void exec_init()
 }
 
 
-// ---- Set right motor PWM output ----
-void set_r_motor_output(int spd)
-{
-    if (spd >= 0)
-    {
-        pwm_set_chan_level(r_motor_slice_num, PWM_CHAN_B, spd);
-        pwm_set_chan_level(r_motor_slice_num, PWM_CHAN_A, 0);
-    }
-
-    else
-    {
-        pwm_set_chan_level(r_motor_slice_num, PWM_CHAN_B, 0);
-        pwm_set_chan_level(r_motor_slice_num, PWM_CHAN_A, spd);  
-    }
-}
-
-
-// ---- Set left motor PWM output ----
-void set_l_motor_output(int spd)
-{
-    if (spd >= 0)
-    {
-        pwm_set_chan_level(l_motor_slice_num, PWM_CHAN_B, spd);
-        pwm_set_chan_level(l_motor_slice_num, PWM_CHAN_A, 0);
-    }
-
-    else
-    {
-        pwm_set_chan_level(l_motor_slice_num, PWM_CHAN_B, 0);
-        pwm_set_chan_level(l_motor_slice_num, PWM_CHAN_A, spd);  
-    }
-}
-
-
-// ---- Right motor control ----
-void right_motor_con()
-{
-    // Calculating motor 1 RPM
-    float tor_ms = (motor_gear_ratio * (r_enc_1_time_diff * (enc_pulses_per_rotation / 2))) / 1000;
-    float r_1_rpm = 60000 / tor_ms;
-
-    // Invert RPM if the direction variable is false (The motor is spinning backward)
-    if (!r_motor_1_dir)
-    {
-        r_1_rpm = 0 - r_motor_1_dir;
-    }
-
-    // Calculating motor 2 RPM
-    tor_ms = (motor_gear_ratio * (r_enc_2_time_diff * (enc_pulses_per_rotation / 2))) / 1000;
-    float r_2_rpm = 60000 / tor_ms;
-
-    if (!r_motor_2_dir)
-    {
-        r_2_rpm = 0 - r_motor_2_dir;
-    }
-
-    // Getting the average
-    r_motor_rpm = (r_1_rpm + r_2_rpm) / 2;
-
-    r_motors.Compute();
-    
-    set_r_motor_output(motor_r_set);
-}
-
-
-// ---- Left motor control ----
-void left_motor_con()
-{
-    // Calculating motor 1 RPM
-    float tor_ms = (motor_gear_ratio * (l_enc_1_time_diff * (enc_pulses_per_rotation / 2))) / 1000;
-    float l_1_rpm = 60000 / tor_ms;
-
-    // Invert RPM if the direction variable is false (The motor is spinning backward)
-    if (!l_motor_1_dir)
-    {
-        l_1_rpm = 0 - l_motor_1_dir;
-    }
-
-    // Calculating motor 2 RPM
-    tor_ms = (motor_gear_ratio * (l_enc_2_time_diff * (enc_pulses_per_rotation / 2))) / 1000;
-    float l_2_rpm = 60000 / tor_ms;
-
-    if (!l_motor_2_dir)
-    {
-        l_2_rpm = 0 - l_motor_2_dir;
-    }
-
-    // Getting the average
-    l_motor_rpm = (l_1_rpm + l_2_rpm) / 2;
-
-    l_motors.Compute();
-    
-    set_l_motor_output(motor_l_set);
-}
-
-
 // ---- Publish ultrasonic sensor data ----
 void publish_ultra()
 {
@@ -695,16 +390,21 @@ void publish_ultra()
 // ---- Setup function (Runs once on core 0) ----
 void setup()
 {
+    // ---- Inputs ----
+    init_pin(ready_sig, INPUT);
+    init_pin(edge_sens_mux_sig, INPUT);
+
+    // ---- Outputs ----
+    init_pin(power_led, OUTPUT);
+    init_pin(onboard_led, OUTPUT);
+    init_pin(pi_power_relay, OUTPUT);
+    init_pin(edge_sens_mux_s2, OUTPUT);
+    init_pin(edge_sens_mux_s1, OUTPUT);
+    init_pin(edge_sens_mux_s0, OUTPUT);
+    init_pin(edge_sens_en, OUTPUT);
+
     init_subs_pubs();
     exec_init();
-
-    // ---- Left motor PID ----
-    l_motors.SetMode(AUTOMATIC);
-    l_motors.SetSampleTime(80);
-
-    // ---- Right motor PID ----
-    r_motors.SetMode(AUTOMATIC);
-    r_motors.SetSampleTime(80);
 }
 
 
@@ -769,8 +469,7 @@ void init_core_1()
     
     if (flag_r != CHECK_FLAG)
     {
-        init_pins();
-        handle_error(1, "Core 1 FIFO receive failure");
+        handle_error(1, "Core 1 FIFO failure");
     }
 
     else
@@ -827,12 +526,6 @@ void startup()
     // Start the Micro ROS executor
     rclc_executor_spin(&executor);
 
-    // Micro ROS cleanup
-    check_rc(rcl_subscription_fini(&rpi_ready_sub, &rc_node));
-    check_rc(rcl_subscription_fini(&cmd_vel_sub, &rc_node));
-    check_rc(rcl_publisher_fini(&e_stop_pub, &rc_node));
-    check_rc(rcl_node_fini(&rc_node));
-
     // Wait for Raspberry Pi 4 ready signal
     while (!rpi_ready)
     {
@@ -864,7 +557,7 @@ int main()
     if (flag_r != CHECK_FLAG)
     {
         init_pins();
-        handle_error(0, "Core 0 FIFO receive failure");
+        handle_error(0, "Core 0 FIFO failure");
     }
 
     else

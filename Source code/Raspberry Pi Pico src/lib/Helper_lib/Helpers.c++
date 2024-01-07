@@ -36,36 +36,36 @@ void init_pin(uint pin, int mode)
 {
     switch(mode)
     {
-        case 1:
+        case OUTPUT:
             gpio_init(pin);
             gpio_set_dir(pin, true);
             break;
 
-        case 2:
+        case OUTPUT_PWM:
             gpio_init(pin);
             gpio_set_dir(pin, true);
             gpio_set_function(pin, GPIO_FUNC_PWM);
             pwm_set_enabled(pwm_gpio_to_slice_num(pin), true);
             break;
 
-        case 3:
+        case INPUT:
             gpio_init(pin);
             gpio_set_dir(pin, false);
             break;
 
-        case 4:
+        case INPUT_PULLUP:
             gpio_init(pin);
             gpio_set_dir(pin, false);
             gpio_pull_up(pin);
             break;
 
-        case 5:
+        case INPUT_PULLDOWN:
             gpio_init(pin);
             gpio_set_dir(pin, false);
             gpio_pull_down(pin);
             break;
 
-        case 6:
+        case INPUT_ADC:
             adc_gpio_init(pin);
             gpio_set_dir(pin, false);
             break;

@@ -43,7 +43,11 @@ add_subdirectory(lib/PID_lib)
 # ---- Pico A ----
 
 # Add source files
-add_executable(${PROJECT_NAME}_PICO_A Pico_A.c++ $ENV{MICROROS_PATH}/pico_uart_transport.c)
+add_executable(${PROJECT_NAME}_PICO_A Pico_A.c++ 
+               Pico_A/IO_Helpers_Ultrasonic.c++ 
+               Pico_A/IO_Helpers_Mux.c++ 
+               Pico_A/IO_Helpers_Edge.c++ 
+               $ENV{MICROROS_PATH}/pico_uart_transport.c)
 
 # Create map/bin/hex/uf2 files
 pico_add_extra_outputs(${PROJECT_NAME}_PICO_A)
@@ -152,6 +156,11 @@ target_link_libraries(${PROJECT_NAME}_TEST_SANDBOX motor_control_lib)
 pico_enable_stdio_usb(${PROJECT_NAME}_TEST_SANDBOX 1)
 pico_enable_stdio_uart(${PROJECT_NAME}_TEST_SANDBOX 0)
 
+target_compile_definitions(${PROJECT_NAME}_TEST_SANDBOX PRIVATE
+  PICO_DEFAULT_UART=0
+  PICO_DEFAULT_UART_TX_PIN=16
+  PICO_DEFAULT_UART_RX_PIN=17
+)
 
 
 # CMake flags
