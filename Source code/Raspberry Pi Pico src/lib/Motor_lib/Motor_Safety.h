@@ -2,8 +2,8 @@
     Motor control library (safety monitoring module) - Written for the ROS Robot Project
     This is an external module of this library that handles safety checks.
 
-    Copyright 2023 Samyar Sadat Akhavi
-    Written by Samyar Sadat Akhavi, 2023.
+    Copyright 2023-2024 Samyar Sadat Akhavi
+    Written by Samyar Sadat Akhavi, 2023-2024.
  
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

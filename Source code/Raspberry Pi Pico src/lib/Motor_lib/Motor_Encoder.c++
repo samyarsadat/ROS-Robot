@@ -3,8 +3,8 @@
     This library handles encoder inputs from motors, and controls them with a PID controller.
     More about how this implementation works in ../../README.md
 
-    Copyright 2023 Samyar Sadat Akhavi
-    Written by Samyar Sadat Akhavi, 2023.
+    Copyright 2023-2024 Samyar Sadat Akhavi
+    Written by Samyar Sadat Akhavi, 2023-2024.
  
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

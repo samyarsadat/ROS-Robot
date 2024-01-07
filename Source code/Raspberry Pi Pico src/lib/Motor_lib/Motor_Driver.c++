@@ -3,8 +3,8 @@
     This submodule provides a standard interface for using motor drivers and handles any
     driver-specific output requirements.
 
-    Copyright 2023 Samyar Sadat Akhavi
-    Written by Samyar Sadat Akhavi, 2023.
+    Copyright 2023-2024 Samyar Sadat Akhavi
+    Written by Samyar Sadat Akhavi, 2023-2024.
  
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

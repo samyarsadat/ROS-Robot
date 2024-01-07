@@ -1,7 +1,7 @@
 /*
     The ROS robot project - IO Helper Module - IR Edge Sensors INCOMPLETE
-    Copyright 2022-2023 Samyar Sadat Akhavi
-    Written by Samyar Sadat Akhavi, 2022-2023.
+    Copyright 2022-2024 Samyar Sadat Akhavi
+    Written by Samyar Sadat Akhavi, 2022-2024.
  
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

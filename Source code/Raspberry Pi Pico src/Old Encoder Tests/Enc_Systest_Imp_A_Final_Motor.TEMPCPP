@@ -1,6 +1,6 @@
 /*
    The ROS robot project - Encoder system test program (Implementation A Motor (Comb. Met_1, Met_2) - 0 RPM det., stable RPM readings, all four motors, motor control)
-   Copyright 2022-2023 Samyar Sadat Akhavi
+   Copyright 2022-2024 Samyar Sadat Akhavi
    Written by Samyar Sadat Akhavi, 2023.
  
    This program is free software: you can redistribute it and/or modify
