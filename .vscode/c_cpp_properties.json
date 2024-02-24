@@ -4,12 +4,13 @@
         {
             "name": "Pico dev",
             "includePath": [
-                "${workspaceFolder}/Source code/Raspberry Pi Pico src/**",
+                "${workspaceFolder}/Source code/Main Board Firmware/**",
                 "${PICO_SDK_PATH}/src/**",
                 "${PICO_SDK_PATH}/lib",
                 "${MICROROS_PATH}/libmicroros/include",
                 "${MICROROS_PATH}",
-                "${PICO_SDK_PATH}/src/common/pico_stdlib/include"
+                "${PICO_SDK_PATH}/src/common/pico_stdlib/include",
+                "C:/VSARM/sdk/pico/micro_ros_raspberrypi_pico_sdk/libmicroros/include"
             ],
             "defines": [
                 "_DEBUG",
