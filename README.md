@@ -1,4 +1,4 @@
-<h1 align="center">The ROS Robot project</h1>
+<h1 align="center">The ROS Robot Project</h1>
 
 <p align="center">
 	<br>
@@ -14,7 +14,7 @@
 </p>
 
 ----
-### Disclaimer: Robot is in development.
+### Disclaimer: Robot is under development.
 The ROS Robot project.
 <br>
 <br>
@@ -71,6 +71,31 @@ More details regarding the electronics design <a href="https://github.com/samyar
 #### Mechanical Design Overview
 The mechanical design of the robot is quite simple. 
 The chassis of the robot is 3D printed in two halves using PLA filament (more details regarding 3D printing <a href="https://github.com/samyarsadat/ROS-Robot/tree/stage-1/CAD%20files/STL%20files">here</a>) and the robot uses four geared DC motors (Namiki 22CL-3501PG) in a differential drive configuration.<be>
+
+<br>
+
+## File Structure
+There are 7 folders in this repository.<br>
+Their names and purposes are as follows:
+
+**.github**<br>
+GitHub issue templates, pull request templates, etc.<br>
+
+**.vscode**<br>
+VSCode configurations files.<br>
+
+**Assets**<br>
+Assets used on Github (such as images used in this README file).<br>
+
+**CAD Files**<br>
+3D CAD design files and 3D printing files for the chassis and other mechanical parts of the robot.<br>
+
+**Circuit Diagrams & PCB Files**<br>
+Overall circuit diagrams and PCB design files for the robot.<br>
+
+**Source Code**<br>
+Source code for the ROS package of the robot and for the firmware of the Raspberry Pi Picos.<br>
+
 
 <br>
 

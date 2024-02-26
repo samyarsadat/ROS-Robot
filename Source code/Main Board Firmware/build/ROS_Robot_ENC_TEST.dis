@@ -1,5 +1,5 @@
 
-D:/Projects/ROS Robot/Stage 1 (Current)/Source code/Main Board Firmware/build/ROS_Robot_ENC_TEST.elf:     file format elf32-littlearm
+D:/Projects/ROS Robot/Stage 1 (Current)/Source Code/Main Board Firmware/build/ROS_Robot_ENC_TEST.elf:     file format elf32-littlearm
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
@@ -50,7 +50,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
  22 .debug_line_str 00000267  00000000  00000000  0007eb3c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
-D:/Projects/ROS Robot/Stage 1 (Current)/Source code/Main Board Firmware/build/ROS_Robot_ENC_TEST.elf:     file format elf32-littlearm
+D:/Projects/ROS Robot/Stage 1 (Current)/Source Code/Main Board Firmware/build/ROS_Robot_ENC_TEST.elf:     file format elf32-littlearm
 
 
 Disassembly of section .boot2:
