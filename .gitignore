@@ -4,7 +4,6 @@ ROS-Robot.code-workspace
 /CAD Files/~$*.sldprt
 /CAD Files/~$*.sldasm
 /Source Code/Pico Workspace/Mainboard Firmware/build/*
-/Source Code/Pico Workspace/Mainboard Firmware/build/*.*
 !/Source Code/Pico Workspace/Mainboard Firmware/build/*.uf2
 !/Source Code/Pico Workspace/Mainboard Firmware/build/*.elf
 !/Source Code/Pico Workspace/Mainboard Firmware/build/*.dis
