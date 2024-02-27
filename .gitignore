@@ -1,16 +1,17 @@
 ROS-Robot.code-workspace
-/CAD files/swxJRNL.swj
-/CAD files/G-Code
-/CAD files/~$*.sldprt
-/CAD files/~$*.sldasm
-/Source Code/Main Board Firmware/build/*
-!/Source Code/Main Board Firmware/build/*.uf2
-!/Source Code/Main Board Firmware/build/*.elf
-!/Source Code/Main Board Firmware/build/*.dis
-/Circuit diagrams & PCB files/**/__Previews
-/Circuit diagrams & PCB files/**/History
-/Circuit diagrams & PCB files/**/Project *
-/Circuit diagrams & PCB files/**/*.Cam
-/Circuit diagrams & PCB files/**/*.OutJob
-/Circuit diagrams & PCB files/**/*.PrjPcbStructure
+/CAD Files/swxJRNL.swj
+/CAD Files/G-Code
+/CAD Files/~$*.sldprt
+/CAD Files/~$*.sldasm
+/Source Code/Pico Workspace/Mainboard Firmware/build/*
+/Source Code/Pico Workspace/Mainboard Firmware/build/*.*
+!/Source Code/Pico Workspace/Mainboard Firmware/build/*.uf2
+!/Source Code/Pico Workspace/Mainboard Firmware/build/*.elf
+!/Source Code/Pico Workspace/Mainboard Firmware/build/*.dis
+/Circuit Diagrams & PCB Files/**/__Previews
+/Circuit Diagrams & PCB Files/**/History
+/Circuit Diagrams & PCB Files/**/Project *
+/Circuit Diagrams & PCB Files/**/*.Cam
+/Circuit Diagrams & PCB Files/**/*.OutJob
+/Circuit Diagrams & PCB Files/**/*.PrjPcbStructure
 /Testing Data
