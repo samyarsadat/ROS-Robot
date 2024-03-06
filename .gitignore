@@ -1,12 +1,11 @@
-ROS-Robot.code-workspace
 /CAD Files/swxJRNL.swj
 /CAD Files/G-Code
 /CAD Files/~$*.sldprt
 /CAD Files/~$*.sldasm
-/Source Code/Pico Workspace/Mainboard Firmware/build/*
-!/Source Code/Pico Workspace/Mainboard Firmware/build/*.uf2
-!/Source Code/Pico Workspace/Mainboard Firmware/build/*.elf
-!/Source Code/Pico Workspace/Mainboard Firmware/build/*.dis
+/Source Code/pico_ws/mainboard_firmware/build/*
+!/Source Code/pico_ws/mainboard_firmware/build/*.uf2
+!/Source Code/pico_ws/mainboard_firmware/build/*.elf
+!/Source Code/pico_ws/mainboard_firmware/build/*.dis
 /Circuit Diagrams & PCB Files/**/__Previews
 /Circuit Diagrams & PCB Files/**/History
 /Circuit Diagrams & PCB Files/**/Project *
