@@ -10,19 +10,19 @@ services:
         volumes:
           - type: bind
             source: ${PWD}/pico_ws/mainboard_firmware
-            target: /home/microros_ws/pico_ws/src
+            target: /home/urosdev/pico_ws/src
           - type: bind
             source: ${PWD}/pico_ws/libmicroros/src
-            target: /home/microros_ws/pico_ws/uros_ws/src/rrp_pico_coms
+            target: /home/urosdev/pico_ws/uros_ws/src/rrp_pico_coms
           - type: bind
             source: ${PWD}/pico_ws/libmicroros/my_colcon.meta
-            target: /home/microros_ws/pico_ws/uros_ws/my_colcon.meta
+            target: /home/urosdev/pico_ws/uros_ws/my_colcon.meta
           - type: bind
             source: ${PWD}/pico_ws/libmicroros/my_toolchain.cmake
-            target: /home/microros_ws/pico_ws/uros_ws/my_toolchain.cmake
+            target: /home/urosdev/pico_ws/uros_ws/my_toolchain.cmake
           - type: bind
             source: ${PWD}/pico_ws/CMakeLists.txt
-            target: /home/microros_ws/pico_ws/CMakeLists.txt
+            target: /home/urosdev/pico_ws/CMakeLists.txt
           - type: bind
             source: ${PWD}/pico_ws/micro_ros.cmake
-            target: /home/microros_ws/pico_ws/micro_ros.cmake
+            target: /home/urosdev/pico_ws/micro_ros.cmake

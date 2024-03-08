@@ -6,6 +6,7 @@
 # https://github.com/joshnewans/dockerfile_example/blob/main/Dockerfile
 # https://micro.ros.org/docs/tutorials/core/first_application_linux/
 # https://circuitdigest.com/microcontroller-projects/how-to-program-raspberry-pi-pico-using-c
+# https://github.com/BrunoB81HK/ros2-workspace-devcontainer-template
 
 FROM ros:humble
 
@@ -16,7 +17,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-ARG USERNAME=microros_ws
+ARG USERNAME=urosdev
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 RUN groupadd --gid $USER_GID $USERNAME \
@@ -29,10 +30,6 @@ RUN apt-get update \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME \
     && rm -rf /var/lib/apt/lists/*
-
-# Bashrc files
-COPY bashrc /home/${USERNAME}/.bashrc
-COPY bashrc ~/.bashrc
 
 # Pico setup
 COPY install_pico.sh /pico_setup.sh
@@ -55,6 +52,15 @@ RUN cd /home/${USERNAME}/pico_ws/uros_ws \
     && rosdep install --from-paths src --ignore-src -y \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy configuration files
+USER ${USERNAME}
+RUN echo 'source /opt/ros/'$ROS_DISTRO'/setup.bash' >> /home/$USERNAME/.bashrc \
+    && echo 'source /home/'$USERNAME'/pico_ws/uros_ws/src/micro_ros_setup/install/local_setup.bash' >> /home/$USERNAME/.bashrc
+
 # Environment setup
-COPY init.sh /init.sh
-CMD ["/bin/bash", "/init.sh"]
+COPY entrypoint.sh /entrypoint.sh
+COPY uros_init.sh /uros_init.sh
+USER root
+RUN chmod +x /entrypoint.sh && chmod +x /uros_init.sh
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/bin/bash", "uros_init.sh"]

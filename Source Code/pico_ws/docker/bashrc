@@ -1,6 +1,0 @@
-# Source ROS 2 installation
-source /opt/ros/$ROS_DISTRO/setup.bash
-
-# Source Micro-ROS tools
-source /home/microros_ws/pico_ws/micro_ros_setup/install/local_setup.bash
-cd /home/microros_ws/pico_ws
