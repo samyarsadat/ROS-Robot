@@ -24,7 +24,7 @@ They can be easily imported into all 3D printer slicer software.<br>
  - **2.**&nbsp; *Add two indents to the sides of the mid plate so that it can be removed without having to remove the side ultrasonics.*
  - **3.**&nbsp; *Reinforce motor mounts. (Not necessary. However, it might be beneficial when more weight is added to the robot.)*
  - **4.**&nbsp; *Add cable channels (or holes for zip ties) for better cable management and to prevent too much stress from being put on solder joints/connectors.*
- - **5.**&nbsp; *Remove the need for motor shaft attachments by integrating them into the design of the wheels. (Might be implemented earlier)*
+ - **5.**&nbsp; ~~*Remove the need for motor shaft attachments by integrating them into the design of the wheels. (Might be implemented earlier)*~~
  - **6.**&nbsp; *Add indents to the bottom of the robot for IR edge fall-off sensor mounting.*
  - **7.**&nbsp; *Add accommodation for mounting lights to the bottom of the robot.*
  - **8.**&nbsp; *Increase hole tolerances.*
