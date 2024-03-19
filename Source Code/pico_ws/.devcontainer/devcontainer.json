@@ -1,0 +1,64 @@
+// The ROS Robot Project
+// MicroROS Library Build Workspace Devcontainer.
+// Prepared by Samyar Sadat Akhavi, 2024.
+//
+// Bits of code taken from:
+// https://github.com/BrunoB81HK/ros2-workspace-devcontainer-template
+
+{
+    "name": "MicroROS Workspace",
+    "remoteUser": "urosdev",
+    "overrideCommand": false,
+    
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "USERNAME": "urosdev",
+            "GID": "1000",
+            "UID": "1000"
+        }
+    },
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-vscode.cpptools-extension-pack",
+                "ms-iot.vscode-ros",
+                "smilerobotics.urdf",
+                "redhat.vscode-xml",
+                "redhat.vscode-yaml",
+                "tamasfe.even-better-toml",
+                "timonwong.shellcheck",
+                "yzhang.markdown-all-in-one",
+                "ms-vscode.cmake-tools",
+                "mcu-debug.memory-view",
+                "mcu-debug.rtos-views",
+                "mcu-debug.peripheral-viewer",
+                "mcu-debug.debug-tracker-vscode",
+                "marus25.cortex-debug",
+                "zainchen.json",
+                "ms-vscode.vscode-serial-monitor"
+            ],
+
+            "settings": {
+                "files.associations": {
+                    "*.rviz": "yaml",
+                    "*.srdf": "xml",
+                    "*.urdf": "xml",
+                    "*.xacro": "xml"
+                }
+            }
+        }
+    },
+
+    "workspaceFolder": "/home/urosdev/pico_ws",
+    "mounts": [{"source": "${localWorkspaceFolder}/mainboard_firmware", "target": "/home/urosdev/pico_ws/src", "type": "bind"},
+               {"source": "${localWorkspaceFolder}/libmicroros/src", "target": "/home/urosdev/pico_ws/uros_ws/src/rrp_pico_coms", "type": "bind"},
+               {"source": "${localWorkspaceFolder}/libmicroros/my_colcon.meta", "target": "/home/urosdev/pico_ws/uros_ws/my_colcon.meta", "type": "bind"},
+               {"source": "${localWorkspaceFolder}/libmicroros/my_toolchain.cmake", "target": "/home/urosdev/pico_ws/uros_ws/my_toolchain.cmake", "type": "bind"},
+               {"source": "${localWorkspaceFolder}/CMakeLists.txt", "target": "/home/urosdev/pico_ws/CMakeLists.txt", "type": "bind"},
+               {"source": "${localWorkspaceFolder}/micro_ros.cmake", "target": "/home/urosdev/pico_ws/micro_ros.cmake", "type": "bind"}],
+
+    "runArgs": ["--net=host"]
+}

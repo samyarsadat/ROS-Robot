@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # A stripped down/modified version of Raspberry Pi's setup script for the Pico.
 # It installs the C/C++ SDK, Picotool, Picoprobe, OpenOCD, and all required dependencies.
 # SET USER TO ROOT BEFORE RUNNING!

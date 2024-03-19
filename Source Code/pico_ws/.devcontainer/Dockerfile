@@ -1,12 +1,12 @@
-# The ROS Robot Project
-# MicroROS Library Build Workspace Dockerfile.
-# Prepared by Samyar Sadat Akhavi, 2024.
+#  The ROS Robot Project
+#  MicroROS Library Build Workspace Dockerfile.
+#  Prepared by Samyar Sadat Akhavi, 2024.
 # 
-# Bits of code taken from:
-# https://github.com/joshnewans/dockerfile_example/blob/main/Dockerfile
-# https://micro.ros.org/docs/tutorials/core/first_application_linux/
-# https://circuitdigest.com/microcontroller-projects/how-to-program-raspberry-pi-pico-using-c
-# https://github.com/BrunoB81HK/ros2-workspace-devcontainer-template
+#  Bits of code taken from:
+#  https://github.com/joshnewans/dockerfile_example/blob/main/Dockerfile
+#  https://micro.ros.org/docs/tutorials/core/first_application_linux/
+#  https://circuitdigest.com/microcontroller-projects/how-to-program-raspberry-pi-pico-using-c
+#  https://github.com/BrunoB81HK/ros2-workspace-devcontainer-template
 
 FROM ros:humble
 
@@ -14,7 +14,7 @@ FROM ros:humble
 # Install git & pip
 RUN apt-get update \
     && apt-get install -y git python3-pip \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* && apt-get autoremove && apt-get autoclean
 
 # Create non-root user
 ARG USERNAME=urosdev
@@ -29,13 +29,13 @@ RUN apt-get update \
     && apt-get install -y sudo \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* && apt-get autoremove && apt-get autoclean
 
 # Pico setup
 COPY install_pico.sh /pico_setup.sh
 RUN export NONROOT_USERNAME=${USERNAME} \
     && bash /pico_setup.sh \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* && apt-get autoremove && apt-get autoclean
 
 # Download and install the micro-ROS tools
 USER ${USERNAME}
@@ -50,7 +50,7 @@ RUN rosdep update
 USER root
 RUN cd /home/${USERNAME}/pico_ws/uros_ws \
     && rosdep install --from-paths src --ignore-src -y \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* && apt-get autoremove && apt-get autoclean
 
 # Copy configuration files
 USER ${USERNAME}
@@ -63,4 +63,4 @@ COPY uros_init.sh /uros_init.sh
 USER root
 RUN chmod +x /entrypoint.sh && chmod +x /uros_init.sh
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/bin/bash", "uros_init.sh"]
+CMD ["./uros_init.sh"]

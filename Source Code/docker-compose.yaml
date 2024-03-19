@@ -1,28 +1,46 @@
-services:
-    microros_ws:
-        image: docker.io/library/microros_ws_image
-        build:
-            dockerfile: Dockerfile
-            context: ./pico_ws/docker
-        network_mode: "host"
-        stdin_open: true
-        tty: true 
-        volumes:
-          - type: bind
-            source: ${PWD}/pico_ws/mainboard_firmware
-            target: /home/urosdev/pico_ws/src
-          - type: bind
-            source: ${PWD}/pico_ws/libmicroros/src
-            target: /home/urosdev/pico_ws/uros_ws/src/rrp_pico_coms
-          - type: bind
-            source: ${PWD}/pico_ws/libmicroros/my_colcon.meta
-            target: /home/urosdev/pico_ws/uros_ws/my_colcon.meta
-          - type: bind
-            source: ${PWD}/pico_ws/libmicroros/my_toolchain.cmake
-            target: /home/urosdev/pico_ws/uros_ws/my_toolchain.cmake
-          - type: bind
-            source: ${PWD}/pico_ws/CMakeLists.txt
-            target: /home/urosdev/pico_ws/CMakeLists.txt
-          - type: bind
-            source: ${PWD}/pico_ws/micro_ros.cmake
-            target: /home/urosdev/pico_ws/micro_ros.cmake
+#  The ROS robot project - Docker Compose file for production containers.
+#  Copyright 2022-2024 Samyar Sadat Akhavi
+#  Written by Samyar Sadat Akhavi, 2024.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https: www.gnu.org/licenses/>.
+
+
+# services:
+#     microros_ws:
+#         image: docker.io/library/microros_ws_image
+#         build:
+#             dockerfile: Dockerfile
+#             context: ./pico_ws/docker
+#         network_mode: "host"
+#         stdin_open: true
+#         tty: true 
+#         volumes:
+#           - type: bind
+#             source: ${PWD}/pico_ws/mainboard_firmware
+#             target: /home/urosdev/pico_ws/src
+#           - type: bind
+#             source: ${PWD}/pico_ws/libmicroros/src
+#             target: /home/urosdev/pico_ws/uros_ws/src/rrp_pico_coms
+#           - type: bind
+#             source: ${PWD}/pico_ws/libmicroros/my_colcon.meta
+#             target: /home/urosdev/pico_ws/uros_ws/my_colcon.meta
+#           - type: bind
+#             source: ${PWD}/pico_ws/libmicroros/my_toolchain.cmake
+#             target: /home/urosdev/pico_ws/uros_ws/my_toolchain.cmake
+#           - type: bind
+#             source: ${PWD}/pico_ws/CMakeLists.txt
+#             target: /home/urosdev/pico_ws/CMakeLists.txt
+#           - type: bind
+#             source: ${PWD}/pico_ws/micro_ros.cmake
+#             target: /home/urosdev/pico_ws/micro_ros.cmake
