@@ -37,20 +37,10 @@ RUN export NONROOT_USERNAME=${USERNAME} \
     && bash /pico_setup.sh \
     && rm -rf /var/lib/apt/lists/* && apt-get autoremove && apt-get autoclean
 
-# Download and install the micro-ROS tools
+# Download MicroROS tools (this is done here to save some time when running uros_init.sh)
 USER ${USERNAME}
-RUN mkdir -p /home/${USERNAME}/pico_ws/uros_ws/src && cd /home/${USERNAME}/pico_ws/uros_ws/src \
-    && rm -rf micro_ros_setup \
-    && mkdir micro_ros_setup \
-    && git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git micro_ros_setup
-USER root
-RUN apt-get update
-USER ${USERNAME}
-RUN rosdep update
-USER root
-RUN cd /home/${USERNAME}/pico_ws/uros_ws \
-    && rosdep install --from-paths src --ignore-src -y \
-    && rm -rf /var/lib/apt/lists/* && apt-get autoremove && apt-get autoclean
+RUN cd /home/$USERNAME && mkdir uros_tools_temp \
+    && git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git uros_tools_temp
 
 # Copy configuration files
 USER ${USERNAME}
@@ -63,4 +53,5 @@ COPY uros_init.sh /uros_init.sh
 USER root
 RUN chmod +x /entrypoint.sh && chmod +x /uros_init.sh
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["./uros_init.sh"]
+USER ${USERNAME}
+CMD ["/uros_init.sh"]

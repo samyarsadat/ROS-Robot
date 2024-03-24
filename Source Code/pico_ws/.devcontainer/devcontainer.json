@@ -54,9 +54,7 @@
 
     "workspaceFolder": "/home/urosdev/pico_ws",
     "mounts": [{"source": "${localWorkspaceFolder}/mainboard_firmware", "target": "/home/urosdev/pico_ws/src", "type": "bind"},
-               {"source": "${localWorkspaceFolder}/libmicroros/src", "target": "/home/urosdev/pico_ws/uros_ws/src/rrp_pico_coms", "type": "bind"},
-               {"source": "${localWorkspaceFolder}/libmicroros/my_colcon.meta", "target": "/home/urosdev/pico_ws/uros_ws/my_colcon.meta", "type": "bind"},
-               {"source": "${localWorkspaceFolder}/libmicroros/my_toolchain.cmake", "target": "/home/urosdev/pico_ws/uros_ws/my_toolchain.cmake", "type": "bind"},
+               {"source": "${localWorkspaceFolder}/libmicroros", "target": "/home/urosdev/pico_ws/uros_ws", "type": "bind"},
                {"source": "${localWorkspaceFolder}/CMakeLists.txt", "target": "/home/urosdev/pico_ws/CMakeLists.txt", "type": "bind"},
                {"source": "${localWorkspaceFolder}/micro_ros.cmake", "target": "/home/urosdev/pico_ws/micro_ros.cmake", "type": "bind"}],
 

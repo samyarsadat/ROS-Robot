@@ -1,0 +1,50 @@
+// The ROS Robot Project
+// ROS2 Development Workspace (Robot) Devcontainer.
+// Prepared by Samyar Sadat Akhavi, 2024.
+//
+// Bits of code taken from:
+// https://github.com/BrunoB81HK/ros2-workspace-devcontainer-template
+
+{
+    "name": "ROS (Robot) Workspace",
+    "remoteUser": "rosdev",
+    "overrideCommand": false,
+    
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "USERNAME": "rosdev",
+            "GID": "1000",
+            "UID": "1000"
+        }
+    },
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-iot.vscode-ros",
+                "smilerobotics.urdf",
+                "redhat.vscode-xml",
+                "redhat.vscode-yaml",
+                "tamasfe.even-better-toml",
+                "timonwong.shellcheck",
+                "yzhang.markdown-all-in-one",
+                "zainchen.json"
+            ],
+
+            "settings": {
+                "files.associations": {
+                    "*.rviz": "yaml",
+                    "*.srdf": "xml",
+                    "*.urdf": "xml",
+                    "*.xacro": "xml"
+                }
+            }
+        }
+    },
+
+    "workspaceFolder": "/home/rosdev/pico_ws",
+    "mounts": [{"source": "${localWorkspaceFolder}/src", "target": "/home/rosdev/ros_ws/src", "type": "bind"}],
+    "runArgs": ["--net=host"]
+}

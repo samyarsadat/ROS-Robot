@@ -2,6 +2,9 @@
 /CAD Files/G-Code
 /CAD Files/~$*.sldprt
 /CAD Files/~$*.sldasm
+/CAD Files/**/~$*.sldprt
+/CAD Files/**/~$*.sldasm
+/Source Code/pico_ws/libmicroros/src/micro_ros_setup
 /Source Code/pico_ws/mainboard_firmware/build/*
 !/Source Code/pico_ws/mainboard_firmware/build/*.uf2
 !/Source Code/pico_ws/mainboard_firmware/build/*.elf
