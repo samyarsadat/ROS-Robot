@@ -1,18 +1,51 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+
+<!--
+    The ROS robot project - Raspberry Pi Pico Communication Messages Package
+    Copyright 2024 Samyar Sadat Akhavi
+    Written by Samyar Sadat Akhavi, 2024.
+ 
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+  
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+ 
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https: www.gnu.org/licenses/>.
+
+    Bits of code taken from:
+    https://github.com/BrunoB81HK/ros2-workspace-devcontainer-template
+-->
+
+
 <package format="3">
-  <name>rrp_pico_coms</name>
-  <version>0.0.0</version>
-  <description>The ROS Robot Project - Raspberry Pi Pico-specific messages package.</description>
-  <maintainer email="samyarsadat@gigawhat.net">Samyar Sadat Akhavi</maintainer>
-  <license>GPL-3.0-only</license>
+    <name>rrp_pico_coms</name>
+    <version>1.0.0</version>
+    <description>The ROS Robot Project - Raspberry Pi Pico-specific messages package.</description>
+    <maintainer email="samyarsadat@gigawhat.net">Samyar Sadat Akhavi</maintainer>
+    <license>GPL-3.0-only</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+    <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
+    <depend>std_msgs</depend>
+    <depend>geometry_msgs</depend>
 
-  <export>
-    <build_type>ament_cmake</build_type>
-  </export>
+    <test_depend>ament_lint_auto</test_depend>
+    <test_depend>ament_lint_common</test_depend>
+    <test_depend>rosidl_cmake</test_depend>
+
+    <build_depend>rosidl_default_generators</build_depend>
+    <exec_depend>rosidl_default_runtime</exec_depend>
+
+    <member_of_group>rosidl_interface_packages</member_of_group>
+
+    <export>
+        <build_type>ament_cmake</build_type>
+    </export>
 </package>

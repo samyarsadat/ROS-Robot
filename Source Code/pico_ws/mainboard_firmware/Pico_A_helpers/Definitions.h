@@ -78,11 +78,6 @@
 #define UROS_NODE_NAME       "pico_a"
 #define UROS_NODE_NAMESPACE  "io"
 
-// ---- RCL return checker modes ----
-#define RCL_HARD_CHECK      0
-#define RCL_SOFT_CHECK      1
-#define RCL_LOG_ONLY_CHECK  2
-
 // ---- Repeating timer intervals ----
 #define motor_odom_rt_interval    80    // In milliseconds
 #define ultra_pub_rt_interval     100   // In milliseconds
@@ -107,11 +102,5 @@
 #define motor_actual_vs_set_extra_timeout   4000                    // In milliseconds
 #define motor_single_side_max_difference    10                      // In RPM
 #define motor_set_vs_actual_max_difference  60                      // In RPM
-#define enc_pulses_per_rotation             2
-#define motor_gear_ratio                    80/1
-#define wheel_diameter                      100.0f                  // In millimeters
-#define wheelbase                           140.0f                  // In millimeters
-#define wheel_circumference                 (PI * wheel_diameter)   // In millimeters
-#define enc_pulses_per_meter_of_travel      (1000 / wheel_circumference) * (motor_gear_ratio * enc_pulses_per_rotation)
 #define right_motor_controller_id           0
 #define left_motor_controller_id            1

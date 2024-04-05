@@ -1,6 +1,7 @@
-#  The ROS robot project - ROS2 Production (Workstation) Dockerfile
+#  The ROS robot project - Raspberry Pi Pico Communication Messages Package
+#  Sensor(s) State Message (Pico B)
 #  Copyright 2024 Samyar Sadat Akhavi
-#  Prepared by Samyar Sadat Akhavi, 2024.
+#  Written by Samyar Sadat Akhavi, 2022-2024.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -14,5 +15,20 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
+ 
+std_msgs/Header header
 
-FROM ros:humble
+
+# ---- Microswitches ----
+bool micro_fr_trig  # true:trigerred
+bool micro_fl_trig  # true:trigerred
+bool micro_br_trig  # true:trigerred
+bool micro_bl_trig  # true:trigerred
+
+# ---- UI Switches ----
+bool control_mode_switch
+uint8 speed_sel_switch  # 0: first position, 1: second position, 2: third position
+
+# ---- Misc. ----
+bool[4] camera_led_stats  # true:on, false:off
+float32 cpu_temp          # RP2040 temperature, Celsius

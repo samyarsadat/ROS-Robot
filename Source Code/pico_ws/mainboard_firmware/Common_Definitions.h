@@ -19,6 +19,7 @@
 
 #pragma once
 #include <limits>
+#include "Global_Definitions.h"
 
 
 // ------- Pin definitions -------
@@ -34,3 +35,8 @@
 #define CHECK_FLAG  1687
 #define INF         std::numeric_limits<float>::infinity()
 #define N_INF       INF * -1
+
+// ---- RCL return checker modes ----
+#define RCL_HARD_CHECK      0
+#define RCL_SOFT_CHECK      1
+#define RCL_LOG_ONLY_CHECK  2

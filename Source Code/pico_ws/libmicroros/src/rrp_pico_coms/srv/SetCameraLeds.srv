@@ -1,6 +1,7 @@
-#  The ROS robot project - ROS2 Production (Workstation) Dockerfile
+#  The ROS robot project - Raspberry Pi Pico Communication Messages Package
+#  Set Camera LED States Service (Pico B)
 #  Copyright 2024 Samyar Sadat Akhavi
-#  Prepared by Samyar Sadat Akhavi, 2024.
+#  Written by Samyar Sadat Akhavi, 2022-2024.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -15,4 +16,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-FROM ros:humble
+
+bool[4] led_state  # true:on, false:off
+---
+bool success
+string message

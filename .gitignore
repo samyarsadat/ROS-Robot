@@ -9,6 +9,10 @@
 !/Source Code/pico_ws/mainboard_firmware/build/*.uf2
 !/Source Code/pico_ws/mainboard_firmware/build/*.elf
 !/Source Code/pico_ws/mainboard_firmware/build/*.dis
+/Source Code/pico_ws/libmicroros/build
+/Source Code/pico_ws/libmicroros/install
+/Source Code/pico_ws/libmicroros/log
+/Source Code/pico_ws/libmicroros/firmware
 /Circuit Diagrams & PCB Files/**/__Previews
 /Circuit Diagrams & PCB Files/**/History
 /Circuit Diagrams & PCB Files/**/Project *
