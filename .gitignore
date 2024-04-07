@@ -5,10 +5,12 @@
 /CAD Files/**/~$*.sldprt
 /CAD Files/**/~$*.sldasm
 /Source Code/pico_ws/libmicroros/src/micro_ros_setup
-/Source Code/pico_ws/mainboard_firmware/build/*
-!/Source Code/pico_ws/mainboard_firmware/build/*.uf2
-!/Source Code/pico_ws/mainboard_firmware/build/*.elf
-!/Source Code/pico_ws/mainboard_firmware/build/*.dis
+/Source Code/pico_ws/build/*
+!/Source Code/pico_ws/build/src/
+/Source Code/pico_ws/build/src/*
+!/Source Code/pico_ws/build/src/*.uf2
+!/Source Code/pico_ws/build/src/*.elf
+!/Source Code/pico_ws/build/src/*.dis
 /Source Code/pico_ws/libmicroros/build
 /Source Code/pico_ws/libmicroros/install
 /Source Code/pico_ws/libmicroros/log

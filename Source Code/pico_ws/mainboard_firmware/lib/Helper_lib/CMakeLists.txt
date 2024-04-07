@@ -20,10 +20,10 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Include build functions from the Pico SDK
-include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
+include(../../../pico_sdk_import.cmake)
 
 # Set project name and C/C++ standards
-project(helpers_lib C CXX ASM)
+project(helpers_lib VERSION 1.0.0 LANGUAGES C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -42,5 +42,8 @@ target_link_libraries(${PROJECT_NAME} hardware_adc)
 
 
 # CMake flags
-SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
+set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
+add_compile_options(-Wall -Wextra -Wpedantic)
+
+message("Configured Helper Library build. (${PROJECT_NAME} - v${CMAKE_PROJECT_VERSION})")

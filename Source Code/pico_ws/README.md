@@ -7,3 +7,8 @@ Run all of these commands inside of the devcontainer.
 4. `ros2 run micro_ros_setup create_firmware_ws.sh generate_lib`
 5. `ros2 run rrp_pico_coms create_fwws.sh`
 6. `ros2 run micro_ros_setup build_firmware.sh $(pwd)/my_toolchain.cmake $(pwd)/my_colcon.meta`
+
+<br>
+
+## Pico Firmware Pre-built Binaries
+If you don't want to build MicroROS and the pico firmware from source, pre-built `.uf2` binaries can be found in the `build/src` folder.
