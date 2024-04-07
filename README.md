@@ -5,7 +5,7 @@
 	<a href="https://www.ros.org"><img src="https://github.com/samyarsadat/ROS-Robot/raw/stage-1/Assets/Logos/ROS_logo.svg"></a><br>
 	<br>
 	<br>
-	<a href="https://github.com/samyarsadat/ROS-Robot/blob/dev/LICENSE"><img src="https://img.shields.io/github/license/samyarsadat/ROS-Robot?color=blue"></a>
+	<a href="https://github.com/samyarsadat/ROS-Robot/blob/stage-1/LICENSE"><img src="https://img.shields.io/github/license/samyarsadat/ROS-Robot?color=blue"></a>
 	|
 	<a href="https://github.com/samyarsadat/ROS-Robot#this-project-will-be-completed-in-stages"><img src="https://img.shields.io/badge/Current_Stage-One-red"></a>
 	|
@@ -65,12 +65,12 @@ The Pi 4 handles image processing, mapping & navigation, and any other type of r
 ROS is used to handle communications between multiple nodes either on the same machine (i.e. a mapping node and a navigation node running on the Pi 4) or between external nodes (i.e. the two Raspberry Pi Picos running microROS). 
 Both Raspberry Pi Picos are connected to the Pi 4 via USB cables.<br>
 <br>
-More details regarding the electronics design <a href="https://github.com/samyarsadat/ROS-Robot/tree/stage-1/Circuit%20diagrams%20%26%20PCB%20files">here</a>.<br>
+More details regarding the electronics design <a href="https://github.com/samyarsadat/ROS-Robot/tree/stage-1/Circuit%20Diagrams%20%26%20PCB%20Files">here</a>.<br>
 <br>
 
 #### Mechanical Design Overview
 The mechanical design of the robot is quite simple. 
-The chassis of the robot is 3D printed in two halves using PLA filament (more details regarding 3D printing <a href="https://github.com/samyarsadat/ROS-Robot/tree/stage-1/CAD%20files/STL%20files">here</a>) and the robot uses four geared DC motors (Namiki 22CL-3501PG) in a differential drive configuration.<be>
+The chassis of the robot is 3D printed in two halves using PLA filament (more details regarding 3D printing <a href="https://github.com/samyarsadat/ROS-Robot/tree/stage-1/CAD%20Files/STL%20files">here</a>) and the robot uses four geared DC motors (Namiki 22CL-3501PG) in a differential drive configuration.<be>
 
 <br>
 
@@ -108,7 +108,7 @@ If you think that you have found a bug or issue please report it <a href="https:
 <br>
 
 ## Contributing
-Please take a look at <a href="https://github.com/samyarsadat/ROS-Robot/blob/dev/CONTRIBUTING.md">CONTRIBUTING.md</a> for contributing.
+Please take a look at <a href="https://github.com/samyarsadat/ROS-Robot/blob/stage-1/CONTRIBUTING.md">CONTRIBUTING.md</a> for contributing.
 
 <br>
 
