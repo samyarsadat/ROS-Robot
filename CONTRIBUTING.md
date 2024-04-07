@@ -10,9 +10,9 @@ Want to help improve The ROS Robot project? There are several ways you can contr
 ## Submitting a Pull Request
 There are two Pull Request templates one for bug fixes and another for new features :
 
-   - <a href="https://github.com/samyarsadat/ROS-Robot/blob/dev/.github/PULL_REQUEST_TEMPLATE/bug-fix.md">Bug Fixes</a>
-   - <a href="https://github.com/samyarsadat/ROS-Robot/blob/dev/.github/PULL_REQUEST_TEMPLATE/new-feature.md">New Features</a>
+   - <a href="https://github.com/samyarsadat/ROS-Robot/blob/stage-1/.github/PULL_REQUEST_TEMPLATE/bug-fix.md">Bug Fixes</a>
+   - <a href="https://github.com/samyarsadat/ROS-Robot/blob/stage-1/.github/PULL_REQUEST_TEMPLATE/new-feature.md">New Features</a>
 
 <br>
 
-By contributing to the The ROS Robot project, you agree to license your contribution under <a href="https://github.com/samyarsadat/ROS-Robot/blob/dev/LICENSE">GNU GPL-v3</a>.
+By contributing to The ROS Robot project, you agree to license your contribution under <a href="https://github.com/samyarsadat/ROS-Robot/blob/dev/LICENSE">GNU GPL-v3</a>.
