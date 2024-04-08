@@ -55,16 +55,7 @@
                 "marus25.cortex-debug",
                 "zainchen.json",
                 "ms-vscode.vscode-serial-monitor"
-            ],
-
-            "settings": {
-                "files.associations": {
-                    "*.rviz": "yaml",
-                    "*.srdf": "xml",
-                    "*.urdf": "xml",
-                    "*.xacro": "xml"
-                }
-            }
+            ]
         }
     },
 

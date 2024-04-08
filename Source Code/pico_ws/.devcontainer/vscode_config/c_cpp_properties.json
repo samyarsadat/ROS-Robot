@@ -1,0 +1,26 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "${default}",
+                "limitSymbolsToIncludedHeaders": false
+            },
+
+            "includePath": [
+                "/opt/ros/humble/include/**",
+                "/usr/include/**",
+                "${env:PICO_SDK_PATH}/**",
+                "${workspaceFolder}/**"
+            ],
+
+            "name": "MicroROS",
+            "intelliSenseMode": "linux-gcc-arm",
+            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ],
+
+    "version": 4
+}

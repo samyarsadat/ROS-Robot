@@ -100,8 +100,8 @@ target_compile_definitions(${PICO_A_NAME} PRIVATE
 
 
 # CMake flags
-SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
+set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
 
 # Compile definitions & options
 add_compile_definitions(PICO_UART_ENABLE_CRLF_SUPPORT=0)

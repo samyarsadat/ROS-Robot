@@ -57,6 +57,8 @@ RUN cd /home/$USERNAME && mkdir uros_tools_temp \
 
 # Copy configuration files
 USER ${USERNAME}
+COPY vscode_config/c_cpp_properties.json /home/$USERNAME/pico_ws/.vscode/c_cpp_properties.json
+COPY vscode_config/settings.json /home/$USERNAME/pico_ws/.vscode/settings.json
 RUN echo 'source /opt/ros/'$ROS_DISTRO'/setup.bash' >> /home/$USERNAME/.bashrc \
     && echo 'source /home/'$USERNAME'/pico_ws/uros_ws/src/micro_ros_setup/install/local_setup.bash' >> /home/$USERNAME/.bashrc
 
