@@ -81,11 +81,8 @@ Their names and purposes are as follows:
 **.github**<br>
 GitHub issue templates, pull request templates, etc.<br>
 
-**.vscode**<br>
-VSCode configurations files.<br>
-
 **Assets**<br>
-Assets used on Github (such as images used in this README file).<br>
+Assets used on GitHub (such as images used in this README file).<br>
 
 **CAD Files**<br>
 3D CAD design files and 3D printing files for the chassis and other mechanical parts of the robot.<br>
