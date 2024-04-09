@@ -28,6 +28,7 @@
 #include <sensor_msgs/msg/range.h>
 #include <std_srvs/srv/set_bool.h>
 #include <nav_msgs/msg/odometry.h>
+#include <rrp_pico_coms/msg/sensor_state_a.h>
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <rcl/error_handling.h>

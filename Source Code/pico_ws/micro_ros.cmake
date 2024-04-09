@@ -1,5 +1,5 @@
 if (DEFINED MICRO_ROS_PATH)
-    message("Using Given MICRO_ROS_PATH '${MICRO_ROS_PATH}')")
+    message("Using given MICRO_ROS_PATH '${MICRO_ROS_PATH}')")
 else ()
     set(MICRO_ROS_PATH "${CMAKE_CURRENT_LIST_DIR}lib/micro_ros_raspberrypi_pico_sdk/libmicroros")
     message("Using local MICRO_ROS_PATH '${MICRO_ROS_PATH}')")
@@ -19,7 +19,7 @@ target_include_directories(micro_ros PUBLIC
     ${MICRO_ROS_PATH}/include/diagnostic_msgs
     ${MICRO_ROS_PATH}/include/example_interfaces
     ${MICRO_ROS_PATH}/include/geometry_msgs
-    ${MICRO_ROS_PATH}/include/ros2_servo
+    ${MICRO_ROS_PATH}/include/rrp_pico_coms
     ${MICRO_ROS_PATH}/include/lifecycle_msgs
     ${MICRO_ROS_PATH}/include/micro_ros_msgs
     ${MICRO_ROS_PATH}/include/nav_msgs
