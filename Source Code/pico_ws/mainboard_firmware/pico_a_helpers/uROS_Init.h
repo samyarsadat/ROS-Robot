@@ -24,10 +24,16 @@
 #include <std_msgs/msg/string.h>
 #include <std_msgs/msg/empty.h>
 #include <geometry_msgs/msg/twist.h>
+#include <geometry_msgs/msg/transform_stamped.h>
 #include <diagnostic_msgs/msg/diagnostic_status.h>
 #include <sensor_msgs/msg/range.h>
 #include <std_srvs/srv/set_bool.h>
 #include <nav_msgs/msg/odometry.h>
+#include <rrp_pico_coms/msg/misc_sensors_a.h>
+#include <rrp_pico_coms/msg/ultrasonic_sensors.h>
+#include <rrp_pico_coms/msg/falloff_sensors.h>
+#include <rrp_pico_coms/msg/motor_ctrl_state.h>
+#include <rrp_pico_coms/srv/set_pid_tunings.h>
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
@@ -56,36 +62,50 @@ extern geometry_msgs__msg__Twist cmd_vel_msg;
 
 // ---- Publishers ----
 
-// Misc.
+// Diagnostics
 extern rcl_publisher_t diagnostics_pub;
 extern diagnostic_msgs__msg__DiagnosticStatus diagnostics_msg;
 
-// Ultrasonic Sensors
-extern rcl_publisher_t front_ultra_pub, left_ultra_pub, right_ultra_pub, back_ultra_pub;
-extern sensor_msgs__msg__Range front_ultra_msg, back_ultra_msg, right_ultra_msg, left_ultra_msg;
+// Sensor States
+extern rcl_publisher_t misc_sensor_pub, ultrasonic_sensor_pub, falloff_sensor_pub;
+extern rrp_pico_coms__msg__MiscSensorsA misc_sensor_msg;
+extern rrp_pico_coms__msg__UltrasonicSensors ultrasonic_sensor_msg;
+extern rrp_pico_coms__msg__FalloffSensors falloff_sensor_msg;
 
-// IR Edge Sensors
-extern rcl_publisher_t front_1_edge_pub, front_2_edge_pub, front_3_edge_pub, front_4_edge_pub;
-extern rcl_publisher_t back_1_edge_pub, back_2_edge_pub, back_3_edge_pub, back_4_edge_pub;
-extern sensor_msgs__msg__Range front_1_edge_msg, front_2_edge_msg, front_3_edge_msg, front_4_edge_msg;
-extern sensor_msgs__msg__Range back_1_edge_msg, back_2_edge_msg, back_3_edge_msg, back_4_edge_msg;
+// Motor Controller States
+extern rcl_publisher_t mtr_ctrl_r_state_pub, mtr_ctrl_l_state_pub;
+extern rrp_pico_coms__msg__MotorCtrlState mtr_ctrl_r_state_msg, mtr_ctrl_l_state_msg;
 
 // Odometry
 extern rcl_publisher_t enc_odom_pub;
 extern nav_msgs__msg__Odometry enc_odom_msg;
 
+// Odometry -> Base Link Transform
+extern rcl_publisher_t odom_baselink_tf_pub;
+extern geometry_msgs__msg__TransformStamped odom_baselink_tf_msg;
+
 
 // ---- Services ----
 
-// Motor controller enable/disable
-extern rcl_service_t en_motor_ctrl_serv;
+// Motor Controller Enable/Disable
+extern rcl_service_t en_motor_ctrl_srv;
 extern std_srvs__srv__SetBool_Request en_motor_ctrl_req;
 extern std_srvs__srv__SetBool_Response en_motor_ctrl_res;
 
-// Emitters (ultrasonic, IR edge) enable/disable 
-extern rcl_service_t en_emitters_serv;
+// Emitters (Ultrasonic, IR Edge) Enable/Disable 
+extern rcl_service_t en_emitters_srv;
 extern std_srvs__srv__SetBool_Request en_emitters_req;
 extern std_srvs__srv__SetBool_Response en_emitters_res;
+
+// Power Relay Enable/Disable  
+extern rcl_service_t en_relay_srv;
+extern std_srvs__srv__SetBool_Request en_relay_req;
+extern std_srvs__srv__SetBool_Response en_relay_res;
+
+// Motor Controller PID Tunings
+extern rcl_service_t set_mtr_pid_tunings_srv;
+extern rrp_pico_coms__srv__SetPidTunings_Request set_mtr_pid_tunings_req;
+extern rrp_pico_coms__srv__SetPidTunings_Response set_mtr_pid_tunings_res;
 
 
 

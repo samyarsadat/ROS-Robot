@@ -91,16 +91,24 @@
 #define ultrasonic_signal_timout_us  32*1000   // 32 milliseconds
 
 // ---- IR edge sensors ----
-#define num_ir_sensors                   8
 #define ir_edge_detection_range          3   // In cm
 #define ir_edge_fov                      20
+#define num_ir_sensors                   8
 #define ir_trigger_limit                 6500
 #define ir_self_test_z_score_threshhold  200.0f
 
-// ---- Motor specs ----
-#define motor_safety_trigger_timeout        3500                    // In milliseconds
-#define motor_actual_vs_set_extra_timeout   4000                    // In milliseconds
-#define motor_single_side_max_difference    10                      // In RPM
-#define motor_set_vs_actual_max_difference  60                      // In RPM
+// ---- Motor controller & safety ----
+#define motor_safety_trigger_timeout        3500   // In milliseconds
+#define motor_actual_vs_set_extra_timeout   4000   // In milliseconds
+#define motor_single_side_max_difference    10     // In RPM
+#define motor_set_vs_actual_max_difference  60     // In RPM
 #define right_motor_controller_id           0
 #define left_motor_controller_id            1
+
+// ---- Motor specs ----
+#define enc_pulses_per_rotation         2
+#define motor_gear_ratio                80/1
+#define wheel_diameter                  100.0f                  // In millimeters
+#define wheelbase                       140.0f                  // In millimeters
+#define wheel_circumference             (PI * wheel_diameter)   // In millimeters
+#define enc_pulses_per_meter_of_travel  (1000 / wheel_circumference) * (motor_gear_ratio * enc_pulses_per_rotation)

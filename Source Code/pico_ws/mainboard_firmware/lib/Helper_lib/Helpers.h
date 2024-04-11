@@ -39,6 +39,9 @@
 #define HIGH  1
 #define LOW   0
 
+// ---- Misc. ----
+#define temp_sens_vref  3.22f   // This is used to convert the ADC readings from the internal temperature sensor to degrees Celsius.
+
 
 // ------- Functions -------
 
@@ -58,8 +61,12 @@ float truncate_adj(float input, int trunc_amount);
 float calculate_mean(float numbers[], int array_length);
 
 // ---- Calculates the standard deviation of the numbers in a float array ----
-float calculate_standard_deviation(float numbers[], int array_length);
+float calculate_standard_deviation(float numbers[], int array_length, float numbers_mean);
 
 // ---- Finds "outliers" in-between the numbers in a float array using the Z-Score (Standard Score) method ----
 // ---- It returns a boolean array (with the same size as the input array) that indicates the "outliers" by returning their array slots as true ----
 std::unique_ptr<bool[]> standard_score_check(float numbers[], int array_length, float z_score_threshhold);
+
+// ---- Returns the temperature measured by the RP2040's internal sensor in Celsius ----
+// ---- NOTE: The ADC must be initialized and the temperature sensor must be enabled! ----
+float get_rp2040_temp();

@@ -1,5 +1,5 @@
 #  The ROS robot project - Raspberry Pi Pico Communication Messages Package
-#  Sensor(s) State Message (Pico B)
+#  Miscellaneous Sensor(s) State Message (Pico B)
 #  Copyright 2024 Samyar Sadat Akhavi
 #  Written by Samyar Sadat Akhavi, 2022-2024.
 #
@@ -16,18 +16,16 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
  
-std_msgs/Header header
+builtin_interfaces/Time time
 
-
-# ---- Microswitches ----
-bool micro_fr_trig  # true:trigerred
-bool micro_fl_trig  # true:trigerred
-bool micro_br_trig  # true:trigerred
-bool micro_bl_trig  # true:trigerred
 
 # ---- UI Switches ----
 bool control_mode_switch
 uint8 speed_sel_switch  # 0: first position, 1: second position, 2: third position
+
+# ---- Battery Power ----
+float32 battery_voltage  # Volts
+int16 battery_current    # Milliamps
 
 # ---- Misc. ----
 bool[4] camera_led_stats  # true:on, false:off

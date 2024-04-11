@@ -19,7 +19,6 @@
 
 #pragma once
 #include <limits>
-#include "Global_Definitions.h"
 
 
 // ------- Pin definitions -------

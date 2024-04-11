@@ -17,9 +17,7 @@
 
 
 # Custom library subdirectories
-add_subdirectory(lib/Motor_lib)
-add_subdirectory(lib/Helper_lib)
-add_subdirectory(lib/PID_lib)
+add_subdirectory(lib)
 
 
 

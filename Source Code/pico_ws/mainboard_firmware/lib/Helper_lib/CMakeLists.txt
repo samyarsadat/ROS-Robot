@@ -19,8 +19,13 @@
 # Set minimum required version of CMake
 cmake_minimum_required(VERSION 3.12)
 
+# Check whether PICO_SDK_PATH is defined.
+if (NOT EXISTS $ENV{PICO_SDK_PATH})
+    message(FATAL_ERROR "The Pico SDK path environment variable is not set!")
+endif ()
+
 # Include build functions from the Pico SDK
-include(../../../pico_sdk_import.cmake)
+include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 
 # Set project name and C/C++ standards
 project(helpers_lib VERSION 1.0.0 LANGUAGES C CXX ASM)

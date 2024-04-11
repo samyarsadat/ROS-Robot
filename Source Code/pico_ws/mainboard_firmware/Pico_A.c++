@@ -21,12 +21,15 @@
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
+#include "hardware/adc.h"
 #include "hardware/pwm.h"
 #include <std_msgs/msg/string.h>
 #include <geometry_msgs/msg/twist.h>
 #include <diagnostic_msgs/msg/diagnostic_status.h>
 #include <diagnostic_msgs/msg/key_value.h>
 #include <sensor_msgs/msg/range.h>
+#include <rrp_pico_coms/msg/motor_ctrl_state.h>
+#include <rrp_pico_coms/srv/set_pid_tunings.h>
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <rcl/error_handling.h>
@@ -301,6 +304,39 @@ void en_emitters_callback(const void *req, void *res)
 }
 
 
+// ---- Enable/disable relay service ----
+void en_relay_callback(const void *req, void *res) 
+{
+    std_srvs__srv__SetBool_Request *req_in = (std_srvs__srv__SetBool_Request *) req;
+    std_srvs__srv__SetBool_Response *res_in = (std_srvs__srv__SetBool_Response *) res;
+
+    if ((bool) req_in->data)
+    {
+        gpio_put(pi_power_relay, HIGH);
+    }
+
+    else 
+    {
+        gpio_put(pi_power_relay, LOW);
+    }
+
+    res_in->success = true;
+}
+
+
+// ---- Set motor controller PID tunings service ----
+void set_mtr_pid_tunings_callback(const void *req, void *res)
+{
+    rrp_pico_coms__srv__SetPidTunings_Request *req_in = (rrp_pico_coms__srv__SetPidTunings_Request *) req;
+    rrp_pico_coms__srv__SetPidTunings_Response *res_in = (rrp_pico_coms__srv__SetPidTunings_Response *) res;
+
+    r_motors.pid->SetTunings((float) req_in->pid_kp, (float) req_in->pid_ki, (float) req_in->pid_kd);
+    l_motors.pid->SetTunings((float) req_in->pid_kp, (float) req_in->pid_ki, (float) req_in->pid_kd);
+
+    res_in->success = true;
+}
+
+
 // ---- Command velocity topic callback ----
 void cmd_vel_call(const void *msgin)
 {
@@ -349,7 +385,9 @@ void setup()
     init_pin(pi_power_relay, OUTPUT);
     init_pin(edge_sens_en, OUTPUT);
 
-    // Mux init
+    // Misc. init
+    adc_init();
+    adc_set_temp_sensor_enabled(true);
     set_mux_pins(analog_mux_s0, analog_mux_s1, analog_mux_s2, analog_mux_s3, analog_mux_io);
 
     // MotorSafety init

@@ -9,16 +9,16 @@
             "includePath": [
                 "/opt/ros/humble/include/**",
                 "/usr/include/**",
-                "${env:PICO_SDK_PATH}/**",
-                "${workspaceFolder}/**"
+                "${PICO_SDK_PATH}/**",
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/uros_ws/firmware/build/**"
             ],
 
             "name": "MicroROS",
             "intelliSenseMode": "linux-gcc-arm",
             "compilerPath": "/usr/bin/arm-none-eabi-gcc",
-            "cStandard": "c11",
-            "cppStandard": "c++17",
-            "configurationProvider": "ms-vscode.cmake-tools"
+            "cStandard": "gnu11",
+            "cppStandard": "gnu++17"
         }
     ],
 

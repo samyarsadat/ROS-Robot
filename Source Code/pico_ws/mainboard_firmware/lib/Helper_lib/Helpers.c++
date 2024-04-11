@@ -155,3 +155,17 @@ unique_ptr<bool[]> standard_score_check(float numbers[], int array_length, float
 
     return outliers;
 }
+
+
+// ---- Returns the temperature measured by the RP2040's internal sensor in Celsius ----
+// ---- NOTE: The ADC must be initialized and the temperature sensor must be enabled! ----
+float get_rp2040_temp()
+{
+    const double CONVERSION_FACTOR = temp_sens_vref / (1 << 12);
+    adc_select_input(4);
+
+    double reading_volts = adc_read() * CONVERSION_FACTOR;
+    float reading_celsius = 27 - (reading_volts - 0.706) / 0.001721;  // Formula taken from the RP2040 datasheet.
+
+    return reading_celsius;
+}

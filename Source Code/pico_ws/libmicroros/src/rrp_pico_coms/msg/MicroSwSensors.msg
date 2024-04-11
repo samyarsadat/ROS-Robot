@@ -1,5 +1,5 @@
 #  The ROS robot project - Raspberry Pi Pico Communication Messages Package
-#  Motor Controller State Message (Pico A)
+#  Microswitch States Message (Pico B)
 #  Copyright 2024 Samyar Sadat Akhavi
 #  Written by Samyar Sadat Akhavi, 2022-2024.
 #
@@ -19,24 +19,8 @@
 builtin_interfaces/Time time
 
 
-# ---- Encoder Measurements ----
-float32[] measured_rpms
-bool[] measured_dirs       # true:forwards, false:backwards
-uint64[] total_enc_counts  # Total number of counted encoder pulses
-
-# ---- Encoder Specs ----
-int16 encoder_pulses_per_rotation  # Number of encoder pulses per rotation of the motor shaft, NOT THE WHEEL!
-int16 wheel_diameter_mm            # Wheel diameter in millimeters.
-float32 motor_gear_ratio_fl        # Motor gearbox ratio (ex. 80/1).
-
-# ---- Set Targets ----
-uint16 target_rpm
-bool target_dir  # true:forwards, false:backwards
-
-# ---- PID ----
-uint16 pid_output
-float32[3] pid_cals  # [Pk, Pi, Pd]
-
-# ---- Power ----
-uint16 total_current        # In milliamps
-float32 driver_out_voltage  # In volts
+# ---- Microswitches ----
+bool micro_fr_trig  # true:trigerred
+bool micro_fl_trig  # true:trigerred
+bool micro_br_trig  # true:trigerred
+bool micro_bl_trig  # true:trigerred
