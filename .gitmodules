@@ -1,3 +1,6 @@
 [submodule "Source Code/pico_ws/mainboard_firmware/lib/PID_lib"]
 	path = Source Code/pico_ws/mainboard_firmware/lib/PID_lib
 	url = https://github.com/samyarsadat/Pico-PID-Library
+[submodule "Source Code/pico_ws/mainboard_firmware/lib/MPU_lib"]
+	path = Source Code/pico_ws/mainboard_firmware/lib/MPU_lib
+	url = https://github.com/HumansAreWeak/rpi-pico-mpu6050
