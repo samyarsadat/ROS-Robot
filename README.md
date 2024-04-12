@@ -75,7 +75,7 @@ The chassis of the robot is 3D printed in two halves using PLA filament (more de
 <br>
 
 ## File Structure
-There are 6 folders in this repository.<br>
+There are 5 folders in this repository.<br>
 Their names and purposes are as follows:
 
 **.github**<br>
