@@ -22,6 +22,8 @@ builtin_interfaces/Time time
 # ---- Inertial Measurement Unit ----
 geometry_msgs/Vector3 imu_accel  # Linear Acceleration
 geometry_msgs/Vector3 imu_gyro   # Angular Velocity
+float32 imu_temp                 # Temperature From MPU6050
+bool imu_freefall_int            # MPU6050 Freefall Detection Interrupt
 
 # ---- Environmental Sensors ----
 float32 env_temp      # Celsius

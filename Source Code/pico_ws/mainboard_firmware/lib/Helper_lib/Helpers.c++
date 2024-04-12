@@ -51,6 +51,11 @@ void init_pin(uint pin, int mode)
             pwm_set_enabled(pwm_gpio_to_slice_num(pin), true);
             break;
 
+        case PROT_I2C:
+            gpio_init(pin);
+            gpio_set_function(pin, GPIO_FUNC_I2C);
+            break;
+
         case INPUT:
             gpio_init(pin);
             gpio_set_dir(pin, false);

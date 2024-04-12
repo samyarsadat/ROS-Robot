@@ -30,21 +30,24 @@ add_executable(${PICO_A_NAME} Pico_A.c++
                pico_a_helpers/IO_Helpers_Edge.c++
                pico_a_helpers/IO_Helpers_Ultrasonic.c++
                pico_a_helpers/uROS_Init.c++
+               pico_a_helpers/Local_Helpers.c++
                uart_transport/pico_uart_transport.c)
 
 # Create map/bin/hex/uf2 files
 pico_add_extra_outputs(${PICO_A_NAME})
 
 # Link to libraries
-target_link_libraries(${PICO_A_NAME} micro_ros)
-target_link_libraries(${PICO_A_NAME} pico_stdlib)
-target_link_libraries(${PICO_A_NAME} pico_multicore)
-target_link_libraries(${PICO_A_NAME} hardware_pwm)
-target_link_libraries(${PICO_A_NAME} hardware_adc)
-target_link_libraries(${PICO_A_NAME} hardware_gpio)
-target_link_libraries(${PICO_A_NAME} helpers_lib)
-target_link_libraries(${PICO_A_NAME} pid_v1_lib)
-target_link_libraries(${PICO_A_NAME} motor_control_lib)
+target_link_libraries(${PICO_A_NAME} micro_ros
+                                     haw_mpu6050
+                                     pico_stdlib
+                                     pico_multicore
+                                     hardware_pwm
+                                     hardware_adc
+                                     hardware_gpio
+                                     helpers_lib
+                                     pid_v1_lib
+                                     motor_control_lib
+)
 
 # Link to include directories
 target_include_directories(${PICO_A_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
@@ -73,13 +76,14 @@ add_executable(${PICO_B_NAME} Pico_B.c++
 pico_add_extra_outputs(${PICO_B_NAME})
 
 # Link to libraries
-target_link_libraries(${PICO_B_NAME} micro_ros)
-target_link_libraries(${PICO_B_NAME} pico_stdlib)
-target_link_libraries(${PICO_B_NAME} pico_multicore)
-target_link_libraries(${PICO_B_NAME} hardware_pwm)
-target_link_libraries(${PICO_B_NAME} hardware_adc)
-target_link_libraries(${PICO_B_NAME} hardware_gpio)
-target_link_libraries(${PICO_B_NAME} helpers_lib)
+target_link_libraries(${PICO_B_NAME} micro_ros
+                                     pico_stdlib
+                                     pico_multicore
+                                     hardware_pwm
+                                     hardware_adc
+                                     hardware_gpio
+                                     helpers_lib
+)
 
 # Link to include directories
 target_include_directories(${PICO_B_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})

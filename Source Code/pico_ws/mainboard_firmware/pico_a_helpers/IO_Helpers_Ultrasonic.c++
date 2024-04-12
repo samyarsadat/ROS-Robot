@@ -40,13 +40,13 @@ float check_return_distance(float dist, char *ultra_hwid)
 {
     if (dist < ultra_min_dist)
     {
-        publish_diag_report(diagnostic_msgs__msg__DiagnosticStatus__WARN, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_ULTRASONICS, ultra_hwid, DIAG_WARN_MSG_ULTRA_MIN_LIM_EXCEED, NULL);
+        publish_diag_report(DIAG_LVL_WARN, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_ULTRASONICS, ultra_hwid, DIAG_WARN_MSG_ULTRA_MIN_LIM_EXCEED, NULL);
         return N_INF;
     }
 
     else if (dist > ultra_max_dist)
     {
-        publish_diag_report(diagnostic_msgs__msg__DiagnosticStatus__WARN, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_ULTRASONICS, ultra_hwid, DIAG_WARN_MSG_ULTRA_MAX_LIM_EXCEED, NULL);
+        publish_diag_report(DIAG_LVL_WARN, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_ULTRASONICS, ultra_hwid, DIAG_WARN_MSG_ULTRA_MAX_LIM_EXCEED, NULL);
         return INF;
     }
 

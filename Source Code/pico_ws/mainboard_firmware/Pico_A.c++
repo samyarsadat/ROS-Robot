@@ -38,6 +38,7 @@
 #include "lib/Helper_lib/Helpers.h"
 #include "lib/Motor_lib/Motor.h"
 #include "lib/Motor_lib/Motor_Safety.h"
+#include "haw/MPU6050.h"
 #include "pico_a_helpers/IO_Helpers_Mux.h"
 #include "pico_a_helpers/IO_Helpers_Ultrasonic.h"
 #include "pico_a_helpers/IO_Helpers_Edge.h"
@@ -45,6 +46,7 @@
 #include "pico_a_helpers/Sensor_Publishers.c++"
 #include "pico_a_helpers/uROS_Init.h"
 #include "pico_a_helpers/Definitions.h"
+#include "pico_a_helpers/Local_Helpers.h"
 #include "uart_transport/pico_uart_transports.h"
 #include <rmw_microros/rmw_microros.h>
 
@@ -67,6 +69,9 @@ struct repeating_timer motor_odom_rt, ultrasonic_publish_rt, edge_ir_publish_rt,
 
 
 // ------- Library object inits -------
+
+// ---- MPU6050 ----
+mpu6050_t mpu6050 = mpu6050_init(i2c_default, MPU6050_ADDRESS_A0_VCC);
 
 // ---- Motor Controller ----
 uint r_motors_drv_pins[2] = {r_motor_drive_1, r_motor_drive_2};
@@ -92,33 +97,6 @@ MotorSafety l_motors_safety(&l_motors, left_motor_controller_id);
 
 
 // ------- Functions ------- 
-
-// ---- RCL return checker prototype ----
-bool check_rc(rcl_ret_t rctc, uint mode);
-
-
-// ---- Diagnostics error reporting ----
-void publish_diag_report(uint8_t level, char *hw_source, char *hw_name, char *hw_id, char *msg, diagnostic_msgs__msg__KeyValue *key_values)
-{
-    sprintf(diagnostics_msg.name.data, "%s/%s", hw_source, hw_name);
-    diagnostics_msg.name.size = strlen(diagnostics_msg.name.data);
-    diagnostics_msg.hardware_id.data = hw_id;
-    diagnostics_msg.hardware_id.size = strlen(diagnostics_msg.hardware_id.data);
-    diagnostics_msg.message.data = msg;
-    diagnostics_msg.message.size = strlen(diagnostics_msg.message.data);
-    diagnostics_msg.values.data = NULL;
-    diagnostics_msg.values.size = 0;
-    diagnostics_msg.level = level;
-    
-    if (key_values != NULL)
-    {
-        diagnostics_msg.values.data = key_values;
-        diagnostics_msg.values.size = sizeof(key_values) / sizeof(key_values[0]);
-    }
-
-    check_rc(rcl_publish(&diagnostics_pub, &diagnostics_msg, NULL), RCL_HARD_CHECK);
-}
-
 
 // ---- Graceful shutdown ----
 void clean_shutdown(const void *msgin)
@@ -147,10 +125,10 @@ void clean_shutdown(const void *msgin)
 
     // MicroROS cleanup
     // TODO: ADD ALL PUBS AND SUBS.
-    check_rc(rcl_subscription_fini(&cmd_vel_sub, &rc_node), RCL_LOG_ONLY_CHECK);
-    check_rc(rcl_publisher_fini(&diagnostics_pub, &rc_node), RCL_LOG_ONLY_CHECK);
-    check_rc(rclc_executor_fini(&rc_executor), RCL_LOG_ONLY_CHECK);
-    check_rc(rcl_node_fini(&rc_node), RCL_LOG_ONLY_CHECK);
+    check_rc(rcl_subscription_fini(&cmd_vel_sub, &rc_node), RT_LOG_ONLY_CHECK);
+    check_rc(rcl_publisher_fini(&diagnostics_pub, &rc_node), RT_LOG_ONLY_CHECK);
+    check_rc(rclc_executor_fini(&rc_executor), RT_LOG_ONLY_CHECK);
+    check_rc(rcl_node_fini(&rc_node), RT_LOG_ONLY_CHECK);
 
 
     // Stop core 0 (only effective when this function is called from core 1)
@@ -171,36 +149,6 @@ void clean_shutdown(const void *msgin)
         gpio_put(onboard_led, HIGH);
         sleep_ms(100);
     }
-}
-
-
-// ---- RCL return checker ----
-bool check_rc(rcl_ret_t rctc, uint mode)
-{
-    if (rctc != RCL_RET_OK)
-    {
-        switch (mode)
-        {
-            case RCL_HARD_CHECK:
-                clean_shutdown(NULL);
-                break;
-
-            case RCL_SOFT_CHECK:
-                publish_diag_report(diagnostic_msgs__msg__DiagnosticStatus__ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_UROS, DIAG_HWID_UROS, DIAG_ERR_MSG_UROS_RC_CHECK_FAIL, NULL);
-                return false;
-                break;
-            
-            case RCL_LOG_ONLY_CHECK:
-                // TODO: LOGGING
-                return false;
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    return true;
 }
 
 
@@ -236,16 +184,16 @@ void motor_safety_callback(MotorSafety::safety_trigger_conditions condition, int
         {
             if (id == right_motor_controller_id)
             {
-                publish_diag_report(diagnostic_msgs__msg__DiagnosticStatus__ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_DRV_R, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
-                publish_diag_report(diagnostic_msgs__msg__DiagnosticStatus__ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R1, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
-                publish_diag_report(diagnostic_msgs__msg__DiagnosticStatus__ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R2, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_DRV_R, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R1, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R2, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
             }
             
             else
             {
-                publish_diag_report(diagnostic_msgs__msg__DiagnosticStatus__ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_DRV_L, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
-                publish_diag_report(diagnostic_msgs__msg__DiagnosticStatus__ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L1, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
-                publish_diag_report(diagnostic_msgs__msg__DiagnosticStatus__ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L2, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_DRV_L, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L1, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L2, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
             }
 
             clean_shutdown(NULL);
@@ -369,9 +317,32 @@ bool motor_control_and_odom_timer_callback(struct repeating_timer *rt)
     return true;
 }
 
-bool publish_other_sensors_timer_callback(struct repeating_timer *rt)
+
+// ---- MPU6050 init ----
+bool init_mpu6050()
 {
-    return true;
+    // Init pins
+    init_pin(PICO_DEFAULT_I2C_SDA_PIN, PROT_I2C);
+    init_pin(PICO_DEFAULT_I2C_SCL_PIN, PROT_I2C);
+    gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
+    gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
+
+    if (mpu6050_begin(&mpu6050))
+    {
+        mpu6050_set_scale(&mpu6050, MPU6050_SCALE_2000DPS);
+        mpu6050_set_range(&mpu6050, MPU6050_RANGE_16G);
+
+        mpu6050_set_temperature_measuring(&mpu6050, true);
+        mpu6050_set_gyroscope_measuring(&mpu6050, true);
+        mpu6050_set_accelerometer_measuring(&mpu6050, true);
+        mpu6050_set_int_free_fall(&mpu6050, true);
+        mpu6050_set_int_motion(&mpu6050, false);
+        mpu6050_set_int_zero_motion(&mpu6050, false);
+
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -389,6 +360,7 @@ void setup()
     adc_init();
     adc_set_temp_sensor_enabled(true);
     set_mux_pins(analog_mux_s0, analog_mux_s1, analog_mux_s2, analog_mux_s3, analog_mux_io);
+    check_bool(init_mpu6050(), RT_HARD_CHECK);
 
     // MotorSafety init
     r_motors_safety.configure_safety(motor_single_side_max_difference, motor_set_vs_actual_max_difference, motor_safety_trigger_timeout, &motor_safety_callback);
@@ -417,7 +389,7 @@ void setup1()
     ultrasonic_ir_edge_rt_active = true;
     alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, edge_ir_pub_rt_interval, publish_edge_ir, NULL, &edge_ir_publish_rt);
     alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, ultra_pub_rt_interval, publish_ultra, NULL, &ultrasonic_publish_rt);
-    alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, sensors_pub_rt_interval, publish_other_sensors_timer_callback, NULL, &other_sensors_publish_rt);
+    alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, sensors_pub_rt_interval, publish_misc_sens, NULL, &other_sensors_publish_rt);
 }
 
 

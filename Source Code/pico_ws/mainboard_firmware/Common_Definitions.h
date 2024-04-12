@@ -19,6 +19,7 @@
 
 #pragma once
 #include <limits>
+#include <diagnostic_msgs/msg/diagnostic_status.h>
 
 
 // ------- Pin definitions -------
@@ -35,7 +36,13 @@
 #define INF         std::numeric_limits<float>::infinity()
 #define N_INF       INF * -1
 
-// ---- RCL return checker modes ----
-#define RCL_HARD_CHECK      0
-#define RCL_SOFT_CHECK      1
-#define RCL_LOG_ONLY_CHECK  2
+// ---- Return checker modes ----
+#define RT_HARD_CHECK      0
+#define RT_SOFT_CHECK      1
+#define RT_LOG_ONLY_CHECK  2
+
+// ---- Diagnostics message levels ----
+#define DIAG_LVL_OK  diagnostic_msgs__msg__DiagnosticStatus__OK
+#define DIAG_LVL_WARN  diagnostic_msgs__msg__DiagnosticStatus__WARN
+#define DIAG_LVL_ERROR  diagnostic_msgs__msg__DiagnosticStatus__ERROR
+#define DIAG_LVL_STALE  diagnostic_msgs__msg__DiagnosticStatus__STALE

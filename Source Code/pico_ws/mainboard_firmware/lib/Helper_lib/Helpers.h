@@ -34,6 +34,7 @@
 #define INPUT_PULLUP    4
 #define INPUT_PULLDOWN  5
 #define INPUT_ADC       6
+#define PROT_I2C        7
 
 // ---- Pin state ----
 #define HIGH  1

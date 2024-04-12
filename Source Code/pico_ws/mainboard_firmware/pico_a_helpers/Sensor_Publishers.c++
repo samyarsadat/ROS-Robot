@@ -24,9 +24,11 @@
 #include "uROS_Init.h"
 #include "IO_Helpers_Ultrasonic.h"
 #include "IO_Helpers_Edge.h"
+#include "haw/MPU6050.h"
 #include "lib/Helper_lib/Helpers.h"
 #include <std_msgs/msg/string.h>
 #include <geometry_msgs/msg/twist.h>
+#include <geometry_msgs/msg/vector3.h>
 #include <sensor_msgs/msg/range.h>
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
@@ -36,10 +38,18 @@
 
 
 
+// ------- Variables ------- 
+
+// ---- MPU6050 object ----
+extern mpu6050_t mpu6050;
+
+
+
 // ------- Functions ------- 
 
 // ---- RCL return checker prototype ----
 extern bool check_rc(rcl_ret_t rctc, uint mode);
+extern bool check_bool(bool function, uint mode);
 
 
 // ---- Publish ultrasonic sensor data ----
@@ -59,7 +69,7 @@ bool publish_ultra(struct repeating_timer *rt)
     ultrasonic_sensor_msg.ultrasonic_r_reading = get_ultra_dist_mux(right_ultra_trig_mux, right_ultra_echo_mux, DIAG_HWID_ULTRASONIC_R);
     ultrasonic_sensor_msg.ultrasonic_l_reading = get_ultra_dist_mux(left_ultra_trig_mux, left_ultra_echo_mux, DIAG_HWID_ULTRASONIC_L);
 
-    check_rc(rcl_publish(&ultrasonic_sensor_pub, &ultrasonic_sensor_msg, NULL), RCL_SOFT_CHECK);
+    check_rc(rcl_publish(&ultrasonic_sensor_pub, &ultrasonic_sensor_msg, NULL), RT_SOFT_CHECK);
     return true;
 }
 
@@ -90,7 +100,7 @@ bool publish_edge_ir(struct repeating_timer *rt)
     falloff_sensor_msg.ir_edge_sens_back_trig[2] = readings[6];
     falloff_sensor_msg.ir_edge_sens_back_trig[3] = readings[7];
 
-    check_rc(rcl_publish(&falloff_sensor_pub, &falloff_sensor_msg, NULL), RCL_SOFT_CHECK);
+    check_rc(rcl_publish(&falloff_sensor_pub, &falloff_sensor_msg, NULL), RT_SOFT_CHECK);
     return true;
 }
 
@@ -104,9 +114,28 @@ bool publish_misc_sens(struct repeating_timer *rt)
     misc_sensor_msg.time.sec = timestamp_sec;
     misc_sensor_msg.time.nanosec = timestamp_nanosec;
     misc_sensor_msg.wheelbase_mm = wheelbase;
-    
     misc_sensor_msg.cpu_temp = get_rp2040_temp();
-    misc_sensor_msg;
+    misc_sensor_msg.env_humidity = -1.0f;
+    misc_sensor_msg.env_temp = -1.0f;
+
+
+    // MPU6050 IMU
+    check_bool(mpu6050_event(&mpu6050) == 1, RT_SOFT_CHECK);
+    mpu6050_vectorf_t *mpu_accel = mpu6050_get_accelerometer(&mpu6050);
+    mpu6050_vectorf_t *mpu_gyro = mpu6050_get_gyroscope(&mpu6050);
+    mpu6050_activity_t *interrupts = mpu6050_read_activities(&mpu6050);
+    geometry_msgs__msg__Vector3 accel, gyro;
+    accel.x = mpu_accel->x;
+    accel.y = mpu_accel->y;
+    accel.z = mpu_accel->z;
+    gyro.x = mpu_gyro->x;
+    gyro.y = mpu_gyro->y;
+    gyro.z = mpu_gyro->z;
+    
+    misc_sensor_msg.imu_accel = accel;
+    misc_sensor_msg.imu_gyro = gyro;
+    misc_sensor_msg.imu_freefall_int = (interrupts->isFreefall == 1);
+    misc_sensor_msg.imu_temp = mpu6050_get_temperature_c(&mpu6050);
 
     return true;
 }
