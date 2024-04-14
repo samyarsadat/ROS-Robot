@@ -26,27 +26,24 @@
 #include "Definitions.h"
 #include <diagnostic_msgs/msg/diagnostic_status.h>
 #include <diagnostic_msgs/msg/key_value.h>
+#include "Local_Helpers.h"
 
 
 
 // ------- Functions ------- 
-
-// ---- Diagnostics reporting function prototype ----
-extern void publish_diag_report(uint8_t level, char *hw_source, char *hw_name, char *hw_id, char *msg, diagnostic_msgs__msg__KeyValue *key_values);
-
 
 // ---- (INTERNAL) Checks whether the measured distance is within limits ----
 float check_return_distance(float dist, char *ultra_hwid)
 {
     if (dist < ultra_min_dist)
     {
-        publish_diag_report(DIAG_LVL_WARN, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_ULTRASONICS, ultra_hwid, DIAG_WARN_MSG_ULTRA_MIN_LIM_EXCEED, NULL);
+        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_ULTRASONICS, ultra_hwid, DIAG_WARN_MSG_ULTRA_MIN_LIM_EXCEED, NULL);
         return N_INF;
     }
 
     else if (dist > ultra_max_dist)
     {
-        publish_diag_report(DIAG_LVL_WARN, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_ULTRASONICS, ultra_hwid, DIAG_WARN_MSG_ULTRA_MAX_LIM_EXCEED, NULL);
+        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_ULTRASONICS, ultra_hwid, DIAG_WARN_MSG_ULTRA_MAX_LIM_EXCEED, NULL);
         return INF;
     }
 

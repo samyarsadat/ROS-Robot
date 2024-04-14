@@ -2,8 +2,9 @@
 This folder contains the source code (firmware) for the two Raspberry Pi Picos that are on the robot's main board.<br>
 The firmware is written in C++ and uses the micro-ROS library to handle communications.<br>
 Pre-built binaries can be found in the `build` directory.<br>
-
 <br>
+
+**_TODO: Move to using C++ Vectors instead of using C-style arrays._**
 
 ## Important Note #1:
 _The motor encoder implementation may look unconventional compared to other robots.<br>

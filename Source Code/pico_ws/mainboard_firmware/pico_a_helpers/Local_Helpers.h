@@ -42,4 +42,4 @@ bool check_rc(rcl_ret_t rctc, uint mode);
 bool check_bool(bool function, uint mode);
 
 // ---- Diagnostics error reporting ----
-void publish_diag_report(uint8_t level, char *hw_source, char *hw_name, char *hw_id, char *msg, diagnostic_msgs__msg__KeyValue *key_values);
+void publish_diag_report(uint8_t level, char *hw_name, char *hw_id, char *msg, diagnostic_msgs__msg__KeyValue *key_values);

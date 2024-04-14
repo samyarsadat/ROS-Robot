@@ -20,12 +20,6 @@
 #pragma once
 
 
-// ------- Diagnostics Sources -------
-#define DIAG_SOURCE_MAIN_BOARD   (char*) "main_board"
-#define DIAG_SOURCE_MOTOR_BOARD  (char*) "motor_board"
-#define DIAG_SOURCE_POWER_BOARD  (char*) "power_board"
-
-
 // ------- Diagnostics Hardware Names -------
 #define DIAG_HWNAME_MOTOR_CTRL_L   (char*) "motor_control_left"
 #define DIAG_HWNAME_MOTOR_CTRL_R   (char*) "motor_control_right"

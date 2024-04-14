@@ -113,11 +113,12 @@ rrp_pico_coms__srv__SetPidTunings_Response set_mtr_pid_tunings_res;
 
 // ------- Subscriber & service callback prototypes -------
 extern void cmd_vel_call(const void *msgin);
-extern void clean_shutdown(const void *msgin);
 extern void en_motor_ctrl_callback(const void *req, void *res);
 extern void en_emitters_callback(const void *req, void *res);
 extern void en_relay_callback(const void *req, void *res);
 extern void set_mtr_pid_tunings_callback(const void *req, void *res);
+extern void clean_shutdown();
+void clean_shutdown_callback(const void *msgin) { clean_shutdown(); }
 
 
 
@@ -193,7 +194,7 @@ void exec_init()
 
     check_rc(rclc_executor_init(&rc_executor, &rc_supp.context, num_handles, &rc_alloc), RT_HARD_CHECK);
     check_rc(rclc_executor_add_subscription(&rc_executor, &cmd_vel_sub, &cmd_vel_msg, &cmd_vel_call, ON_NEW_DATA), RT_HARD_CHECK);
-    check_rc(rclc_executor_add_subscription(&rc_executor, &e_stop_sub, &e_stop_msg, &clean_shutdown, ON_NEW_DATA), RT_HARD_CHECK);
+    check_rc(rclc_executor_add_subscription(&rc_executor, &e_stop_sub, &e_stop_msg, &clean_shutdown_callback, ON_NEW_DATA), RT_HARD_CHECK);
     check_rc(rclc_executor_add_service(&rc_executor, &en_motor_ctrl_srv, &en_motor_ctrl_req, &en_motor_ctrl_res, en_motor_ctrl_callback), RT_HARD_CHECK);
     check_rc(rclc_executor_add_service(&rc_executor, &en_emitters_srv, &en_emitters_req, &en_emitters_res, en_emitters_callback), RT_HARD_CHECK);
     check_rc(rclc_executor_add_service(&rc_executor, &en_relay_srv, &en_relay_req, &en_relay_res, en_relay_callback), RT_HARD_CHECK);

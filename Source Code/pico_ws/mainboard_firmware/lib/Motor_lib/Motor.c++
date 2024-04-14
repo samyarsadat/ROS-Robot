@@ -41,6 +41,8 @@ Motor::Motor(MotorDriver* drv, MotorEncoder* encs[], int number_of_encoders)
     Motor::set_control_mode(control_mode::BLIND);
     Motor::set_motor_direction(motor_direction::FORWARD);
 
+    // TODO: Check the actual size of encs[], and do something if it's larger than max_number_of_encoders.
+    // TODO: Preferably use dynamic memory allocation instead of having a pre-defined max_number_of_encoders.
     if (number_of_encoders <= max_number_of_encoders)
     {
         driver = drv;
@@ -369,4 +371,19 @@ MotorEncoder** Motor::get_encs_array()
 int Motor::get_num_defined_encs()
 {
     return number_of_encoders_defined;
+}
+
+
+/*  Returns the PID controller's output variable.
+ *  This is for diagnostic purposes.
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    float: PID output
+ */
+float Motor::get_pid_output()
+{
+    return pid_output;
 }

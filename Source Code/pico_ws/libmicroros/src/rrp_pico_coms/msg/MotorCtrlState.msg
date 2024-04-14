@@ -22,7 +22,7 @@ builtin_interfaces/Time time
 # ---- Encoder Measurements ----
 float32[] measured_rpms
 bool[] measured_dirs       # true:forwards, false:backwards
-uint64[] total_enc_counts  # Total number of counted encoder pulses
+int32[] total_enc_counts   # Total number of counted encoder pulses; TODO: Better explanation.
 
 # ---- Encoder Specs ----
 int16 encoder_pulses_per_rotation  # Number of encoder pulses per rotation of the motor shaft, NOT THE WHEEL!
@@ -30,7 +30,7 @@ int16 wheel_diameter_mm            # Wheel diameter in millimeters.
 float32 motor_gear_ratio_fl        # Motor gearbox ratio (ex. 80/1).
 
 # ---- Set Targets ----
-uint16 target_rpm
+float32 target_rpm
 bool target_dir  # true:forwards, false:backwards
 
 # ---- PID ----

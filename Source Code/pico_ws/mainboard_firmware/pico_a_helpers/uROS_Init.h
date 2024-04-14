@@ -118,4 +118,4 @@ void init_subs_pubs();
 void exec_init();
 
 // ---- Node init ----
-void uros_init(const char * node_name, const char * name_space);
+void uros_init(const char *node_name, const char *name_space);

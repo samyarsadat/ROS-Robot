@@ -112,3 +112,7 @@
 #define wheelbase                       140.0f                  // In millimeters
 #define wheel_circumference             (PI * wheel_diameter)   // In millimeters
 #define enc_pulses_per_meter_of_travel  (1000 / wheel_circumference) * (motor_gear_ratio * enc_pulses_per_rotation)
+
+// ---- Frame IDs ----
+#define odom_frame_id       (char *) "odom"
+#define base_link_frame_id  (char *) "base_link"

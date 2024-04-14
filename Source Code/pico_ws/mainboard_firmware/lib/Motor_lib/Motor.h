@@ -128,6 +128,10 @@ class Motor
         // (i.e. number of encoder object pointers in the encoders array)
         // This is used by the MotorSafety module.
         int get_num_defined_encs();
+
+        // Returns the PID controller's output variable.
+        // This is for diagnostic purposes.
+        float get_pid_output();
         
 
     private:

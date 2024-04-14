@@ -34,8 +34,8 @@
 // Note: clean_shutdown() must be defines elsewhere!
 // Note: publish_diag_report() must be defines elsewhere!
 
-extern void clean_shutdown(const void *msgin);
-extern void publish_diag_report(uint8_t level, char *hw_source, char *hw_name, char *hw_id, char *msg, diagnostic_msgs__msg__KeyValue *key_values);
+extern void clean_shutdown();
+void publish_diag_report(uint8_t level, char *hw_name, char *hw_id, char *msg, diagnostic_msgs__msg__KeyValue *key_values);
 
 // --- RCL return checker ---
 bool check_rc(rcl_ret_t rctc, uint mode)
@@ -45,11 +45,12 @@ bool check_rc(rcl_ret_t rctc, uint mode)
         switch (mode)
         {
             case RT_HARD_CHECK:
-                clean_shutdown(NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_UROS, DIAG_HWID_UROS, DIAG_ERR_MSG_UROS_RC_CHECK_FAIL, NULL);
+                clean_shutdown();
                 break;
 
             case RT_SOFT_CHECK:
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_UROS, DIAG_HWID_UROS, DIAG_ERR_MSG_UROS_RC_CHECK_FAIL, NULL);
+                publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UROS, DIAG_HWID_UROS, DIAG_WARN_MSG_UROS_RC_CHECK_FAIL, NULL);
                 return false;
                 break;
             
@@ -75,11 +76,12 @@ bool check_bool(bool function, uint mode)
         switch (mode)
         {
             case RT_HARD_CHECK:
-                clean_shutdown(NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_ERR_MSG_BOOL_RT_CHECK_FAIL, NULL);
+                clean_shutdown();
                 break;
 
             case RT_SOFT_CHECK:
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_UROS, DIAG_HWID_UROS, DIAG_ERR_MSG_UROS_RC_CHECK_FAIL, NULL);
+                publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_BOOL_RT_CHECK_FAIL, NULL);
                 break;
             
             case RT_LOG_ONLY_CHECK:
@@ -96,9 +98,9 @@ bool check_bool(bool function, uint mode)
 
 
 // ---- Diagnostics error reporting ----
-void publish_diag_report(uint8_t level, char *hw_source, char *hw_name, char *hw_id, char *msg, diagnostic_msgs__msg__KeyValue *key_values)
+void publish_diag_report(uint8_t level, char *hw_name, char *hw_id, char *msg, diagnostic_msgs__msg__KeyValue *key_values)
 {
-    sprintf(diagnostics_msg.name.data, "%s/%s", hw_source, hw_name);
+    diagnostics_msg.name.data = hw_name;
     diagnostics_msg.name.size = strlen(diagnostics_msg.name.data);
     diagnostics_msg.hardware_id.data = hw_id;
     diagnostics_msg.hardware_id.size = strlen(diagnostics_msg.hardware_id.data);
@@ -114,5 +116,12 @@ void publish_diag_report(uint8_t level, char *hw_source, char *hw_name, char *hw
         diagnostics_msg.values.size = sizeof(key_values) / sizeof(key_values[0]);
     }
 
-    check_rc(rcl_publish(&diagnostics_pub, &diagnostics_msg, NULL), RT_HARD_CHECK);
+    /* 
+        The return value of rcl_publish() is intentionally not checked here to prevent infinite recursion of publish_diag_report().
+        This edge case may occur if MicroROS is not initialized properly when check_rc() is called 
+        (this could happen if check_rc() fails for rclc_node_init_default(), for example).
+        In this case, this publish function would also not return RCL_RET_OK, resulting in its
+        check_rc() calling publish_diag_report() and then the same thing happening over and over again.
+    */
+    rcl_publish(&diagnostics_pub, &diagnostics_msg, NULL);
 }

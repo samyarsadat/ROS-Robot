@@ -49,6 +49,9 @@
 #include "pico_a_helpers/Local_Helpers.h"
 #include "uart_transport/pico_uart_transports.h"
 #include <rmw_microros/rmw_microros.h>
+#include <iterator>
+#include <vector>
+#include <cmath>
 
 
 
@@ -61,6 +64,11 @@ alarm_pool_t *core_1_alarm_pool;
 
 // ---- Loop time ----
 uint32_t loop_time, loop_1_time;
+
+// ---- Motor encoder counter storage ----
+int32_t enc_r_count_old, enc_l_count_old, total_enc_avg_travel;
+int32_t enc_odom_x_pos, enc_odom_y_pos;
+float theta;
 
 // ---- Timers ----
 bool ultrasonic_ir_edge_rt_active = false;
@@ -99,7 +107,7 @@ MotorSafety l_motors_safety(&l_motors, left_motor_controller_id);
 // ------- Functions ------- 
 
 // ---- Graceful shutdown ----
-void clean_shutdown(const void *msgin)
+void clean_shutdown()
 {
     // Stop all repeating timers
     cancel_repeating_timer(&motor_odom_rt);
@@ -167,6 +175,7 @@ void motor_safety_callback(MotorSafety::safety_trigger_conditions condition, int
 {
     if (!self_test_mode)
     {
+        // TODO: This could cause the motors to jitter back and forth if a cooldown period is not added!
         if (condition == MotorSafety::safety_trigger_conditions::SET_VS_ACTUAL_DIR_DIFF)
         {
             if (id == right_motor_controller_id)
@@ -184,19 +193,19 @@ void motor_safety_callback(MotorSafety::safety_trigger_conditions condition, int
         {
             if (id == right_motor_controller_id)
             {
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_DRV_R, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R1, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R2, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_DRV_R, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R1, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R2, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
             }
             
             else
             {
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_DRV_L, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L1, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_SOURCE_MAIN_BOARD, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L2, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_DRV_L, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L1, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L2, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
             }
 
-            clean_shutdown(NULL);
+            clean_shutdown();  // This is a critical failure, so we'll call the shutdown functions without waiting for an e-stop signal.
         }
     }
 }
@@ -304,6 +313,156 @@ void cmd_vel_call(const void *msgin)
 
 // ------- Main program -------
 
+// ---- Publish motor controller data ----
+void publish_motor_ctrl_data()
+{
+    uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
+    uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;
+    bool temp_bool_array[2];
+    float temp_float_array[2];
+    int32_t temp_int_array[2];
+    
+    mtr_ctrl_r_state_msg.time.sec = timestamp_sec;
+    mtr_ctrl_r_state_msg.time.nanosec = timestamp_nanosec;
+    mtr_ctrl_l_state_msg.time.sec = timestamp_sec;
+    mtr_ctrl_l_state_msg.time.nanosec = timestamp_nanosec;
+
+    // RIGHT
+    temp_bool_array[0] = (r_motor_1_enc.get_direction() == MotorEncoder::FORWARD);
+    temp_bool_array[1] = (r_motor_2_enc.get_direction() == MotorEncoder::FORWARD);
+    mtr_ctrl_r_state_msg.measured_dirs.data = temp_bool_array;
+    mtr_ctrl_r_state_msg.measured_dirs.size = sizeof(mtr_ctrl_r_state_msg.measured_dirs.data);
+
+    temp_float_array[0] = r_motor_1_enc.get_rpm();
+    temp_float_array[1] = r_motor_2_enc.get_rpm();
+    mtr_ctrl_r_state_msg.measured_rpms.data = temp_float_array;
+    mtr_ctrl_r_state_msg.measured_rpms.size = sizeof(mtr_ctrl_r_state_msg.measured_rpms.data);
+
+    temp_int_array[0] = r_motor_1_enc.get_pulse_counter();
+    temp_int_array[1] = r_motor_2_enc.get_pulse_counter();
+    mtr_ctrl_r_state_msg.total_enc_counts.data = temp_int_array;
+    mtr_ctrl_r_state_msg.total_enc_counts.size = sizeof(mtr_ctrl_r_state_msg.total_enc_counts.data);
+
+    mtr_ctrl_r_state_msg.motor_gear_ratio_fl = motor_gear_ratio;
+    mtr_ctrl_r_state_msg.pid_output = (int) r_motors.get_pid_output();
+    mtr_ctrl_r_state_msg.target_dir = (r_motors.get_set_motor_direction() == Motor::FORWARD);
+    mtr_ctrl_r_state_msg.target_rpm = r_motors.get_pid_ctrl_speed();
+    
+    mtr_ctrl_r_state_msg.pid_cals[0] = r_motors.pid->GetKp();
+    mtr_ctrl_r_state_msg.pid_cals[1] = r_motors.pid->GetKi();
+    mtr_ctrl_r_state_msg.pid_cals[2] = r_motors.pid->GetKd();
+    mtr_ctrl_r_state_msg.encoder_pulses_per_rotation = enc_pulses_per_rotation;
+    mtr_ctrl_r_state_msg.wheel_diameter_mm = wheel_diameter;
+
+    mtr_ctrl_r_state_msg.total_current = 0;            // TODO: Sensor not installed (for V2)
+    mtr_ctrl_r_state_msg.driver_out_voltage = -1.0f;   // TODO: Sensor not installed (for V2)
+
+    // LEFT
+    temp_bool_array[0] = (l_motor_1_enc.get_direction() == MotorEncoder::FORWARD);
+    temp_bool_array[1] = (l_motor_2_enc.get_direction() == MotorEncoder::FORWARD);
+    mtr_ctrl_l_state_msg.measured_dirs.data = temp_bool_array;
+    mtr_ctrl_l_state_msg.measured_dirs.size = sizeof(mtr_ctrl_l_state_msg.measured_dirs.data);
+
+    temp_float_array[0] = l_motor_1_enc.get_rpm();
+    temp_float_array[1] = l_motor_2_enc.get_rpm();
+    mtr_ctrl_l_state_msg.measured_rpms.data = temp_float_array;
+    mtr_ctrl_l_state_msg.measured_rpms.size = sizeof(mtr_ctrl_l_state_msg.measured_rpms.data);
+
+    temp_int_array[0] = l_motor_1_enc.get_pulse_counter();
+    temp_int_array[1] = l_motor_2_enc.get_pulse_counter();
+    mtr_ctrl_l_state_msg.total_enc_counts.data = temp_int_array;
+    mtr_ctrl_l_state_msg.total_enc_counts.size = sizeof(mtr_ctrl_l_state_msg.total_enc_counts.data);
+
+    mtr_ctrl_l_state_msg.motor_gear_ratio_fl = motor_gear_ratio;
+    mtr_ctrl_l_state_msg.pid_output = (int) l_motors.get_pid_output();
+    mtr_ctrl_l_state_msg.target_dir = (l_motors.get_set_motor_direction() == Motor::FORWARD);
+    mtr_ctrl_l_state_msg.target_rpm = l_motors.get_pid_ctrl_speed();
+    
+    mtr_ctrl_l_state_msg.pid_cals[0] = l_motors.pid->GetKp();
+    mtr_ctrl_l_state_msg.pid_cals[1] = l_motors.pid->GetKi();
+    mtr_ctrl_l_state_msg.pid_cals[2] = l_motors.pid->GetKd();
+    mtr_ctrl_l_state_msg.encoder_pulses_per_rotation = enc_pulses_per_rotation;
+    mtr_ctrl_l_state_msg.wheel_diameter_mm = wheel_diameter;
+
+    mtr_ctrl_l_state_msg.total_current = 0;            // TODO: Sensor not installed (for V2)
+    mtr_ctrl_l_state_msg.driver_out_voltage = -1.0f;   // TODO: Sensor not installed (for V2)
+
+    check_rc(rcl_publish(&mtr_ctrl_l_state_pub, &mtr_ctrl_l_state_msg, NULL), RT_SOFT_CHECK);
+}
+
+
+// ---- Publish odometry and transform ----
+void publish_odom_tf()
+{
+    uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
+    uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;
+
+    int32_t r_enc_counts = r_motors.get_avg_enc_pulse_count();
+    int32_t l_enc_counts = l_motors.get_avg_enc_pulse_count();
+
+    int16_t r_enc_diff = r_enc_counts - enc_r_count_old;
+    int16_t l_enc_diff = l_enc_counts - enc_l_count_old;
+    enc_r_count_old = r_enc_counts;
+    enc_l_count_old = l_enc_counts;
+
+    // Convert to millimeters
+    int32_t r_enc_mm = (int) (r_enc_counts / (enc_pulses_per_rotation * motor_gear_ratio)) * wheel_circumference;
+    int32_t l_enc_mm = (int) (l_enc_counts / (enc_pulses_per_rotation * motor_gear_ratio)) * wheel_circumference;
+    float r_enc_diff_mm = ((r_enc_counts - enc_r_count_old) / (enc_pulses_per_rotation * motor_gear_ratio)) * wheel_circumference;
+    float l_enc_diff_mm = ((l_enc_counts - enc_l_count_old) / (enc_pulses_per_rotation * motor_gear_ratio)) * wheel_circumference;
+
+    // Calculate the total distance travelled by taking the average of both sides (in millimeters)
+    int32_t enc_avg_travel_diff = (int) (r_enc_diff_mm + l_enc_diff_mm) / 2;
+    total_enc_avg_travel += enc_avg_travel_diff;
+
+    // Calculate rotation
+    theta += (r_enc_diff_mm - l_enc_diff_mm) / 360;
+    if (theta > PI) { theta -= TAU; }
+    else if (theta < (-PI)) { theta += TAU; }
+    
+    // Calculate X and Y (in millimeters)
+    enc_odom_x_pos += (int) enc_avg_travel_diff * cos(theta);
+    enc_odom_y_pos += (int) enc_avg_travel_diff * sin(theta);
+
+    // Rotation quaternion
+    geometry_msgs__msg__Quaternion rot_quat;
+    rot_quat.z = theta;
+
+    // Odometry
+    enc_odom_msg.header.stamp.sec = timestamp_sec;
+    enc_odom_msg.header.stamp.nanosec = timestamp_nanosec;
+    enc_odom_msg.header.frame_id.data = odom_frame_id;
+    enc_odom_msg.header.frame_id.size = sizeof(enc_odom_msg.header.frame_id.data);
+    enc_odom_msg.child_frame_id.data = base_link_frame_id;
+    enc_odom_msg.child_frame_id.size = sizeof(enc_odom_msg.child_frame_id.data);
+
+    enc_odom_msg.pose.pose.position.x = enc_odom_x_pos / 1000;   // Convert to meters
+    enc_odom_msg.pose.pose.position.y = enc_odom_y_pos / 1000;   // Convert to meters
+    enc_odom_msg.pose.pose.position.z = 0.0;
+    enc_odom_msg.pose.pose.orientation = rot_quat;
+    enc_odom_msg.twist.twist.linear.x = (r_motors.get_avg_rpm() + l_motors.get_avg_rpm()) / 2;   // Linear velocity
+    enc_odom_msg.twist.twist.linear.y = 0.0;
+    enc_odom_msg.twist.twist.angular.z = ((r_enc_diff_mm - l_enc_diff_mm) / 360) * 100;          // Anglular velocity
+
+    // Odom -> base_link transform
+    odom_baselink_tf_msg.header.stamp.sec = timestamp_sec;
+    odom_baselink_tf_msg.header.stamp.nanosec = timestamp_nanosec;
+    odom_baselink_tf_msg.header.frame_id.data = odom_frame_id;
+    odom_baselink_tf_msg.header.frame_id.size = sizeof(odom_baselink_tf_msg.header.frame_id.data);
+    odom_baselink_tf_msg.child_frame_id.data = base_link_frame_id;
+    odom_baselink_tf_msg.child_frame_id.size = sizeof(odom_baselink_tf_msg.child_frame_id.data);
+
+    odom_baselink_tf_msg.transform.translation.x = enc_odom_x_pos;
+    odom_baselink_tf_msg.transform.translation.y = enc_odom_y_pos;
+    odom_baselink_tf_msg.transform.translation.z = 0;
+    odom_baselink_tf_msg.transform.rotation = rot_quat;
+
+    // Publish
+    check_rc(rcl_publish(&enc_odom_pub, &enc_odom_msg, NULL), RT_SOFT_CHECK);
+    check_rc(rcl_publish(&odom_baselink_tf_pub, &odom_baselink_tf_msg, NULL), RT_SOFT_CHECK);
+}
+
+
 // ----- Timer tasks -----
 bool motor_control_and_odom_timer_callback(struct repeating_timer *rt)
 {
@@ -311,8 +470,8 @@ bool motor_control_and_odom_timer_callback(struct repeating_timer *rt)
     r_motors.compute_outputs();
     l_motors.compute_outputs();
 
-    // Calculate and publish odometry data
-    enc_odom_msg.twist.twist.linear.x;
+    publish_motor_ctrl_data();   // Publish motor controller data
+    publish_odom_tf();           // Calculate and publish odometry data
 
     return true;
 }
@@ -342,6 +501,7 @@ bool init_mpu6050()
         return true;
     }
 
+    publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_ENV_SENSORS, DIAG_HWID_ENV_IMU, DIAG_ERR_MSG_INIT_FAILED, NULL);
     return false;
 }
 
@@ -360,7 +520,6 @@ void setup()
     adc_init();
     adc_set_temp_sensor_enabled(true);
     set_mux_pins(analog_mux_s0, analog_mux_s1, analog_mux_s2, analog_mux_s3, analog_mux_io);
-    check_bool(init_mpu6050(), RT_HARD_CHECK);
 
     // MotorSafety init
     r_motors_safety.configure_safety(motor_single_side_max_difference, motor_set_vs_actual_max_difference, motor_safety_trigger_timeout, &motor_safety_callback);
@@ -382,8 +541,11 @@ void setup()
 // ---- Setup function (Runs once on core 1) ----
 void setup1()
 {
+    // MPU init
+    check_bool(init_mpu6050(), RT_HARD_CHECK);
+
     // Create alarm pool for core 1 timers
-    core_1_alarm_pool = alarm_pool_create(4, 16);
+    core_1_alarm_pool = alarm_pool_create(4, 3);
 
     // Repeating timers
     ultrasonic_ir_edge_rt_active = true;
@@ -400,7 +562,7 @@ void loop()
 
     if (time_us_32() - loop_time > loop_time_max)
     {
-        clean_shutdown(NULL);
+        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_LOOP_OVERTIME, NULL);
     }
 }
 
@@ -412,7 +574,7 @@ void loop1()
 
     if (time_us_32() - loop_1_time > loop_1_time_max)
     {
-        clean_shutdown(NULL);
+        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_LOOP_OVERTIME, NULL);
     }
 }
 

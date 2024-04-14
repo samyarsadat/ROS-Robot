@@ -47,7 +47,7 @@ extern mpu6050_t mpu6050;
 
 // ------- Functions ------- 
 
-// ---- RCL return checker prototype ----
+// ---- Return checkers ----
 extern bool check_rc(rcl_ret_t rctc, uint mode);
 extern bool check_bool(bool function, uint mode);
 
@@ -115,27 +115,27 @@ bool publish_misc_sens(struct repeating_timer *rt)
     misc_sensor_msg.time.nanosec = timestamp_nanosec;
     misc_sensor_msg.wheelbase_mm = wheelbase;
     misc_sensor_msg.cpu_temp = get_rp2040_temp();
-    misc_sensor_msg.env_humidity = -1.0f;
-    misc_sensor_msg.env_temp = -1.0f;
-
+    misc_sensor_msg.env_humidity = -1.0f;   // TODO: Sensor will be installed later.
+    misc_sensor_msg.env_temp = -1.0f;       // TODO: Sensor will be installed later.
 
     // MPU6050 IMU
-    check_bool(mpu6050_event(&mpu6050) == 1, RT_SOFT_CHECK);
-    mpu6050_vectorf_t *mpu_accel = mpu6050_get_accelerometer(&mpu6050);
-    mpu6050_vectorf_t *mpu_gyro = mpu6050_get_gyroscope(&mpu6050);
-    mpu6050_activity_t *interrupts = mpu6050_read_activities(&mpu6050);
-    geometry_msgs__msg__Vector3 accel, gyro;
-    accel.x = mpu_accel->x;
-    accel.y = mpu_accel->y;
-    accel.z = mpu_accel->z;
-    gyro.x = mpu_gyro->x;
-    gyro.y = mpu_gyro->y;
-    gyro.z = mpu_gyro->z;
-    
-    misc_sensor_msg.imu_accel = accel;
-    misc_sensor_msg.imu_gyro = gyro;
-    misc_sensor_msg.imu_freefall_int = (interrupts->isFreefall == 1);
-    misc_sensor_msg.imu_temp = mpu6050_get_temperature_c(&mpu6050);
+    if (check_bool(mpu6050_event(&mpu6050) == 1, RT_SOFT_CHECK))
+    {
+        mpu6050_vectorf_t *mpu_accel = mpu6050_get_accelerometer(&mpu6050);
+        mpu6050_vectorf_t *mpu_gyro = mpu6050_get_gyroscope(&mpu6050);
+        mpu6050_activity_t *interrupts = mpu6050_read_activities(&mpu6050);
+        
+        misc_sensor_msg.imu_accel.x = mpu_accel->x;
+        misc_sensor_msg.imu_accel.y = mpu_accel->y;
+        misc_sensor_msg.imu_accel.z = mpu_accel->z;
+        misc_sensor_msg.imu_gyro.x = mpu_gyro->x;
+        misc_sensor_msg.imu_gyro.y = mpu_gyro->y;
+        misc_sensor_msg.imu_gyro.z = mpu_gyro->z;
 
+        misc_sensor_msg.imu_freefall_int = (interrupts->isFreefall == 1);
+        misc_sensor_msg.imu_temp = mpu6050_get_temperature_c(&mpu6050);
+    }
+
+    check_rc(rcl_publish(&misc_sensor_pub, &misc_sensor_msg, NULL), RT_SOFT_CHECK);
     return true;
 }

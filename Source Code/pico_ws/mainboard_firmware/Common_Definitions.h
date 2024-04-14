@@ -32,6 +32,7 @@
 
 // ---- Misc. ----
 #define PI          3.141f
+#define TAU         2 * PI
 #define CHECK_FLAG  1687
 #define INF         std::numeric_limits<float>::infinity()
 #define N_INF       INF * -1
