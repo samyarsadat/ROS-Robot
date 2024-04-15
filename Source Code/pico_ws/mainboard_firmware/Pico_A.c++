@@ -445,6 +445,7 @@ void publish_odom_tf()
     enc_odom_msg.twist.twist.angular.z = ((r_enc_diff_mm - l_enc_diff_mm) / 360) * 100;          // Anglular velocity
 
     // Odom -> base_link transform
+    // TODO: TRANSFORMS SHOULD BE BROADCAST, NOT PUBLISHED! (will require geometry2/tf2)
     odom_baselink_tf_msg.header.stamp.sec = timestamp_sec;
     odom_baselink_tf_msg.header.stamp.nanosec = timestamp_nanosec;
     odom_baselink_tf_msg.header.frame_id.data = odom_frame_id;
