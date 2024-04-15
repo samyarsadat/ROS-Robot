@@ -62,8 +62,8 @@ bool halt_core_0 = false;
 bool self_test_mode = false;
 alarm_pool_t *core_1_alarm_pool;
 
-// ---- Loop time ----
-uint32_t loop_time, loop_1_time;
+// ---- Timer execution times storage (milliseconds) ----
+uint32_t last_motor_odom_time, last_ultrasonic_publish_time, last_edge_ir_publish_time, last_other_sensors_publish_time;
 
 // ---- Motor encoder counter storage ----
 int32_t enc_r_count_old, enc_l_count_old, total_enc_avg_travel;
@@ -466,6 +466,15 @@ void publish_odom_tf()
 // ----- Timer tasks -----
 bool motor_control_and_odom_timer_callback(struct repeating_timer *rt)
 {
+    // Check execution time
+    uint16_t exec_time_ms = (time_us_32() / 1000) - last_motor_odom_time;   // TODO: Log this.
+    last_motor_odom_time = time_us_32() / 1000;
+    
+    if (exec_time_ms > (motor_odom_rt_interval + 10)) 
+    { 
+        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
+    }
+
     // Calculate and set motor outputs
     r_motors.compute_outputs();
     l_motors.compute_outputs();
@@ -555,30 +564,6 @@ void setup1()
 }
 
 
-// ---- Main loop (Runs forever on core 0) ----
-void loop()
-{
-    loop_time = time_us_32();
-
-    if (time_us_32() - loop_time > loop_time_max)
-    {
-        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_LOOP_OVERTIME, NULL);
-    }
-}
-
-
-// ---- Main loop (Runs forever on core 1) ----
-void loop1()
-{
-    loop_1_time = time_us_32();
-
-    if (time_us_32() - loop_1_time > loop_1_time_max)
-    {
-        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_LOOP_OVERTIME, NULL);
-    }
-}
-
-
 
 // ******** END OF MAIN PROGRAM *********
 // *********** STARTUP & INIT ***********
@@ -588,11 +573,8 @@ void main_core_1()
 {
     setup1();
 
-    // Start core 1 loop
-    while (true)
-    {
-        loop1();
-    }
+    // Core 1 loop
+    while (true);   // All core 1 functions run on timers. Nothing needs to be run in a loop.
 }
 
 
@@ -618,11 +600,8 @@ int main()
 
     gpio_put(power_led, HIGH);
 
-    // Start core 0 loop
-    while (!halt_core_0)
-    {
-        loop();
-    }
+    // Core 0 loop
+    while (!halt_core_0);   // All core 0 functions run on timers. Nothing needs to be run in a loop.
 
     return 0;
 }

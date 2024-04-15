@@ -71,17 +71,17 @@
 // ------- Other definitions -------
 
 // ---- Misc. ----
-#define loop_time_max    60*1000    // 60 milliseconds
-#define loop_1_time_max  200*1000   // 200 milliseconds
+#define loop_time_max    75*1000    // 75 milliseconds
+#define loop_1_time_max  150*1000   // 150 milliseconds
 
 // ---- MicroROS node config ----
 #define UROS_NODE_NAME       "pico_a"
 #define UROS_NODE_NAMESPACE  "io"
 
 // ---- Repeating timer intervals ----
-#define motor_odom_rt_interval    80    // In milliseconds
+#define motor_odom_rt_interval    50    // In milliseconds
 #define ultra_pub_rt_interval     100   // In milliseconds
-#define edge_ir_pub_rt_interval   100   // In milliseconds
+#define edge_ir_pub_rt_interval   80    // In milliseconds
 #define sensors_pub_rt_interval   100   // In milliseconds
 
 // ---- Ultrasonic sensor specs ----

@@ -35,6 +35,7 @@
 #include <rcl/error_handling.h>
 #include <rclc/executor.h>
 #include <limits>
+#include "Local_Helpers.h"
 
 
 
@@ -42,6 +43,9 @@
 
 // ---- MPU6050 object ----
 extern mpu6050_t mpu6050;
+
+// ---- Timer execution times storage (milliseconds) ----
+extern uint32_t last_ultrasonic_publish_time, last_edge_ir_publish_time, last_other_sensors_publish_time;
 
 
 
@@ -55,6 +59,15 @@ extern bool check_bool(bool function, uint mode);
 // ---- Publish ultrasonic sensor data ----
 bool publish_ultra(struct repeating_timer *rt)
 {
+    // Check execution time
+    uint16_t exec_time_ms = (time_us_32() / 1000) - last_ultrasonic_publish_time;   // TODO: Log this.
+    last_ultrasonic_publish_time = time_us_32() / 1000;
+    
+    if (exec_time_ms > (ultra_pub_rt_interval + 10)) 
+    { 
+        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
+    }
+
     uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
     uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;
 
@@ -77,6 +90,15 @@ bool publish_ultra(struct repeating_timer *rt)
 // ---- Publish edge sensor data ----
 bool publish_edge_ir(struct repeating_timer *rt)
 {
+    // Check execution time
+    uint16_t exec_time_ms = (time_us_32() / 1000) - last_edge_ir_publish_time;   // TODO: Log this.
+    last_edge_ir_publish_time = time_us_32() / 1000;
+    
+    if (exec_time_ms > (edge_ir_pub_rt_interval + 10)) 
+    { 
+        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
+    }
+
     uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
     uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;
     
@@ -108,6 +130,15 @@ bool publish_edge_ir(struct repeating_timer *rt)
 // ---- Other sensor data ----
 bool publish_misc_sens(struct repeating_timer *rt)
 {
+    // Check execution time
+    uint16_t exec_time_ms = (time_us_32() / 1000) - last_other_sensors_publish_time;   // TODO: Log this.
+    last_other_sensors_publish_time = time_us_32() / 1000;
+    
+    if (exec_time_ms > (sensors_pub_rt_interval + 10)) 
+    { 
+        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
+    }
+
     uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
     uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;
 
