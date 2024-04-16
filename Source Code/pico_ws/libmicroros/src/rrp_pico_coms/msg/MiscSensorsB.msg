@@ -23,10 +23,14 @@ builtin_interfaces/Time time
 bool control_mode_switch
 uint8 speed_sel_switch  # 0: first position, 1: second position, 2: third position
 
+# ---- Environmental Sensors ----
+float32 env_temp      # Celsius
+float32 env_humidity  # Relative Humidity %
+
 # ---- Battery Power ----
 float32 battery_voltage  # Volts
 int16 battery_current    # Milliamps
 
 # ---- Misc. ----
-bool[4] camera_led_stats  # true:on, false:off
-float32 cpu_temp          # RP2040 temperature, Celsius
+# uint16[4] camera_led_vals  # Any value between 0-65535 (PWM value).
+float32 cpu_temp             # RP2040 temperature, Celsius

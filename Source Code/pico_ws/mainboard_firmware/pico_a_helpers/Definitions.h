@@ -70,10 +70,6 @@
 
 // ------- Other definitions -------
 
-// ---- Misc. ----
-#define loop_time_max    75*1000    // 75 milliseconds
-#define loop_1_time_max  150*1000   // 150 milliseconds
-
 // ---- MicroROS node config ----
 #define UROS_NODE_NAME       "pico_a"
 #define UROS_NODE_NAMESPACE  "io"

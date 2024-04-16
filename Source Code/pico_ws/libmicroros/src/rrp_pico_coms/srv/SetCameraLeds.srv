@@ -1,5 +1,5 @@
 #  The ROS robot project - Raspberry Pi Pico Communication Messages Package
-#  Set Camera LED States Service (Pico B)
+#  Set Camera LED Brightness Service (Pico B)
 #  Copyright 2024 Samyar Sadat Akhavi
 #  Written by Samyar Sadat Akhavi, 2022-2024.
 #
@@ -17,7 +17,7 @@
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
 
-bool[4] led_state  # true:on, false:off
+uint16[4] led_outputs  # Any value between 0-65535 for PWM control.
 ---
 bool success
 string message

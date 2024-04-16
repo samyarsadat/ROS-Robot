@@ -70,6 +70,9 @@ message("Configuring Pico B firmware build... (${PICO_B_NAME})")
 
 # Add source files
 add_executable(${PICO_B_NAME} Pico_B.c++ 
+               pico_b_helpers/uROS_Init.c++
+               pico_b_helpers/Local_Helpers.c++
+               pico_b_helpers/IO_Helpers_General.c++
                uart_transport/pico_uart_transport.c)
 
 # Create map/bin/hex/uf2 files

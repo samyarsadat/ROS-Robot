@@ -26,14 +26,10 @@
 #include "IO_Helpers_Edge.h"
 #include "haw/MPU6050.h"
 #include "lib/Helper_lib/Helpers.h"
-#include <std_msgs/msg/string.h>
 #include <geometry_msgs/msg/twist.h>
 #include <geometry_msgs/msg/vector3.h>
-#include <sensor_msgs/msg/range.h>
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
-#include <rcl/error_handling.h>
-#include <rclc/executor.h>
 #include <limits>
 #include "Local_Helpers.h"
 
@@ -146,8 +142,6 @@ bool publish_misc_sens(struct repeating_timer *rt)
     misc_sensor_msg.time.nanosec = timestamp_nanosec;
     misc_sensor_msg.wheelbase_mm = wheelbase;
     misc_sensor_msg.cpu_temp = get_rp2040_temp();
-    misc_sensor_msg.env_humidity = -1.0f;   // TODO: Sensor will be installed later.
-    misc_sensor_msg.env_temp = -1.0f;       // TODO: Sensor will be installed later.
 
     // MPU6050 IMU
     if (check_bool(mpu6050_event(&mpu6050) == 1, RT_SOFT_CHECK))

@@ -1,5 +1,5 @@
 /*
-    The ROS robot project - Pico A helper functions
+    The ROS robot project - Pico A local helper functions
     Copyright 2022-2024 Samyar Sadat Akhavi
     Written by Samyar Sadat Akhavi, 2022-2024.
  
@@ -22,7 +22,7 @@
 #include "Local_Helpers.h"
 #include "pico/stdlib.h"
 #include <rcl/rcl.h>
-#include "pico_a_helpers/Definitions.h"
+#include "Definitions.h"
 #include "pico/multicore.h"
 #include "uROS_Init.h"
 

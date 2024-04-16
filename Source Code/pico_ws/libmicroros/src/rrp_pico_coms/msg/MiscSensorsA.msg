@@ -25,10 +25,6 @@ geometry_msgs/Vector3 imu_gyro   # Angular Velocity
 float32 imu_temp                 # Temperature From MPU6050
 bool imu_freefall_int            # MPU6050 Freefall Detection Interrupt
 
-# ---- Environmental Sensors ----
-float32 env_temp      # Celsius
-float32 env_humidity  # Relative Humidity %
-
 # ---- Misc. ----
 float32 cpu_temp    # RP2040 temperature, Celsius
 int16 wheelbase_mm  # Robot's wheelbase in millimeters.

@@ -23,7 +23,6 @@
 #include "pico/multicore.h"
 #include "hardware/adc.h"
 #include "hardware/pwm.h"
-#include <std_msgs/msg/string.h>
 #include <geometry_msgs/msg/twist.h>
 #include <diagnostic_msgs/msg/diagnostic_status.h>
 #include <diagnostic_msgs/msg/key_value.h>
@@ -34,7 +33,6 @@
 #include <rclc/rclc.h>
 #include <rcl/error_handling.h>
 #include <rclc/executor.h>
-#include "lib/PID_lib/PID_v1.h"
 #include "lib/Helper_lib/Helpers.h"
 #include "lib/Motor_lib/Motor.h"
 #include "lib/Motor_lib/Motor_Safety.h"
@@ -79,7 +77,7 @@ struct repeating_timer motor_odom_rt, ultrasonic_publish_rt, edge_ir_publish_rt,
 // ------- Library object inits -------
 
 // ---- MPU6050 ----
-mpu6050_t mpu6050 = mpu6050_init(i2c_default, MPU6050_ADDRESS_A0_VCC);
+mpu6050_t mpu6050 = mpu6050_init(i2c1, MPU6050_ADDRESS_A0_VCC);
 
 // ---- Motor Controller ----
 uint r_motors_drv_pins[2] = {r_motor_drive_1, r_motor_drive_2};
@@ -220,7 +218,7 @@ void en_motor_ctrl_callback(const void *req, void *res)
     std_srvs__srv__SetBool_Request *req_in = (std_srvs__srv__SetBool_Request *) req;
     std_srvs__srv__SetBool_Response *res_in = (std_srvs__srv__SetBool_Response *) res;
 
-    if ((bool) req_in->data)
+    if (req_in->data)
     {
         r_motors.enable_controller();
         l_motors.enable_controller();
@@ -242,7 +240,7 @@ void en_emitters_callback(const void *req, void *res)
     std_srvs__srv__SetBool_Request *req_in = (std_srvs__srv__SetBool_Request *) req;
     std_srvs__srv__SetBool_Response *res_in = (std_srvs__srv__SetBool_Response *) res;
 
-    if ((bool) req_in->data && !ultrasonic_ir_edge_rt_active)
+    if (req_in->data && !ultrasonic_ir_edge_rt_active)
     {
         ultrasonic_ir_edge_rt_active = true;
         alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, edge_ir_pub_rt_interval, publish_edge_ir, NULL, &edge_ir_publish_rt);
@@ -267,7 +265,7 @@ void en_relay_callback(const void *req, void *res)
     std_srvs__srv__SetBool_Request *req_in = (std_srvs__srv__SetBool_Request *) req;
     std_srvs__srv__SetBool_Response *res_in = (std_srvs__srv__SetBool_Response *) res;
 
-    if ((bool) req_in->data)
+    if (req_in->data)
     {
         gpio_put(pi_power_relay, HIGH);
     }
@@ -287,8 +285,8 @@ void set_mtr_pid_tunings_callback(const void *req, void *res)
     rrp_pico_coms__srv__SetPidTunings_Request *req_in = (rrp_pico_coms__srv__SetPidTunings_Request *) req;
     rrp_pico_coms__srv__SetPidTunings_Response *res_in = (rrp_pico_coms__srv__SetPidTunings_Response *) res;
 
-    r_motors.pid->SetTunings((float) req_in->pid_kp, (float) req_in->pid_ki, (float) req_in->pid_kd);
-    l_motors.pid->SetTunings((float) req_in->pid_kp, (float) req_in->pid_ki, (float) req_in->pid_kd);
+    r_motors.pid->SetTunings(req_in->pid_kp, req_in->pid_ki, req_in->pid_kd);
+    l_motors.pid->SetTunings(req_in->pid_kp, req_in->pid_ki, req_in->pid_kd);
 
     res_in->success = true;
 }
@@ -424,10 +422,6 @@ void publish_odom_tf()
     enc_odom_x_pos += (int) enc_avg_travel_diff * cos(theta);
     enc_odom_y_pos += (int) enc_avg_travel_diff * sin(theta);
 
-    // Rotation quaternion
-    geometry_msgs__msg__Quaternion rot_quat;
-    rot_quat.z = theta;
-
     // Odometry
     enc_odom_msg.header.stamp.sec = timestamp_sec;
     enc_odom_msg.header.stamp.nanosec = timestamp_nanosec;
@@ -439,7 +433,7 @@ void publish_odom_tf()
     enc_odom_msg.pose.pose.position.x = enc_odom_x_pos / 1000;   // Convert to meters
     enc_odom_msg.pose.pose.position.y = enc_odom_y_pos / 1000;   // Convert to meters
     enc_odom_msg.pose.pose.position.z = 0.0;
-    enc_odom_msg.pose.pose.orientation = rot_quat;
+    enc_odom_msg.pose.pose.orientation.z = theta;
     enc_odom_msg.twist.twist.linear.x = (r_motors.get_avg_rpm() + l_motors.get_avg_rpm()) / 2;   // Linear velocity
     enc_odom_msg.twist.twist.linear.y = 0.0;
     enc_odom_msg.twist.twist.angular.z = ((r_enc_diff_mm - l_enc_diff_mm) / 360) * 100;          // Anglular velocity
@@ -456,7 +450,7 @@ void publish_odom_tf()
     odom_baselink_tf_msg.transform.translation.x = enc_odom_x_pos;
     odom_baselink_tf_msg.transform.translation.y = enc_odom_y_pos;
     odom_baselink_tf_msg.transform.translation.z = 0;
-    odom_baselink_tf_msg.transform.rotation = rot_quat;
+    odom_baselink_tf_msg.transform.rotation.z = theta;
 
     // Publish
     check_rc(rcl_publish(&enc_odom_pub, &enc_odom_msg, NULL), RT_SOFT_CHECK);
@@ -491,10 +485,10 @@ bool motor_control_and_odom_timer_callback(struct repeating_timer *rt)
 bool init_mpu6050()
 {
     // Init pins
-    init_pin(PICO_DEFAULT_I2C_SDA_PIN, PROT_I2C);
-    init_pin(PICO_DEFAULT_I2C_SCL_PIN, PROT_I2C);
-    gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
-    gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
+    init_pin(i2c_sda, PROT_I2C);
+    init_pin(i2c_scl, PROT_I2C);
+    gpio_pull_up(i2c_sda);
+    gpio_pull_up(i2c_scl);
 
     if (mpu6050_begin(&mpu6050))
     {

@@ -1,20 +1,20 @@
 /*
-   The ROS robot project - Helper/commonly used functions
-   Copyright 2022-2024 Samyar Sadat Akhavi
-   Written by Samyar Sadat Akhavi, 2022-2024.
+    The ROS robot project - Helper/commonly used functions
+    Copyright 2022-2024 Samyar Sadat Akhavi
+    Written by Samyar Sadat Akhavi, 2022-2024.
  
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
  
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
  
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <https: www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https: www.gnu.org/licenses/>.
 */
 
 
@@ -86,6 +86,7 @@ void gpio_put_pwm(uint pin, uint16_t level)
 {
     // All A channel PWM pins' pin numbers are even so we can easily check to see whether
     // the pin we are setting is on channel A or channel B.
+
     if (pin % 2 == 0)
     {
         pwm_set_chan_level(pwm_gpio_to_slice_num(pin), PWM_CHAN_A, level);
@@ -166,11 +167,20 @@ unique_ptr<bool[]> standard_score_check(float numbers[], int array_length, float
 // ---- NOTE: The ADC must be initialized and the temperature sensor must be enabled! ----
 float get_rp2040_temp()
 {
-    const double CONVERSION_FACTOR = temp_sens_vref / (1 << 12);
     adc_select_input(4);
 
-    double reading_volts = adc_read() * CONVERSION_FACTOR;
+    double reading_volts = adc_read() * adc_conversion_factor;
     float reading_celsius = 27 - (reading_volts - 0.706) / 0.001721;  // Formula taken from the RP2040 datasheet.
 
     return reading_celsius;
+}
+
+
+// ---- Returns the ADC channel of a given GPIO pin ----
+int get_gpio_adc_channel(uint gpio)
+{
+    if (gpio == 26) { return 0; }
+    else if (gpio == 27) { return 1; }
+    else if (gpio == 28) { return 2; }
+    return 0;   // Just in case there's user error and a non-ADC pin is provided.
 }

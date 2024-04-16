@@ -1,20 +1,20 @@
 /*
-   The ROS robot project - Helper/commonly used functions
-   Copyright 2022-2024 Samyar Sadat Akhavi
-   Written by Samyar Sadat Akhavi, 2022-2024.
+    The ROS robot project - Helper/commonly used functions
+    Copyright 2022-2024 Samyar Sadat Akhavi
+    Written by Samyar Sadat Akhavi, 2022-2024.
  
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
  
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
  
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <https: www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https: www.gnu.org/licenses/>.
 */
 
 
@@ -41,7 +41,8 @@
 #define LOW   0
 
 // ---- Misc. ----
-#define temp_sens_vref  3.22f   // This is used to convert the ADC readings from the internal temperature sensor to degrees Celsius.
+#define temp_sens_vref         3.22f   // Volts
+#define adc_conversion_factor  temp_sens_vref / (1 << 12)
 
 
 // ------- Functions -------
@@ -71,3 +72,6 @@ std::unique_ptr<bool[]> standard_score_check(float numbers[], int array_length, 
 // ---- Returns the temperature measured by the RP2040's internal sensor in Celsius ----
 // ---- NOTE: The ADC must be initialized and the temperature sensor must be enabled! ----
 float get_rp2040_temp();
+
+// ---- Returns the ADC channel of a given GPIO pin ----
+int get_gpio_adc_channel(uint gpio);

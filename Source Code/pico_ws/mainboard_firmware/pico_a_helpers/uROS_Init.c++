@@ -131,7 +131,6 @@ extern bool check_rc(rcl_ret_t rctc, uint mode);
 // ---- Setup subscribers and publishers ----
 void init_subs_pubs()
 {
-    // const rosidl_message_type_support_t *string_type = ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String);
     const rosidl_message_type_support_t *twist_type = ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist);
     const rosidl_message_type_support_t *transform_s_type = ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, TransformStamped);
     const rosidl_message_type_support_t *diag_status_type = ROSIDL_GET_MSG_TYPE_SUPPORT(diagnostic_msgs, msg, DiagnosticStatus);

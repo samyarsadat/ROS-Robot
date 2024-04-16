@@ -78,6 +78,6 @@ void set_mux_io_mode(int mode)
 
     if (mode == INPUT_ADC)
     {
-        adc_select_input(0);
+        adc_select_input(get_gpio_adc_channel(mux_io));
     }
 }
