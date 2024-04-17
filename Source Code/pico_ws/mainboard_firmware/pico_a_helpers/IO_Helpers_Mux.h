@@ -22,6 +22,7 @@
 
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
+#include "../lib/Helper_lib/Helpers.h"
 
 
 // ------- Global variables -------
@@ -37,4 +38,4 @@ void set_mux_pins(uint addr_a, uint addr_b, uint addr_c, uint addr_d, uint io);
 void set_mux_addr(uint pin);
 
 // ---- Set mux IO mode ----
-void set_mux_io_mode(int mode);
+void set_mux_io_mode(PIN_CONFIG_MODE mode);

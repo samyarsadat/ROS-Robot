@@ -50,6 +50,7 @@
 #include <iterator>
 #include <vector>
 #include <cmath>
+#include <stdio.h>
 
 
 
@@ -519,6 +520,9 @@ void setup()
     init_pin(onboard_led, OUTPUT);
     init_pin(pi_power_relay, OUTPUT);
     init_pin(edge_sens_en, OUTPUT);
+
+    // UART output
+    stdio_init_all();
 
     // Misc. init
     adc_init();

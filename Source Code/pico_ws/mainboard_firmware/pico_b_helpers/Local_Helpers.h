@@ -26,6 +26,13 @@
 #include "Definitions.h"
 #include "pico/multicore.h"
 #include "uROS_Init.h"
+#include <string>
+
+
+
+// ------- Enums -------
+enum RT_CHECK_MODE {RT_HARD_CHECK, RT_SOFT_CHECK, RT_LOG_ONLY_CHECK};
+enum LOG_LEVEL {LOG_LVL_INFO, LOG_LVL_WARN, LOG_LVL_ERROR, LOG_LVL_FATAL};
 
 
 
@@ -36,10 +43,13 @@
 // Note: publish_diag_report() must be defines elsewhere!
 
 // --- RCL return checker ---
-bool check_rc(rcl_ret_t rctc, uint mode);
+bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode);
 
 // --- Return checker, except for functions that return a boolean ---
-bool check_bool(bool function, uint mode);
+bool check_bool(bool function, RT_CHECK_MODE mode);
 
 // ---- Diagnostics error reporting ----
 void publish_diag_report(uint8_t level, char *hw_name, char *hw_id, char *msg, diagnostic_msgs__msg__KeyValue *key_values);
+
+// ---- Logging functions ----
+void write_log(std::string src, std::string msg, LOG_LEVEL lvl);

@@ -47,11 +47,6 @@ extern uint32_t last_ultrasonic_publish_time, last_edge_ir_publish_time, last_ot
 
 // ------- Functions ------- 
 
-// ---- Return checkers ----
-extern bool check_rc(rcl_ret_t rctc, uint mode);
-extern bool check_bool(bool function, uint mode);
-
-
 // ---- Publish ultrasonic sensor data ----
 bool publish_ultra(struct repeating_timer *rt)
 {

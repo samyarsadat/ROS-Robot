@@ -53,8 +53,8 @@ target_link_libraries(${PICO_A_NAME} micro_ros
 target_include_directories(${PICO_A_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 # Enable USB, disable UART
-pico_enable_stdio_usb(${PICO_A_NAME} 1)
-pico_enable_stdio_uart(${PICO_A_NAME} 0)
+pico_enable_stdio_usb(${PICO_A_NAME} 0)
+pico_enable_stdio_uart(${PICO_A_NAME} 1)
 
 # UART Config
 target_compile_definitions(${PICO_A_NAME} PRIVATE
@@ -92,8 +92,8 @@ target_link_libraries(${PICO_B_NAME} micro_ros
 target_include_directories(${PICO_B_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 # Enable USB, disable UART
-pico_enable_stdio_usb(${PICO_B_NAME} 1)
-pico_enable_stdio_uart(${PICO_B_NAME} 0)
+pico_enable_stdio_usb(${PICO_B_NAME} 0)
+pico_enable_stdio_uart(${PICO_B_NAME} 1)
 
 # UART Config
 target_compile_definitions(${PICO_A_NAME} PRIVATE

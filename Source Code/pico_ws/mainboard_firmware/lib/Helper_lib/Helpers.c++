@@ -32,10 +32,9 @@ using namespace std;
 
 // ------- Functions -------
 // TODO: Better usage information
-// TODO: Use enums instead of definitions for init_pin()
 
 // ---- Arduino pinMode-like function ----
-void init_pin(uint pin, int mode)
+void init_pin(uint pin, PIN_CONFIG_MODE mode)
 {
     switch(mode)
     {

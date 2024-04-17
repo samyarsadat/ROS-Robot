@@ -37,11 +37,6 @@
 #define INF         std::numeric_limits<float>::infinity()
 #define N_INF       INF * -1
 
-// ---- Return checker modes ----
-#define RT_HARD_CHECK      0
-#define RT_SOFT_CHECK      1
-#define RT_LOG_ONLY_CHECK  2
-
 // ---- Diagnostics message levels ----
 #define DIAG_LVL_OK  diagnostic_msgs__msg__DiagnosticStatus__OK
 #define DIAG_LVL_WARN  diagnostic_msgs__msg__DiagnosticStatus__WARN

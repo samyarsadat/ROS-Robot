@@ -42,11 +42,6 @@ extern uint32_t last_microsw_publish_time, last_other_sensors_publish_time;
 
 // ------- Functions ------- 
 
-// ---- Return checkers ----
-extern bool check_rc(rcl_ret_t rctc, uint mode);
-extern bool check_bool(bool function, uint mode);
-
-
 // ---- Microswitch data ----
 bool publish_microsw_sens(struct repeating_timer *rt)
 {

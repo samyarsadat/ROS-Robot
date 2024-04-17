@@ -26,19 +26,9 @@
 
 // ------- Definitions -------
 
-// TODO: Make these Enums
-// ---- Pin direction/type ----
-#define OUTPUT          1
-#define OUTPUT_PWM      2
-#define INPUT           3
-#define INPUT_PULLUP    4
-#define INPUT_PULLDOWN  5
-#define INPUT_ADC       6
-#define PROT_I2C        7
-
-// ---- Pin state ----
-#define HIGH  1
-#define LOW   0
+// ---- Enums ----
+enum PIN_CONFIG_MODE {OUTPUT, OUTPUT_PWM, INPUT, INPUT_PULLUP, INPUT_PULLDOWN, INPUT_ADC, PROT_I2C};
+enum PIN_STATE {LOW, HIGH};
 
 // ---- Misc. ----
 #define temp_sens_vref         3.22f   // Volts
@@ -48,7 +38,7 @@
 // ------- Functions -------
 
 // ---- Arduino pinMode-like function ----
-void init_pin(uint pin, int mode);
+void init_pin(uint pin, PIN_CONFIG_MODE mode);
 
 // ---- gpio_put function but for PWM-enbaled pins ----
 void gpio_put_pwm(uint pin, uint16_t level);

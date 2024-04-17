@@ -149,6 +149,9 @@ void setup()
     gpio_set_irq_enabled(ms_back_r, GPIO_IRQ_EDGE_FALL, true);
     gpio_set_irq_enabled(ms_back_l, GPIO_IRQ_EDGE_FALL, true);
 
+    // UART output
+    stdio_init_all();
+
     // Misc. init
     adc_init();
     adc_set_temp_sensor_enabled(true);

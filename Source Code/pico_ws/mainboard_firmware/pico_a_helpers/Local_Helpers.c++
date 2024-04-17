@@ -25,6 +25,7 @@
 #include "Definitions.h"
 #include "pico/multicore.h"
 #include "uROS_Init.h"
+#include <string>
 
 
 
@@ -38,7 +39,7 @@ extern void clean_shutdown();
 void publish_diag_report(uint8_t level, char *hw_name, char *hw_id, char *msg, diagnostic_msgs__msg__KeyValue *key_values);
 
 // --- RCL return checker ---
-bool check_rc(rcl_ret_t rctc, uint mode)
+bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode)
 {
     if (rctc != RCL_RET_OK)
     {
@@ -69,7 +70,7 @@ bool check_rc(rcl_ret_t rctc, uint mode)
 
 
 // --- Return checker, except for functions that return a boolean ---
-bool check_bool(bool function, uint mode)
+bool check_bool(bool function, RT_CHECK_MODE mode)
 {
     if (!function)
     {
@@ -124,4 +125,21 @@ void publish_diag_report(uint8_t level, char *hw_name, char *hw_id, char *msg, d
         check_rc() calling publish_diag_report() and then the same thing happening over and over again.
     */
     rcl_publish(&diagnostics_pub, &diagnostics_msg, NULL);
+}
+
+
+// ---- Logging functions ----
+void write_log(std::string src, std::string msg, LOG_LEVEL lvl)
+{
+    uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
+    uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;
+
+    std::string level;
+    if (lvl == LOG_LVL_INFO) { level = "INFO"; }
+    else if (lvl == LOG_LVL_WARN) { level = "WARNING"; }
+    else if (lvl == LOG_LVL_ERROR) { level = "ERROR"; }
+    else if (lvl == LOG_LVL_FATAL) { level = "FATAL"; }
+
+    std::string log_msg = "[%u.%u] [%s] [" + src + "]: " + msg;
+    printf(log_msg.c_str(), timestamp_sec, timestamp_nanosec, level.c_str());
 }

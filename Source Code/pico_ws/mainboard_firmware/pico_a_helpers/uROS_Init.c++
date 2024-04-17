@@ -39,6 +39,7 @@
 #include <rcl/error_handling.h>
 #include <rclc/executor.h>
 #include "Definitions.h"
+#include "Local_Helpers.h"
 
 
 
@@ -123,10 +124,6 @@ void clean_shutdown_callback(const void *msgin) { clean_shutdown(); }
 
 
 // ------- Functions -------
-
-// ---- RCL return checker prototype ----
-extern bool check_rc(rcl_ret_t rctc, uint mode);
-
 
 // ---- Setup subscribers and publishers ----
 void init_subs_pubs()
