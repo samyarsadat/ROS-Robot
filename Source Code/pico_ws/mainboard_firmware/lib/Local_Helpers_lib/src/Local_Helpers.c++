@@ -156,7 +156,7 @@ void publish_diag_report(uint8_t level, char *hw_name, char *hw_id, char *msg, d
 }
 
 
-// ---- Logging functions ----
+// ---- Logging function (outputs to STDIO UART) ----
 void write_log(std::string src, std::string msg, LOG_LEVEL lvl)
 {
     uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
