@@ -1,5 +1,8 @@
 /*
     The ROS robot project - Helper/commonly used functions
+    These are general IO/math functions that can be used in any other program.
+    They are not program-specific.
+    
     Copyright 2022-2024 Samyar Sadat Akhavi
     Written by Samyar Sadat Akhavi, 2022-2024.
  
@@ -27,7 +30,7 @@
 // ------- Definitions -------
 
 // ---- Enums ----
-enum PIN_CONFIG_MODE {OUTPUT, OUTPUT_PWM, INPUT, INPUT_PULLUP, INPUT_PULLDOWN, INPUT_ADC, PROT_I2C};
+enum PIN_CONFIG_MODE {OUTPUT, OUTPUT_PWM, INPUT, INPUT_PULLUP, INPUT_PULLDOWN, INPUT_ADC, PROT_I2C, PROT_UART};
 enum PIN_STATE {LOW, HIGH};
 
 // ---- Misc. ----

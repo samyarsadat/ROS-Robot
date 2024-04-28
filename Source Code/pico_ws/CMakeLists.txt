@@ -42,4 +42,4 @@ include(micro_ros.cmake)
 # Add our source directory
 add_subdirectory(src)
 
-message("Configuration completed! (${PROJ_NAME} - v${CMAKE_PROJECT_VERSION})")
+message("Configuration completed! (${PROJ_NAME} - v${PROJECT_VERSION})")

@@ -22,7 +22,7 @@
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
 #include "Definitions.h"
-#include "../lib/Helper_lib/Helpers.h"
+#include "helpers_lib/Helpers.h"
 #include "hardware/adc.h"
 
 

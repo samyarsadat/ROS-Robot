@@ -4,10 +4,19 @@
         "/opt/ros/humble/local/lib/python3.10/dist-packages"
     ],
     
-    // "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "C_Cpp.errorSquiggles": "enabled",
     "cmake.sourceDirectory": "/home/urosdev/pico_ws",
     "cmake.generator": "Unix Makefiles",
     "cmake.parallelJobs": 12,
-    "cmake.buildDirectory": "${workspaceFolder}/build"
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.buildBeforeRun": true,
+    "cortex-debug.openocdPath": "openocd",
+
+    "cmake.touchbar.advanced": {
+        "debug": "hidden",
+        "launch": "hidden",
+        "build": "default",
+        "buildTarget": "hidden"
+    }
 }

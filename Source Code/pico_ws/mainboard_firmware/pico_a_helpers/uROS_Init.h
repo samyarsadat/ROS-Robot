@@ -34,6 +34,7 @@
 #include <rrp_pico_coms/msg/falloff_sensors.h>
 #include <rrp_pico_coms/msg/motor_ctrl_state.h>
 #include <rrp_pico_coms/srv/set_pid_tunings.h>
+#include <diagnostic_msgs/srv/self_test.h>
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
@@ -106,6 +107,11 @@ extern std_srvs__srv__SetBool_Response en_relay_res;
 extern rcl_service_t set_mtr_pid_tunings_srv;
 extern rrp_pico_coms__srv__SetPidTunings_Request set_mtr_pid_tunings_req;
 extern rrp_pico_coms__srv__SetPidTunings_Response set_mtr_pid_tunings_res;
+
+// Initiate the self-test function
+extern rcl_service_t run_self_test_srv;
+extern diagnostic_msgs__srv__SelfTest_Request run_self_test_req;
+extern diagnostic_msgs__srv__SelfTest_Response run_self_test_res;
 
 
 

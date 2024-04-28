@@ -25,13 +25,13 @@
 #include "IO_Helpers_Ultrasonic.h"
 #include "IO_Helpers_Edge.h"
 #include "haw/MPU6050.h"
-#include "lib/Helper_lib/Helpers.h"
+#include "helpers_lib/Helpers.h"
 #include <geometry_msgs/msg/twist.h>
 #include <geometry_msgs/msg/vector3.h>
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <limits>
-#include "Local_Helpers.h"
+#include "local_helpers_lib/Local_Helpers.h"
 
 
 

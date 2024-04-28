@@ -22,8 +22,8 @@
 
 
 #include "pico/stdlib.h"
-#include "../Helper_lib/Helpers.h"
-#include "Motor_Driver.h"
+#include "helpers_lib/Helpers.h"
+#include "motor_control_lib/Motor_Driver.h"
 
 
 /*  Constructor

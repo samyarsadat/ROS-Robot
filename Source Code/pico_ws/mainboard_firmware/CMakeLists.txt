@@ -30,7 +30,6 @@ add_executable(${PICO_A_NAME} Pico_A.c++
                pico_a_helpers/IO_Helpers_Edge.c++
                pico_a_helpers/IO_Helpers_Ultrasonic.c++
                pico_a_helpers/uROS_Init.c++
-               pico_a_helpers/Local_Helpers.c++
                uart_transport/pico_uart_transport.c)
 
 # Create map/bin/hex/uf2 files
@@ -45,6 +44,7 @@ target_link_libraries(${PICO_A_NAME} micro_ros
                                      hardware_adc
                                      hardware_gpio
                                      helpers_lib
+                                     local_helpers_lib
                                      pid_v1_lib
                                      motor_control_lib
 )
@@ -52,16 +52,16 @@ target_link_libraries(${PICO_A_NAME} micro_ros
 # Link to include directories
 target_include_directories(${PICO_A_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-# Enable USB, disable UART
-pico_enable_stdio_usb(${PICO_A_NAME} 0)
-pico_enable_stdio_uart(${PICO_A_NAME} 1)
-
 # UART Config
 target_compile_definitions(${PICO_A_NAME} PRIVATE
     PICO_DEFAULT_UART=0
     PICO_DEFAULT_UART_TX_PIN=16
     PICO_DEFAULT_UART_RX_PIN=17
 )
+
+# Enable USB, disable UART
+pico_enable_stdio_usb(${PICO_A_NAME} 1)
+pico_enable_stdio_uart(${PICO_A_NAME} 1)
 
 
 
@@ -71,7 +71,6 @@ message("Configuring Pico B firmware build... (${PICO_B_NAME})")
 # Add source files
 add_executable(${PICO_B_NAME} Pico_B.c++ 
                pico_b_helpers/uROS_Init.c++
-               pico_b_helpers/Local_Helpers.c++
                pico_b_helpers/IO_Helpers_General.c++
                uart_transport/pico_uart_transport.c)
 
@@ -86,21 +85,15 @@ target_link_libraries(${PICO_B_NAME} micro_ros
                                      hardware_adc
                                      hardware_gpio
                                      helpers_lib
+                                     local_helpers_lib
 )
 
 # Link to include directories
 target_include_directories(${PICO_B_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 # Enable USB, disable UART
-pico_enable_stdio_usb(${PICO_B_NAME} 0)
+pico_enable_stdio_usb(${PICO_B_NAME} 1)
 pico_enable_stdio_uart(${PICO_B_NAME} 1)
-
-# UART Config
-target_compile_definitions(${PICO_A_NAME} PRIVATE
-    PICO_DEFAULT_UART=1
-    PICO_DEFAULT_UART_TX_PIN=8
-    PICO_DEFAULT_UART_RX_PIN=9
-)
 
 
 

@@ -19,36 +19,14 @@
 # Set minimum required version of CMake
 cmake_minimum_required(VERSION 3.12)
 
-# Check whether PICO_SDK_PATH is defined.
-if (NOT EXISTS $ENV{PICO_SDK_PATH})
-    message(FATAL_ERROR "The Pico SDK path environment variable is not set!")
-endif ()
-
-# Include build functions from the Pico SDK
-include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
-
-# Set project name and C/C++ standards
-project(helpers_lib VERSION 1.0.0 LANGUAGES C CXX ASM)
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
-
-# Initialize the Pico SDK
-pico_sdk_init()
-
-
 # Add source files
 add_library(${PROJECT_NAME} Helpers.c++)
+
+# Include header files
+target_include_directories(${PROJECT_NAME} PUBLIC ../include)
 
 # Link to libraries
 target_link_libraries(${PROJECT_NAME} pico_stdlib)
 target_link_libraries(${PROJECT_NAME} hardware_pwm)
 target_link_libraries(${PROJECT_NAME} hardware_gpio)
 target_link_libraries(${PROJECT_NAME} hardware_adc)
-
-
-# CMake flags
-set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
-add_compile_options(-Wall -Wextra -Wpedantic)
-
-message("Configured Helper Library build. (${PROJECT_NAME} - v${CMAKE_PROJECT_VERSION})")

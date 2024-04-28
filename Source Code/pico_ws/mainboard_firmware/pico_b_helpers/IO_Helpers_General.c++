@@ -23,7 +23,7 @@
 #include "pico/stdlib.h"
 #include "Definitions.h"
 #include "IO_Helpers_General.h"
-#include "../lib/Helper_lib/Helpers.h"
+#include "helpers_lib/Helpers.h"
 #include "hardware/adc.h"
 
 

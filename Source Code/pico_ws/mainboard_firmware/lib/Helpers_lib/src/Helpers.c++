@@ -1,5 +1,8 @@
 /*
     The ROS robot project - Helper/commonly used functions
+    These are general IO/math functions that can be used in any other program.
+    They are not program-specific.
+    
     Copyright 2022-2024 Samyar Sadat Akhavi
     Written by Samyar Sadat Akhavi, 2022-2024.
  
@@ -26,7 +29,7 @@
 #include <math.h>
 #include <cmath>
 #include <memory>
-#include "Helpers.h"
+#include "helpers_lib/Helpers.h"
 using namespace std;
 
 
@@ -50,11 +53,6 @@ void init_pin(uint pin, PIN_CONFIG_MODE mode)
             pwm_set_enabled(pwm_gpio_to_slice_num(pin), true);
             break;
 
-        case PROT_I2C:
-            gpio_init(pin);
-            gpio_set_function(pin, GPIO_FUNC_I2C);
-            break;
-
         case INPUT:
             gpio_init(pin);
             gpio_set_dir(pin, false);
@@ -76,6 +74,15 @@ void init_pin(uint pin, PIN_CONFIG_MODE mode)
             adc_gpio_init(pin);
             gpio_set_dir(pin, false);
             break;
+
+        case PROT_I2C:
+            gpio_init(pin);
+            gpio_set_function(pin, GPIO_FUNC_I2C);
+            break;
+        
+        case PROT_UART:
+            gpio_init(pin);
+            gpio_set_function(pin, GPIO_FUNC_UART);
     }
 }
 
@@ -167,7 +174,6 @@ unique_ptr<bool[]> standard_score_check(float numbers[], int array_length, float
 float get_rp2040_temp()
 {
     adc_select_input(4);
-
     double reading_volts = adc_read() * adc_conversion_factor;
     float reading_celsius = 27 - (reading_volts - 0.706) / 0.001721;  // Formula taken from the RP2040 datasheet.
 

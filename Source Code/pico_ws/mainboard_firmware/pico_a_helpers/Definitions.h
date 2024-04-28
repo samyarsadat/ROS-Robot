@@ -18,8 +18,7 @@
 */
 
 #pragma once
-#include "../Common_Definitions.h"
-#include "../Diagnostics_Definitons.h"
+#include "local_helpers_lib/Common_Definitions.h"
 #include "Diag_Msgs.h"
 
 
@@ -64,15 +63,17 @@
 #define r_motor_drive_2  18
 
 // ---- I2C ----
-#define i2c_sda  14
-#define i2c_scl  15
+#define i2c_inst   i2c1   // I2C instance (14 & 15 are on I2C1)
+#define i2c_sda    14
+#define i2c_scl    15
 
 
 // ------- Other definitions -------
 
 // ---- MicroROS node config ----
-#define UROS_NODE_NAME       "pico_a"
-#define UROS_NODE_NAMESPACE  "io"
+#define UROS_NODE_NAME        "pico_a"
+#define UROS_NODE_NAMESPACE   "io"
+#define UROS_EXEC_TIMEOUT_MS  80   // In milliseconds
 
 // ---- Repeating timer intervals ----
 #define motor_odom_rt_interval    50    // In milliseconds

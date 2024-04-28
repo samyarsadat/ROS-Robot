@@ -33,9 +33,9 @@
 #include <rclc/rclc.h>
 #include <rcl/error_handling.h>
 #include <rclc/executor.h>
-#include "lib/Helper_lib/Helpers.h"
-#include "lib/Motor_lib/Motor.h"
-#include "lib/Motor_lib/Motor_Safety.h"
+#include "helpers_lib/Helpers.h"
+#include "motor_control_lib/Motor.h"
+#include "motor_control_lib/Motor_Safety.h"
 #include "haw/MPU6050.h"
 #include "pico_a_helpers/IO_Helpers_Mux.h"
 #include "pico_a_helpers/IO_Helpers_Ultrasonic.h"
@@ -44,13 +44,12 @@
 #include "pico_a_helpers/Sensor_Publishers.c++"
 #include "pico_a_helpers/uROS_Init.h"
 #include "pico_a_helpers/Definitions.h"
-#include "pico_a_helpers/Local_Helpers.h"
+#include "local_helpers_lib/Local_Helpers.h"
 #include "uart_transport/pico_uart_transports.h"
 #include <rmw_microros/rmw_microros.h>
 #include <iterator>
 #include <vector>
 #include <cmath>
-#include <stdio.h>
 
 
 
@@ -60,6 +59,10 @@
 bool halt_core_0 = false;
 bool self_test_mode = false;
 alarm_pool_t *core_1_alarm_pool;
+
+// ---- MicroROS state ----
+enum UROS_STATE {WAITING_FOR_AGENT, AGENT_AVAILABLE, AGENT_CONNECTED, AGENT_DISCONNECTED};
+UROS_STATE current_uros_state = WAITING_FOR_AGENT;
 
 // ---- Timer execution times storage (milliseconds) ----
 uint32_t last_motor_odom_time, last_ultrasonic_publish_time, last_edge_ir_publish_time, last_other_sensors_publish_time;
@@ -78,7 +81,7 @@ struct repeating_timer motor_odom_rt, ultrasonic_publish_rt, edge_ir_publish_rt,
 // ------- Library object inits -------
 
 // ---- MPU6050 ----
-mpu6050_t mpu6050 = mpu6050_init(i2c1, MPU6050_ADDRESS_A0_VCC);
+mpu6050_t mpu6050 = mpu6050_init(i2c_inst, MPU6050_ADDRESS_A0_VCC);
 
 // ---- Motor Controller ----
 uint r_motors_drv_pins[2] = {r_motor_drive_1, r_motor_drive_2};
@@ -108,6 +111,8 @@ MotorSafety l_motors_safety(&l_motors, left_motor_controller_id);
 // ---- Graceful shutdown ----
 void clean_shutdown()
 {
+    write_log("clean_shutdown", "A clean shutdown has been triggered. The program will now shut down.", LOG_LVL_FATAL);
+
     // Stop all repeating timers
     cancel_repeating_timer(&motor_odom_rt);
     cancel_repeating_timer(&ultrasonic_publish_rt);
@@ -131,11 +136,24 @@ void clean_shutdown()
     gpio_put(edge_sens_en, LOW);
 
     // MicroROS cleanup
-    // TODO: ADD ALL PUBS AND SUBS.
-    check_rc(rcl_subscription_fini(&cmd_vel_sub, &rc_node), RT_LOG_ONLY_CHECK);
-    check_rc(rcl_publisher_fini(&diagnostics_pub, &rc_node), RT_LOG_ONLY_CHECK);
-    check_rc(rclc_executor_fini(&rc_executor), RT_LOG_ONLY_CHECK);
-    check_rc(rcl_node_fini(&rc_node), RT_LOG_ONLY_CHECK);
+    rcl_service_fini(&en_motor_ctrl_srv, &rc_node);
+    rcl_service_fini(&en_emitters_srv, &rc_node);
+    rcl_service_fini(&en_relay_srv, &rc_node);
+    rcl_service_fini(&set_mtr_pid_tunings_srv, &rc_node);
+    rcl_service_fini(&run_self_test_srv, &rc_node);
+    rcl_subscription_fini(&cmd_vel_sub, &rc_node);
+    rcl_subscription_fini(&e_stop_sub, &rc_node);
+    rcl_publisher_fini(&enc_odom_pub, &rc_node);
+    rcl_publisher_fini(&diagnostics_pub, &rc_node);
+    rcl_publisher_fini(&misc_sensor_pub, &rc_node);
+    rcl_publisher_fini(&ultrasonic_sensor_pub, &rc_node);
+    rcl_publisher_fini(&falloff_sensor_pub, &rc_node);
+    rcl_publisher_fini(&mtr_ctrl_r_state_pub, &rc_node);
+    rcl_publisher_fini(&mtr_ctrl_l_state_pub, &rc_node);
+    rcl_publisher_fini(&odom_baselink_tf_pub, &rc_node);
+    rclc_executor_fini(&rc_executor);
+    rcl_node_fini(&rc_node);
+    rclc_support_fini(&rc_supp);
 
 
     // Stop core 0 (only effective when this function is called from core 1)
@@ -149,6 +167,8 @@ void clean_shutdown()
 
     while (true)
     {
+        write_log("clean_shutdown", "Program shutdown hang loop.", LOG_LVL_INFO);
+
         gpio_put(power_led, LOW);
         gpio_put(onboard_led, LOW);
         sleep_ms(100);
@@ -172,6 +192,10 @@ void irq_call(uint pin, uint32_t events)
 // ---- MotorSafety trigger callback ----
 void motor_safety_callback(MotorSafety::safety_trigger_conditions condition, int id)
 {
+    char buffer[50];
+    sprintf(buffer, "Motor Safety triggered: [code: %d, id: %d]", static_cast<int>(condition), id);
+    write_log("motor_safety_callback", buffer, LOG_LVL_INFO);
+
     if (!self_test_mode)
     {
         // TODO: This could cause the motors to jitter back and forth if a cooldown period is not added!
@@ -179,11 +203,13 @@ void motor_safety_callback(MotorSafety::safety_trigger_conditions condition, int
         {
             if (id == right_motor_controller_id)
             {
+                write_log("motor_safety_callback", "SET_VS_ACTUAL_DIR_DIFF triggered. Reversing control direction. [Right]", LOG_LVL_WARN);
                 r_motors.set_direction_reversed(!r_motors.get_dir_reversed());
             }
 
-            else if (id == left_motor_controller_id)
+            else
             {
+                write_log("motor_safety_callback", "SET_VS_ACTUAL_DIR_DIFF triggered. Reversing control direction. [Left]", LOG_LVL_WARN);
                 l_motors.set_direction_reversed(!l_motors.get_dir_reversed());
             }
         }
@@ -192,6 +218,7 @@ void motor_safety_callback(MotorSafety::safety_trigger_conditions condition, int
         {
             if (id == right_motor_controller_id)
             {
+                write_log("motor_safety_callback", "Critical Motor Safety condition triggered! Shutting down. [Right]", LOG_LVL_FATAL);
                 publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_DRV_R, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
                 publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R1, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
                 publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R2, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
@@ -199,12 +226,13 @@ void motor_safety_callback(MotorSafety::safety_trigger_conditions condition, int
             
             else
             {
+                write_log("motor_safety_callback", "Critical Motor Safety condition triggered! Shutting down. [Left]", LOG_LVL_FATAL);
                 publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_DRV_L, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
                 publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L1, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
                 publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L2, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
             }
 
-            clean_shutdown();  // This is a critical failure, so we'll call the shutdown functions without waiting for an e-stop signal.
+            clean_shutdown();  // This is a critical failure, so we'll call the shutdown function without waiting for an e-stop signal.
         }
     }
 }
@@ -218,6 +246,8 @@ void en_motor_ctrl_callback(const void *req, void *res)
 {
     std_srvs__srv__SetBool_Request *req_in = (std_srvs__srv__SetBool_Request *) req;
     std_srvs__srv__SetBool_Response *res_in = (std_srvs__srv__SetBool_Response *) res;
+
+    // TODO: Add logging.
 
     if (req_in->data)
     {
@@ -240,6 +270,8 @@ void en_emitters_callback(const void *req, void *res)
 {
     std_srvs__srv__SetBool_Request *req_in = (std_srvs__srv__SetBool_Request *) req;
     std_srvs__srv__SetBool_Response *res_in = (std_srvs__srv__SetBool_Response *) res;
+
+    // TODO: Add logging.
 
     if (req_in->data && !ultrasonic_ir_edge_rt_active)
     {
@@ -266,6 +298,8 @@ void en_relay_callback(const void *req, void *res)
     std_srvs__srv__SetBool_Request *req_in = (std_srvs__srv__SetBool_Request *) req;
     std_srvs__srv__SetBool_Response *res_in = (std_srvs__srv__SetBool_Response *) res;
 
+    // TODO: Add logging.
+
     if (req_in->data)
     {
         gpio_put(pi_power_relay, HIGH);
@@ -286,6 +320,10 @@ void set_mtr_pid_tunings_callback(const void *req, void *res)
     rrp_pico_coms__srv__SetPidTunings_Request *req_in = (rrp_pico_coms__srv__SetPidTunings_Request *) req;
     rrp_pico_coms__srv__SetPidTunings_Response *res_in = (rrp_pico_coms__srv__SetPidTunings_Response *) res;
 
+    char buffer[65];
+    sprintf(buffer, "Received set_pid_tunings: [Kp: %.3f, Ki: %.3f, Kd: %.3f]", req_in->pid_kp, req_in->pid_ki, req_in->pid_kd);
+    write_log("set_mtr_pid_tunings_callback", buffer, LOG_LVL_INFO);
+
     r_motors.pid->SetTunings(req_in->pid_kp, req_in->pid_ki, req_in->pid_kd);
     l_motors.pid->SetTunings(req_in->pid_kp, req_in->pid_ki, req_in->pid_kd);
 
@@ -293,13 +331,24 @@ void set_mtr_pid_tunings_callback(const void *req, void *res)
 }
 
 
+// ---- Run self-test functions service ----
+void run_self_test_callback(const void *req, void *res)
+{
+
+}
+
+
 // ---- Command velocity topic callback ----
 void cmd_vel_call(const void *msgin)
 {
     const geometry_msgs__msg__Twist *msg = (const geometry_msgs__msg__Twist *) msgin;
+
+    char buffer[60];
+    sprintf(buffer, "Received cmd_vel: [lin: %.2fm/s, ang: %.2frad/s]", msg->linear.x, msg->angular.z);
+    write_log("cmd_vel_call", buffer, LOG_LVL_INFO);
     
-    float angular = msg -> angular.z;     // rad/s
-    float linear = msg -> linear.x;       // m/s
+    float angular = msg->angular.z;     // rad/s
+    float linear = msg->linear.x;       // m/s
 
     float motor_l_speed_ms = linear - (angular * ((wheelbase / 1000) / 2));               // Calculate motor speeds in m/s
     float motor_r_speed_ms = linear + (angular * ((wheelbase / 1000) / 2));
@@ -433,10 +482,10 @@ void publish_odom_tf()
 
     enc_odom_msg.pose.pose.position.x = enc_odom_x_pos / 1000;   // Convert to meters
     enc_odom_msg.pose.pose.position.y = enc_odom_y_pos / 1000;   // Convert to meters
-    enc_odom_msg.pose.pose.position.z = 0.0;
+    enc_odom_msg.pose.pose.position.z = 0;
     enc_odom_msg.pose.pose.orientation.z = theta;
     enc_odom_msg.twist.twist.linear.x = (r_motors.get_avg_rpm() + l_motors.get_avg_rpm()) / 2;   // Linear velocity
-    enc_odom_msg.twist.twist.linear.y = 0.0;
+    enc_odom_msg.twist.twist.linear.y = 0;
     enc_odom_msg.twist.twist.angular.z = ((r_enc_diff_mm - l_enc_diff_mm) / 360) * 100;          // Anglular velocity
 
     // Odom -> base_link transform
@@ -459,15 +508,19 @@ void publish_odom_tf()
 }
 
 
-// ----- Timer tasks -----
+// ----- Compute motor PID outputs and publish odometry data (timer callback) -----
 bool motor_control_and_odom_timer_callback(struct repeating_timer *rt)
 {
     // Check execution time
-    uint16_t exec_time_ms = (time_us_32() / 1000) - last_motor_odom_time;   // TODO: Log this.
+    uint16_t exec_time_ms = (time_us_32() / 1000) - last_motor_odom_time;
     last_motor_odom_time = time_us_32() / 1000;
     
     if (exec_time_ms > (motor_odom_rt_interval + 10)) 
-    { 
+    {
+        char buffer[80];
+        sprintf(buffer, "Timer function execution time exceeded limits! [act: %ums, lim: %dms]", exec_time_ms, (motor_odom_rt_interval + 10));
+        write_log("motor_control_and_odom_timer_callback", buffer, LOG_LVL_WARN);
+
         publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
     }
 
@@ -488,8 +541,11 @@ bool init_mpu6050()
     // Init pins
     init_pin(i2c_sda, PROT_I2C);
     init_pin(i2c_scl, PROT_I2C);
+    i2c_init(i2c_inst, 400000);
     gpio_pull_up(i2c_sda);
     gpio_pull_up(i2c_scl);
+
+    write_log("init_mpu6050", "MPU6050 WHOAMI ADDRESS: " + std::to_string(mpu6050_who_am_i(&mpu6050)), LOG_LVL_INFO);
 
     if (mpu6050_begin(&mpu6050))
     {
@@ -503,11 +559,24 @@ bool init_mpu6050()
         mpu6050_set_int_motion(&mpu6050, false);
         mpu6050_set_int_zero_motion(&mpu6050, false);
 
+        write_log("init_mpu6050", "MPU init successful.", LOG_LVL_INFO);
         return true;
     }
 
+    write_log("init_mpu6050", "MPU init failed.", LOG_LVL_WARN);
     publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_ENV_SENSORS, DIAG_HWID_ENV_IMU, DIAG_ERR_MSG_INIT_FAILED, NULL);
     return false;
+}
+
+
+// ---- Setup repeating timers ----
+void start_repeating_timers()
+{
+    add_repeating_timer_ms(motor_odom_rt_interval, motor_control_and_odom_timer_callback, NULL, &motor_odom_rt);
+    alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, edge_ir_pub_rt_interval, publish_edge_ir, NULL, &edge_ir_publish_rt);
+    alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, ultra_pub_rt_interval, publish_ultra, NULL, &ultrasonic_publish_rt);
+    alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, sensors_pub_rt_interval, publish_misc_sens, NULL, &other_sensors_publish_rt);
+    ultrasonic_ir_edge_rt_active = true;
 }
 
 
@@ -521,9 +590,6 @@ void setup()
     init_pin(pi_power_relay, OUTPUT);
     init_pin(edge_sens_en, OUTPUT);
 
-    // UART output
-    stdio_init_all();
-
     // Misc. init
     adc_init();
     adc_set_temp_sensor_enabled(true);
@@ -535,14 +601,21 @@ void setup()
     r_motors_safety.set_set_vs_actual_spd_time_tolerance(motor_actual_vs_set_extra_timeout);
     l_motors_safety.set_set_vs_actual_spd_time_tolerance(motor_actual_vs_set_extra_timeout);
 
-    // MicroROS init
-    init_subs_pubs();
-    exec_init();
-    uros_init(UROS_NODE_NAME, UROS_NODE_NAMESPACE);
-    rclc_executor_spin(&rc_executor);
+    //stdio_init_all();
+    //stdio_filter_driver(&stdio_usb);   // Filter the output of STDIO to USB.
+    //write_log("main", "STDIO init!", LOG_LVL_INFO);
 
-    // Repeating timers
-    add_repeating_timer_ms(motor_odom_rt_interval, motor_control_and_odom_timer_callback, NULL, &motor_odom_rt);
+    // MicroROS transport init
+    rmw_uros_set_custom_transport(
+		true,
+		NULL,
+		pico_serial_transport_open,
+		pico_serial_transport_close,
+		pico_serial_transport_write,
+		pico_serial_transport_read
+	);
+
+    // MicroROS and timer inits are performed in the core 0 loop.
 }
 
 
@@ -550,16 +623,11 @@ void setup()
 void setup1()
 {
     // MPU init
+    write_log("setup1", "Begin MPU6050 init.", LOG_LVL_INFO);
     check_bool(init_mpu6050(), RT_HARD_CHECK);
 
     // Create alarm pool for core 1 timers
     core_1_alarm_pool = alarm_pool_create(4, 3);
-
-    // Repeating timers
-    ultrasonic_ir_edge_rt_active = true;
-    alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, edge_ir_pub_rt_interval, publish_edge_ir, NULL, &edge_ir_publish_rt);
-    alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, ultra_pub_rt_interval, publish_ultra, NULL, &ultrasonic_publish_rt);
-    alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, sensors_pub_rt_interval, publish_misc_sens, NULL, &other_sensors_publish_rt);
 }
 
 
@@ -582,10 +650,18 @@ int main()
 {
     multicore_reset_core1();
 
+    // UART output
+    stdio_init_all();
+    stdio_filter_driver(&stdio_usb);   // Filter the output of STDIO to USB.
+    write_log("main", "STDIO init, program starting...", LOG_LVL_INFO);
+
     // Wait for 5 seconds
-    // TODO: Should wait for signal from Raspberry Pi computer.
+    init_pin(power_led, OUTPUT);
+    init_pin(onboard_led, OUTPUT);
+
     for (int i = 0; i < 5; i++)
     {
+        write_log("main", "Waiting...", LOG_LVL_INFO);
         gpio_put(power_led, HIGH);
         gpio_put(onboard_led, HIGH);
         sleep_ms(500);
@@ -597,10 +673,44 @@ int main()
     setup();
     multicore_launch_core1(main_core_1);
 
+    gpio_put(onboard_led, HIGH);
     gpio_put(power_led, HIGH);
 
     // Core 0 loop
-    while (!halt_core_0);   // All core 0 functions run on timers. Nothing needs to be run in a loop.
+    while (!halt_core_0)
+    {
+        switch (current_uros_state) 
+        {
+    	    case WAITING_FOR_AGENT:
+    	        current_uros_state = ping_agent() ? AGENT_AVAILABLE:WAITING_FOR_AGENT;
+    	        break;
+    	    
+            case AGENT_AVAILABLE:
+    	        uros_init(UROS_NODE_NAME, UROS_NODE_NAMESPACE);
+                init_subs_pubs();
+                exec_init();
+                start_repeating_timers();
 
+    	        current_uros_state = AGENT_CONNECTED;
+    	        break;
+    	    
+            case AGENT_CONNECTED:
+    	        current_uros_state = ping_agent() ? AGENT_CONNECTED:AGENT_DISCONNECTED;
+    	        
+                if (current_uros_state == AGENT_CONNECTED) 
+                {
+    	            rclc_executor_spin_some(&rc_executor, UROS_EXEC_TIMEOUT_MS * 1000000);
+    	        }
+    	        
+                break;
+    	    
+            case AGENT_DISCONNECTED:
+                // TODO: Maybe wait for the agent to connect again?
+    	        clean_shutdown();
+    	        break;
+    	}
+    }
+
+    write_log("main", "Program exit.", LOG_LVL_INFO);
     return 0;
 }

@@ -18,8 +18,7 @@
 */
 
 #pragma once
-#include "../Common_Definitions.h"
-#include "../Diagnostics_Definitons.h"
+#include "local_helpers_lib/Common_Definitions.h"
 #include "Diag_Msgs.h"
 
 
@@ -48,8 +47,9 @@
 #define ms_back_r   10
 
 // ---- I2C ----
-#define i2c_sda  0
-#define i2c_scl  1
+#define i2c_inst   i2c0   // I2C instance (0 & 1 are on I2C0)
+#define i2c_sda    0
+#define i2c_scl    1
 
 
 // ------- Other definitions -------
@@ -59,9 +59,10 @@
 #define batt_voltage_divider_r2  2.7 * 1000   // In ohms (2.7k ohms)
 
 // ---- MicroROS node config ----
-#define UROS_NODE_NAME       "pico_b"
-#define UROS_NODE_NAMESPACE  "io"
+#define UROS_NODE_NAME        "pico_b"
+#define UROS_NODE_NAMESPACE   "io"
+#define UROS_EXEC_TIMEOUT_MS  80   // In milliseconds
 
 // ---- Repeating timer intervals ----
-#define microsw_pub_rt_interval   100   // In milliseconds
+#define microsw_pub_rt_interval   200   // In milliseconds
 #define sensors_pub_rt_interval   80    // In milliseconds

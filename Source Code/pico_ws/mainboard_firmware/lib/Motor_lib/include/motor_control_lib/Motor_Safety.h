@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include "Motor_Encoder.h"   // Motor encoder interface
-#include "Motor.h"           // Motor controller
+#include "motor_control_lib/Motor_Encoder.h"   // Motor encoder interface
+#include "motor_control_lib/Motor.h"           // Motor controller
 #include "pico/stdlib.h"
 
 

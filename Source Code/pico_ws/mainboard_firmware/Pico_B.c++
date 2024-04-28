@@ -32,7 +32,7 @@
 #include "pico_b_helpers/Sensor_Publishers.c++"
 #include "pico_b_helpers/uROS_Init.h"
 #include "pico_b_helpers/Definitions.h"
-#include "pico_b_helpers/Local_Helpers.h"
+#include "local_helpers_lib/Local_Helpers.h"
 #include "pico_b_helpers/IO_Helpers_General.h"
 #include "uart_transport/pico_uart_transports.h"
 #include <rmw_microros/rmw_microros.h>
@@ -47,6 +47,10 @@ bool halt_core_0 = false;
 bool self_test_mode = false;
 alarm_pool_t *core_1_alarm_pool;
 
+// ---- MicroROS state ----
+enum UROS_STATE {WAITING_FOR_AGENT, AGENT_AVAILABLE, AGENT_CONNECTED, AGENT_DISCONNECTED};
+UROS_STATE current_uros_state = WAITING_FOR_AGENT;
+
 // ---- Timer execution times storage (milliseconds) ----
 uint32_t last_microsw_publish_time, last_other_sensors_publish_time;
 
@@ -60,6 +64,8 @@ struct repeating_timer microsw_publish_rt, other_sensors_publish_rt;
 // ---- Graceful shutdown ----
 void clean_shutdown()
 {
+    write_log("clean_shutdown", "A clean shutdown has been triggered. The program will now shut down.", LOG_LVL_FATAL);
+
     // Stop all repeating timers
     cancel_repeating_timer(&microsw_publish_rt);
     cancel_repeating_timer(&other_sensors_publish_rt);
@@ -69,10 +75,15 @@ void clean_shutdown()
     set_camera_leds(0, 0, 0, 0);
 
     // MicroROS cleanup
-    // TODO: ADD ALL PUBS AND SUBS.
-    check_rc(rcl_publisher_fini(&diagnostics_pub, &rc_node), RT_LOG_ONLY_CHECK);
-    check_rc(rclc_executor_fini(&rc_executor), RT_LOG_ONLY_CHECK);
-    check_rc(rcl_node_fini(&rc_node), RT_LOG_ONLY_CHECK);
+    rcl_service_fini(&en_camera_leds_srv, &rc_node);
+    rcl_service_fini(&run_self_test_srv, &rc_node);
+    rcl_subscription_fini(&e_stop_sub, &rc_node);
+    rcl_publisher_fini(&diagnostics_pub, &rc_node);
+    rcl_publisher_fini(&misc_sensor_pub, &rc_node);
+    rcl_publisher_fini(&microsw_sensor_pub, &rc_node);
+    rclc_executor_fini(&rc_executor);
+    rcl_node_fini(&rc_node);
+    rclc_support_fini(&rc_supp);
 
 
     // Stop core 0 (only effective when this function is called from core 1)
@@ -86,6 +97,8 @@ void clean_shutdown()
 
     while (true)
     {
+        write_log("clean_shutdown", "Program shutdown hang loop.", LOG_LVL_INFO);
+
         gpio_put_pwm(cam_led_1, 0);
         gpio_put(onboard_led, LOW);
         sleep_ms(100);
@@ -116,13 +129,32 @@ void en_camera_leds_callback(const void *req, void *res)
     rrp_pico_coms__srv__SetCameraLeds_Request *req_in = (rrp_pico_coms__srv__SetCameraLeds_Request *) req;
     rrp_pico_coms__srv__SetCameraLeds_Response *res_in = (rrp_pico_coms__srv__SetCameraLeds_Response *) res;
 
+    char buffer[75];
+    sprintf(buffer, "Received set_camera_leds: [c1: %u, c2: %u, c3: %u, c4: %u]", req_in->led_outputs[0], req_in->led_outputs[1], req_in->led_outputs[2], req_in->led_outputs[3]);
+    write_log("en_camera_leds_callback", buffer, LOG_LVL_INFO);
+
     set_camera_leds(req_in->led_outputs[0], req_in->led_outputs[1], req_in->led_outputs[2], req_in->led_outputs[3]);
     res_in->success = true;
 }
 
 
+// ---- Run self-test functions service ----
+void run_self_test_callback(const void *req, void *res)
+{
+
+}
+
+
 
 // ------- Main program -------
+
+// ---- Setup repeating timers ----
+void start_repeating_timers()
+{
+    add_repeating_timer_ms(microsw_pub_rt_interval, publish_microsw_sens, NULL, &microsw_publish_rt);
+    alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, sensors_pub_rt_interval, publish_misc_sens, NULL, &other_sensors_publish_rt);
+}
+
 
 // ---- Setup function (Runs once on core 0) ----
 void setup()
@@ -149,21 +181,25 @@ void setup()
     gpio_set_irq_enabled(ms_back_r, GPIO_IRQ_EDGE_FALL, true);
     gpio_set_irq_enabled(ms_back_l, GPIO_IRQ_EDGE_FALL, true);
 
-    // UART output
-    stdio_init_all();
-
     // Misc. init
     adc_init();
     adc_set_temp_sensor_enabled(true);
 
-    // MicroROS init
-    init_subs_pubs();
-    exec_init();
-    uros_init(UROS_NODE_NAME, UROS_NODE_NAMESPACE);
-    rclc_executor_spin(&rc_executor);
+    //stdio_init_all();
+    //stdio_filter_driver(&stdio_usb);   // Filter the output of STDIO to USB.
+    //write_log("main", "STDIO init!", LOG_LVL_INFO);
 
-    // Repeating timers
-    add_repeating_timer_ms(microsw_pub_rt_interval, publish_microsw_sens, NULL, &microsw_publish_rt);
+    // MicroROS transport init
+    rmw_uros_set_custom_transport(
+		true,
+		NULL,
+		pico_serial_transport_open,
+		pico_serial_transport_close,
+		pico_serial_transport_write,
+		pico_serial_transport_read
+	);
+
+    // MicroROS and timer inits are performed in the core 0 loop.
 }
 
 
@@ -172,9 +208,6 @@ void setup1()
 {
     // Create alarm pool for core 1 timers
     core_1_alarm_pool = alarm_pool_create(4, 3);
-
-    // Repeating timers
-    alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, sensors_pub_rt_interval, publish_misc_sens, NULL, &other_sensors_publish_rt);
 }
 
 
@@ -197,10 +230,18 @@ int main()
 {
     multicore_reset_core1();
 
+    // UART output
+    stdio_init_all();
+    stdio_filter_driver(&stdio_usb);   // Filter the output of STDIO to USB.
+    write_log("main", "STDIO init, program starting...", LOG_LVL_INFO);
+
     // Wait for 5 seconds
-    // TODO: Should wait for signal from Raspberry Pi computer.
+    init_pin(onboard_led, OUTPUT);
+    init_pin(cam_led_1, OUTPUT_PWM);
+    
     for (int i = 0; i < 5; i++)
     {
+        write_log("main", "Waiting...", LOG_LVL_INFO);
         gpio_put_pwm(cam_led_1, 65535);
         gpio_put(onboard_led, HIGH);
         sleep_ms(500);
@@ -212,10 +253,43 @@ int main()
     setup();
     multicore_launch_core1(main_core_1);
 
-    //gpio_put(power_led, HIGH);
+    gpio_put(onboard_led, HIGH);
 
     // Core 0 loop
-    while (!halt_core_0);   // All core 0 functions run on timers. Nothing needs to be run in a loop.
+    while (!halt_core_0)
+    {
+        switch (current_uros_state) 
+        {
+    	    case WAITING_FOR_AGENT:
+    	        current_uros_state = ping_agent() ? AGENT_AVAILABLE:WAITING_FOR_AGENT;
+    	        break;
+    	    
+            case AGENT_AVAILABLE:
+    	        uros_init(UROS_NODE_NAME, UROS_NODE_NAMESPACE);
+                init_subs_pubs();
+                exec_init();
+                start_repeating_timers();
 
+    	        current_uros_state = AGENT_CONNECTED;
+    	        break;
+    	    
+            case AGENT_CONNECTED:
+    	        current_uros_state = ping_agent() ? AGENT_CONNECTED:AGENT_DISCONNECTED;
+    	        
+                if (current_uros_state == AGENT_CONNECTED) 
+                {
+    	            rclc_executor_spin_some(&rc_executor, UROS_EXEC_TIMEOUT_MS * 1000000);
+    	        }
+    	        
+                break;
+    	    
+            case AGENT_DISCONNECTED:
+                // TODO: Maybe wait for the agent to connect again?
+    	        clean_shutdown();
+    	        break;
+    	}
+    }
+
+    write_log("main", "Program exit.", LOG_LVL_INFO);
     return 0;
 }

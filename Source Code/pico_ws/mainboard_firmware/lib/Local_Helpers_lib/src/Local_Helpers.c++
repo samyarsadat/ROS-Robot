@@ -1,13 +1,17 @@
 /*
-    The ROS robot project - Pico A local helper functions
-    Copyright 2022-2024 Samyar Sadat Akhavi
-    Written by Samyar Sadat Akhavi, 2022-2024.
+    The ROS robot project - Local Helper/commonly used functions
+    These are specific MicroROS/IO/etc. functions/definitions that are not 
+    designed to be used in any other programs.
+    They are program-specific.
+    
+    Copyright 2024 Samyar Sadat Akhavi
+    Written by Samyar Sadat Akhavi, 2024.
  
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-  
+ 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -19,44 +23,61 @@
 
 
 // ------- Libraries & Modules -------
-#include "Local_Helpers.h"
+#include "local_helpers_lib/Local_Helpers.h"
 #include "pico/stdlib.h"
 #include <rcl/rcl.h>
-#include "Definitions.h"
-#include "pico/multicore.h"
-#include "uROS_Init.h"
 #include <string>
+#include <rmw_microros/rmw_microros.h>
+#include <diagnostic_msgs/msg/diagnostic_status.h>
+#include "pico/stdio_uart.h"
+#include "pico/stdio/driver.h"
+#include "pico/stdio.h"
 
 
 
 // ------- Functions ------- 
 
 // ----- RETURN CHECKERS -----
-// Note: clean_shutdown() must be defines elsewhere!
-// Note: publish_diag_report() must be defines elsewhere!
+// Note: clean_shutdown() must be defined elsewhere!
+// Note: diagnostics_msg (type: diagnostic_msgs__msg__DiagnosticStatus) must be defined eslewhere!
+// Note: diagnostics_pub (type: rcl_publisher_t) must be defined eslewhere!
 
+extern diagnostic_msgs__msg__DiagnosticStatus diagnostics_msg;
+extern rcl_publisher_t diagnostics_pub;
 extern void clean_shutdown();
 void publish_diag_report(uint8_t level, char *hw_name, char *hw_id, char *msg, diagnostic_msgs__msg__KeyValue *key_values);
+void write_log(std::string src, std::string msg, LOG_LEVEL lvl);
+
 
 // --- RCL return checker ---
 bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode)
 {
     if (rctc != RCL_RET_OK)
     {
+        char buffer[60];
+
         switch (mode)
         {
             case RT_HARD_CHECK:
+                sprintf(buffer, "RCL Return check failed: [code: %d, RT_HARD_CHECK]", rctc);
+                write_log("check_rc", buffer, LOG_LVL_FATAL);
+                
                 publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_UROS, DIAG_HWID_UROS, DIAG_ERR_MSG_UROS_RC_CHECK_FAIL, NULL);
                 clean_shutdown();
                 break;
 
             case RT_SOFT_CHECK:
+                sprintf(buffer, "RCL Return check failed: [code: %d, RT_SOFT_CHECK]", rctc);
+                write_log("check_rc", buffer, LOG_LVL_ERROR);
+                
                 publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UROS, DIAG_HWID_UROS, DIAG_WARN_MSG_UROS_RC_CHECK_FAIL, NULL);
                 return false;
                 break;
             
             case RT_LOG_ONLY_CHECK:
-                // TODO: LOGGING
+                sprintf(buffer, "RCL Return check failed: [code: %d, RT_LOG_ONLY_CHECK]", rctc);
+                write_log("check_rc", buffer, LOG_LVL_WARN);
+
                 return false;
                 break;
 
@@ -77,16 +98,18 @@ bool check_bool(bool function, RT_CHECK_MODE mode)
         switch (mode)
         {
             case RT_HARD_CHECK:
+                write_log("check_bool", "BOOL Return check failed: [RT_HARD_CHECK]", LOG_LVL_FATAL);
                 publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_ERR_MSG_BOOL_RT_CHECK_FAIL, NULL);
                 clean_shutdown();
                 break;
 
             case RT_SOFT_CHECK:
+                write_log("check_bool", "BOOL Return check failed: [RT_SOFT_CHECK]", LOG_LVL_ERROR);
                 publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_BOOL_RT_CHECK_FAIL, NULL);
                 break;
             
             case RT_LOG_ONLY_CHECK:
-                // TODO: LOGGING
+                write_log("check_bool", "BOOL Return check failed: [RT_LOG_ONLY_CHECK]", LOG_LVL_WARN);
                 break;
 
             default:
@@ -110,6 +133,11 @@ void publish_diag_report(uint8_t level, char *hw_name, char *hw_id, char *msg, d
     diagnostics_msg.values.data = NULL;
     diagnostics_msg.values.size = 0;
     diagnostics_msg.level = level;
+
+    // TODO: LOGGING
+    /*char buffer[60];
+    sprintf(buffer, "Publishing diagnostics report: [hwname: %d, hwid: %s, lvl: %u]", hw_name);
+    write_log("publish_diag_report", buffer, LOG_LVL_FATAL);*/
     
     if (key_values != NULL)
     {
@@ -140,6 +168,15 @@ void write_log(std::string src, std::string msg, LOG_LEVEL lvl)
     else if (lvl == LOG_LVL_ERROR) { level = "ERROR"; }
     else if (lvl == LOG_LVL_FATAL) { level = "FATAL"; }
 
-    std::string log_msg = "[%u.%u] [%s] [" + src + "]: " + msg;
-    printf(log_msg.c_str(), timestamp_sec, timestamp_nanosec, level.c_str());
+    // This is quite ugly, but it works.
+    std::string log_msg = "[" + std::to_string(timestamp_sec) + "." + std::to_string(timestamp_nanosec) + "] [" + level + "] [" + src + "]: " + msg + "\r\n";
+    stdio_uart.out_chars(log_msg.c_str(), log_msg.length());
+}
+
+
+// ---- Pings the MicroROS agent ----
+bool ping_agent()
+{
+    bool success = (rmw_uros_ping_agent(uros_agent_find_timeout_ms, uros_agent_find_attempts) == RMW_RET_OK);
+    return success;
 }

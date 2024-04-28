@@ -1,13 +1,17 @@
 /*
-    The ROS robot project - Pico A local helper functions
-    Copyright 2022-2024 Samyar Sadat Akhavi
-    Written by Samyar Sadat Akhavi, 2022-2024.
+    The ROS robot project - Local Helper/commonly used functions
+    These are specific MicroROS/IO/etc. functions/definitions that are not 
+    designed to be used in any other programs.
+    They are program-specific.
+    
+    Copyright 2024 Samyar Sadat Akhavi
+    Written by Samyar Sadat Akhavi, 2024.
  
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-  
+ 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -22,10 +26,10 @@
 
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
+#include "local_helpers_lib/Diagnostics_Definitons.h"
+#include "local_helpers_lib/Common_Definitions.h"
+#include <diagnostic_msgs/msg/diagnostic_status.h>
 #include <rcl/rcl.h>
-#include "Definitions.h"
-#include "pico/multicore.h"
-#include "uROS_Init.h"
 #include <string>
 
 
@@ -39,8 +43,8 @@ enum LOG_LEVEL {LOG_LVL_INFO, LOG_LVL_WARN, LOG_LVL_ERROR, LOG_LVL_FATAL};
 // ------- Functions ------- 
 
 // ----- RETURN CHECKERS -----
-// Note: clean_shutdown() must be defines elsewhere!
-// Note: publish_diag_report() must be defines elsewhere!
+// Note: clean_shutdown() must be defined elsewhere!
+// Note: diagnostics_msg (type: diagnostic_msgs__msg__DiagnosticStatus) must be defined eslewhere!
 
 // --- RCL return checker ---
 bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode);
@@ -53,3 +57,6 @@ void publish_diag_report(uint8_t level, char *hw_name, char *hw_id, char *msg, d
 
 // ---- Logging functions ----
 void write_log(std::string src, std::string msg, LOG_LEVEL lvl);
+
+// ---- Pings the MicroROS agent ----
+bool ping_agent();

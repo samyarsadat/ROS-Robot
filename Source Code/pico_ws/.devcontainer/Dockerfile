@@ -24,9 +24,9 @@
 FROM ros:humble
 
 
-# Install git, pip and curl
+# Install git, pip, curl, and udev
 RUN apt-get update \
-    && apt-get install -y git python3-pip curl \
+    && apt-get install -y git python3-pip curl udev \
     && rm -rf /var/lib/apt/lists/* && apt-get autoremove && apt-get autoclean
 
 # Create non-root user
@@ -57,10 +57,16 @@ RUN cd /home/$USERNAME && mkdir uros_tools_temp \
 
 # Copy configuration files
 USER ${USERNAME}
-COPY vscode_config/c_cpp_properties.json /home/$USERNAME/pico_ws/.vscode/c_cpp_properties.json
-COPY vscode_config/settings.json /home/$USERNAME/pico_ws/.vscode/settings.json
-RUN echo 'source /opt/ros/'$ROS_DISTRO'/setup.bash' >> /home/$USERNAME/.bashrc \
-    && echo 'source /home/'$USERNAME'/pico_ws/uros_ws/src/micro_ros_setup/install/local_setup.bash' >> /home/$USERNAME/.bashrc
+COPY vscode_config/* /home/$USERNAME/pico_ws/.vscode/
+RUN echo "source /opt/ros/"$ROS_DISTRO"/setup.bash" >> /home/$USERNAME/.bashrc \
+    && echo "source /home/"$USERNAME"/pico_ws/uros_ws/src/micro_ros_setup/install/local_setup.bash" >> /home/$USERNAME/.bashrc
+
+# OpenOCD Debug Probe permission fix
+USER root
+ARG DP_VENDOR_ID="xxxx"
+RUN mkdir -p /etc/udev/rules.d && cd /etc/udev/rules.d \
+    && touch 99-openocd.rules \
+    && echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="'$DP_VENDOR_ID'", MODE="0666"' > 99-openocd.rules
 
 # Environment setup
 COPY entrypoint.sh /entrypoint.sh

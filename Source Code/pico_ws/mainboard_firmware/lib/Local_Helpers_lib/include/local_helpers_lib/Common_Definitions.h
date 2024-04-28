@@ -1,13 +1,15 @@
 /*
-    The ROS robot project - Common Program Definitions
-    Copyright 2022-2024 Samyar Sadat Akhavi
-    Written by Samyar Sadat Akhavi, 2022-2024.
+    The ROS robot project - Local Helper/commonly used functions
+    Common program definitions
+    
+    Copyright 2024 Samyar Sadat Akhavi
+    Written by Samyar Sadat Akhavi, 2024.
  
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-  
+ 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -19,6 +21,8 @@
 
 #pragma once
 #include <limits>
+#include "local_helpers_lib/Common_Diag_Msgs.h"
+#include "local_helpers_lib/Diagnostics_Definitons.h"
 #include <diagnostic_msgs/msg/diagnostic_status.h>
 
 
@@ -42,3 +46,7 @@
 #define DIAG_LVL_WARN  diagnostic_msgs__msg__DiagnosticStatus__WARN
 #define DIAG_LVL_ERROR  diagnostic_msgs__msg__DiagnosticStatus__ERROR
 #define DIAG_LVL_STALE  diagnostic_msgs__msg__DiagnosticStatus__STALE
+
+// ---- MicroROS agent detection ----
+#define uros_agent_find_timeout_ms  1000
+#define uros_agent_find_attempts    120

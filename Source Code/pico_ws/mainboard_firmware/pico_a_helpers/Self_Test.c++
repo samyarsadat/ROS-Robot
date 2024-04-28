@@ -21,7 +21,7 @@
 
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
-#include "../lib/Helper_lib/Helpers.h"
+#include "helpers_lib/Helpers.h"
 #include "IO_Helpers_Mux.h"
 #include "Definitions.h"
 

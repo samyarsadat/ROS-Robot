@@ -35,9 +35,10 @@
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <rcl/error_handling.h>
+#include <diagnostic_msgs/srv/self_test.h>
 #include <rclc/executor.h>
 #include "Definitions.h"
-#include "Local_Helpers.h"
+#include "local_helpers_lib/Local_Helpers.h"
 
 
 
@@ -76,10 +77,16 @@ rcl_service_t en_camera_leds_srv;
 rrp_pico_coms__srv__SetCameraLeds_Request en_camera_leds_req;
 rrp_pico_coms__srv__SetCameraLeds_Response en_camera_leds_res;
 
+// Initiate the self-test function
+rcl_service_t run_self_test_srv;
+diagnostic_msgs__srv__SelfTest_Request run_self_test_req;
+diagnostic_msgs__srv__SelfTest_Response run_self_test_res;
+
 
 
 // ------- Subscriber & service callback prototypes -------
 extern void en_camera_leds_callback(const void *req, void *res);
+extern void run_self_test_callback(const void *req, void *res);
 extern void clean_shutdown();
 void clean_shutdown_callback(const void *msgin) { clean_shutdown(); }
 
@@ -95,9 +102,11 @@ void init_subs_pubs()
     const rosidl_message_type_support_t *misc_sensors_type = ROSIDL_GET_MSG_TYPE_SUPPORT(rrp_pico_coms, msg, MiscSensorsB);
     const rosidl_message_type_support_t *microsw_sensors_type = ROSIDL_GET_MSG_TYPE_SUPPORT(rrp_pico_coms, msg, MicroSwSensors);
     const rosidl_service_type_support_t *set_camera_leds_type = ROSIDL_GET_SRV_TYPE_SUPPORT(rrp_pico_coms, srv, SetCameraLeds);
+    const rosidl_service_type_support_t *run_self_test_type = ROSIDL_GET_SRV_TYPE_SUPPORT(diagnostic_msgs, srv, SelfTest);
 
     // ---- Services ----
     check_rc(rclc_service_init_default(&en_camera_leds_srv, &rc_node, set_camera_leds_type, "/enable_disable/camera_leds"), RT_HARD_CHECK);
+    check_rc(rclc_service_init_default(&run_self_test_srv, &rc_node, run_self_test_type, "/self-test/pico_b"), RT_HARD_CHECK);
 
     // ---- E-stop topic ----
     check_rc(rclc_subscription_init_default(&e_stop_sub, &rc_node, empty_type, "/e_stop"), RT_HARD_CHECK);
@@ -119,11 +128,12 @@ void init_subs_pubs()
 void exec_init()
 {
     rc_executor = rclc_executor_get_zero_initialized_executor();
-    const uint num_handles = 2;
+    const uint num_handles = 3;
 
     check_rc(rclc_executor_init(&rc_executor, &rc_supp.context, num_handles, &rc_alloc), RT_HARD_CHECK);
     check_rc(rclc_executor_add_subscription(&rc_executor, &e_stop_sub, &e_stop_msg, &clean_shutdown_callback, ON_NEW_DATA), RT_HARD_CHECK);
     check_rc(rclc_executor_add_service(&rc_executor, &en_camera_leds_srv, &en_camera_leds_req, &en_camera_leds_res, en_camera_leds_callback), RT_HARD_CHECK);
+    check_rc(rclc_executor_add_service(&rc_executor, &run_self_test_srv, &run_self_test_req, &run_self_test_res, &run_self_test_callback), RT_HARD_CHECK);
 }
 
 

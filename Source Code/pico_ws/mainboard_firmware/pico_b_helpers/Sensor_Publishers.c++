@@ -22,14 +22,14 @@
 #include "pico/stdlib.h"
 #include "Definitions.h"
 #include "uROS_Init.h"
-#include "lib/Helper_lib/Helpers.h"
+#include "helpers_lib/Helpers.h"
 #include "IO_Helpers_General.h"
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <rcl/error_handling.h>
 #include <rclc/executor.h>
 #include <limits>
-#include "Local_Helpers.h"
+#include "local_helpers_lib/Local_Helpers.h"
 
 
 

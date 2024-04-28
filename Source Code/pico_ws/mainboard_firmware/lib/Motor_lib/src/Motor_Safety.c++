@@ -20,9 +20,9 @@
 */
 
 
-#include "Motor_Safety.h"
-#include "Motor_Encoder.h"   // Motor encoder interface
-#include "Motor.h"           // Motor controller
+#include "motor_control_lib/Motor_Safety.h"
+#include "motor_control_lib/Motor_Encoder.h"   // Motor encoder interface
+#include "motor_control_lib/Motor.h"           // Motor controller
 #include "pico/stdlib.h"
 #include <cstdlib>
 

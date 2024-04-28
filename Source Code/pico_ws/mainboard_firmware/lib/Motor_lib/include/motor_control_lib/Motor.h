@@ -22,9 +22,9 @@
 
 #pragma once
 
-#include "Motor_Driver.h"    // Motor driver interface
-#include "Motor_Encoder.h"   // Motor encoder interface
-#include "../PID_lib/PID_v1.h"
+#include "motor_control_lib/Motor_Driver.h"    // Motor driver interface
+#include "motor_control_lib/Motor_Encoder.h"   // Motor encoder interface
+#include "pid_v1_lib/PID_v1.h"
 #include "pico/stdlib.h"
 #include <memory>
 

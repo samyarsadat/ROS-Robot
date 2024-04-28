@@ -20,13 +20,13 @@
 
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
-#include "../lib/Helper_lib/Helpers.h"
+#include "helpers_lib/Helpers.h"
 #include "hardware/pwm.h"
 #include "IO_Helpers_Mux.h"
 #include "Definitions.h"
 #include <diagnostic_msgs/msg/diagnostic_status.h>
 #include <diagnostic_msgs/msg/key_value.h>
-#include "Local_Helpers.h"
+#include "local_helpers_lib/Local_Helpers.h"
 
 
 

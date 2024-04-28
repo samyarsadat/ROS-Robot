@@ -20,7 +20,8 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Library subdirectories
-add_subdirectory(Helper_lib)
+add_subdirectory(Helpers_lib)
+add_subdirectory(Local_Helpers_lib)
 add_subdirectory(Motor_lib)
 add_subdirectory(PID_lib)
 add_subdirectory(MPU_lib)

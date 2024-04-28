@@ -17,3 +17,13 @@ Reload the devcontainer after you have verified that the MicroROS tools have ins
 (Check whether `~/pico_ws/uros_ws/src/micro_ros_setup/install` exists.)<br>
 <br>
 When prompted to select a build kit by the CMake Tools extension, select `GCC [version] arm-none-eabi`.
+
+<br>
+
+## Note On Using Debug Probes
+If you're using a debug probe (such as the Raspberry Pi Debug Probe), make sure to change<br>
+the `DP_VENDOR_ID` argument in `.devcontainer/devcontainer.json` to the<br>
+Vendor ID of your debug probe.<br>
+<br>
+You can obtain the Vendor ID by running the `lsusb` command. The Vendor ID is<br>
+the four characters before the colon (VID:PID).

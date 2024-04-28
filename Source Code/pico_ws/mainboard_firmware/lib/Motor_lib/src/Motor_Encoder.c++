@@ -22,8 +22,8 @@
 
 
 #include "pico/stdlib.h"
-#include "../Helper_lib/Helpers.h"
-#include "Motor_Encoder.h"
+#include "helpers_lib/Helpers.h"
+#include "motor_control_lib/Motor_Encoder.h"
 
 
 /*  Constructor (dual-channel encoders)

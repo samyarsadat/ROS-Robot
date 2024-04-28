@@ -26,6 +26,7 @@
 #include <geometry_msgs/msg/twist.h>
 #include <geometry_msgs/msg/transform_stamped.h>
 #include <diagnostic_msgs/msg/diagnostic_status.h>
+#include <diagnostic_msgs/srv/self_test.h>
 #include <sensor_msgs/msg/range.h>
 #include <std_srvs/srv/set_bool.h>
 #include <nav_msgs/msg/odometry.h>
@@ -39,7 +40,7 @@
 #include <rcl/error_handling.h>
 #include <rclc/executor.h>
 #include "Definitions.h"
-#include "Local_Helpers.h"
+#include "local_helpers_lib/Local_Helpers.h"
 
 
 
@@ -110,6 +111,11 @@ rcl_service_t set_mtr_pid_tunings_srv;
 rrp_pico_coms__srv__SetPidTunings_Request set_mtr_pid_tunings_req;
 rrp_pico_coms__srv__SetPidTunings_Response set_mtr_pid_tunings_res;
 
+// Initiate the self-test function
+rcl_service_t run_self_test_srv;
+diagnostic_msgs__srv__SelfTest_Request run_self_test_req;
+diagnostic_msgs__srv__SelfTest_Response run_self_test_res;
+
 
 
 // ------- Subscriber & service callback prototypes -------
@@ -118,6 +124,7 @@ extern void en_motor_ctrl_callback(const void *req, void *res);
 extern void en_emitters_callback(const void *req, void *res);
 extern void en_relay_callback(const void *req, void *res);
 extern void set_mtr_pid_tunings_callback(const void *req, void *res);
+extern void run_self_test_callback(const void *req, void *res);
 extern void clean_shutdown();
 void clean_shutdown_callback(const void *msgin) { clean_shutdown(); }
 
@@ -128,6 +135,8 @@ void clean_shutdown_callback(const void *msgin) { clean_shutdown(); }
 // ---- Setup subscribers and publishers ----
 void init_subs_pubs()
 {
+    write_log("init_subs_pubs", "Initializing publishers, subscribers, and services...", LOG_LVL_INFO);
+
     const rosidl_message_type_support_t *twist_type = ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist);
     const rosidl_message_type_support_t *transform_s_type = ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, TransformStamped);
     const rosidl_message_type_support_t *diag_status_type = ROSIDL_GET_MSG_TYPE_SUPPORT(diagnostic_msgs, msg, DiagnosticStatus);
@@ -139,12 +148,14 @@ void init_subs_pubs()
     const rosidl_message_type_support_t *falloff_sensors_type = ROSIDL_GET_MSG_TYPE_SUPPORT(rrp_pico_coms, msg, FalloffSensors);
     const rosidl_service_type_support_t *set_bool_type = ROSIDL_GET_SRV_TYPE_SUPPORT(std_srvs, srv, SetBool);
     const rosidl_service_type_support_t *set_pid_tunings_type = ROSIDL_GET_SRV_TYPE_SUPPORT(rrp_pico_coms, srv, SetPidTunings);
+    const rosidl_service_type_support_t *run_self_test_type = ROSIDL_GET_SRV_TYPE_SUPPORT(diagnostic_msgs, srv, SelfTest);
 
     // ---- Services ----
     check_rc(rclc_service_init_default(&en_motor_ctrl_srv, &rc_node, set_bool_type, "/enable_disable/motor_ctrl"), RT_HARD_CHECK);
     check_rc(rclc_service_init_default(&en_emitters_srv, &rc_node, set_bool_type, "/enable_disable/emitters"), RT_HARD_CHECK);
     check_rc(rclc_service_init_default(&en_relay_srv, &rc_node, set_bool_type, "/enable_disable/pico_a_relay"), RT_HARD_CHECK);
     check_rc(rclc_service_init_default(&set_mtr_pid_tunings_srv, &rc_node, set_pid_tunings_type, "/config/set_motor_pid_tunings"), RT_HARD_CHECK);
+    check_rc(rclc_service_init_default(&run_self_test_srv, &rc_node, run_self_test_type, "/self-test/pico_a"), RT_HARD_CHECK);
 
     // ---- Command velocity topic ----
     check_rc(rclc_subscription_init_default(&cmd_vel_sub, &rc_node, twist_type, "/cmd_vel"), RT_HARD_CHECK);
@@ -179,29 +190,40 @@ void init_subs_pubs()
     // ---- Odometry -> base link transform topic ----
     check_rc(rclc_publisher_init_default(&odom_baselink_tf_pub, &rc_node, transform_s_type, "/tf/pico_odom_base"), RT_HARD_CHECK);
     geometry_msgs__msg__TransformStamped__init(&odom_baselink_tf_msg);
+
+    write_log("init_subs_pubs", "Init. completed.", LOG_LVL_INFO);
 }
 
 
 // ---- Executor init ----
 void exec_init()
 {
+    write_log("exec_init", "Initializing the MicroROS executor...", LOG_LVL_INFO);
+
     rc_executor = rclc_executor_get_zero_initialized_executor();
-    const uint num_handles = 6;
+    const uint num_handles = 7;
 
     check_rc(rclc_executor_init(&rc_executor, &rc_supp.context, num_handles, &rc_alloc), RT_HARD_CHECK);
     check_rc(rclc_executor_add_subscription(&rc_executor, &cmd_vel_sub, &cmd_vel_msg, &cmd_vel_call, ON_NEW_DATA), RT_HARD_CHECK);
     check_rc(rclc_executor_add_subscription(&rc_executor, &e_stop_sub, &e_stop_msg, &clean_shutdown_callback, ON_NEW_DATA), RT_HARD_CHECK);
-    check_rc(rclc_executor_add_service(&rc_executor, &en_motor_ctrl_srv, &en_motor_ctrl_req, &en_motor_ctrl_res, en_motor_ctrl_callback), RT_HARD_CHECK);
-    check_rc(rclc_executor_add_service(&rc_executor, &en_emitters_srv, &en_emitters_req, &en_emitters_res, en_emitters_callback), RT_HARD_CHECK);
-    check_rc(rclc_executor_add_service(&rc_executor, &en_relay_srv, &en_relay_req, &en_relay_res, en_relay_callback), RT_HARD_CHECK);
-    check_rc(rclc_executor_add_service(&rc_executor, &set_mtr_pid_tunings_srv, &set_mtr_pid_tunings_req, &set_mtr_pid_tunings_res, set_mtr_pid_tunings_callback), RT_HARD_CHECK);
+    check_rc(rclc_executor_add_service(&rc_executor, &en_motor_ctrl_srv, &en_motor_ctrl_req, &en_motor_ctrl_res, &en_motor_ctrl_callback), RT_HARD_CHECK);
+    check_rc(rclc_executor_add_service(&rc_executor, &en_emitters_srv, &en_emitters_req, &en_emitters_res, &en_emitters_callback), RT_HARD_CHECK);
+    check_rc(rclc_executor_add_service(&rc_executor, &en_relay_srv, &en_relay_req, &en_relay_res, &en_relay_callback), RT_HARD_CHECK);
+    check_rc(rclc_executor_add_service(&rc_executor, &set_mtr_pid_tunings_srv, &set_mtr_pid_tunings_req, &set_mtr_pid_tunings_res, &set_mtr_pid_tunings_callback), RT_HARD_CHECK);
+    check_rc(rclc_executor_add_service(&rc_executor, &run_self_test_srv, &run_self_test_req, &run_self_test_res, &run_self_test_callback), RT_HARD_CHECK);
+
+    write_log("exec_init", "Init. completed.", LOG_LVL_INFO);
 }
 
 
 // ---- Node init ----
 void uros_init(const char *node_name, const char *name_space)
 {
+    write_log("uros_init", "Initializing the MicroROS node...", LOG_LVL_INFO);
+
     rc_alloc = rcl_get_default_allocator();
     check_rc(rclc_support_init(&rc_supp, 0, NULL, &rc_alloc), RT_HARD_CHECK);
     check_rc(rclc_node_init_default(&rc_node, node_name, name_space, &rc_supp), RT_HARD_CHECK);
+    
+    write_log("uros_init", "Init. completed.", LOG_LVL_INFO);
 }

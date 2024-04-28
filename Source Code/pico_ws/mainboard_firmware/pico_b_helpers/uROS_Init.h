@@ -32,6 +32,7 @@
 #include <rrp_pico_coms/msg/misc_sensors_b.h>
 #include <rrp_pico_coms/msg/micro_sw_sensors.h>
 #include <rrp_pico_coms/srv/set_camera_leds.h>
+#include <diagnostic_msgs/srv/self_test.h>
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
@@ -72,6 +73,11 @@ extern rrp_pico_coms__msg__MicroSwSensors microsw_sensor_msg;
 extern rcl_service_t en_camera_leds_srv;
 extern rrp_pico_coms__srv__SetCameraLeds_Request en_camera_leds_req;
 extern rrp_pico_coms__srv__SetCameraLeds_Response en_camera_leds_res;
+
+// Initiate the self-test function
+extern rcl_service_t run_self_test_srv;
+extern diagnostic_msgs__srv__SelfTest_Request run_self_test_req;
+extern diagnostic_msgs__srv__SelfTest_Response run_self_test_res;
 
 
 
