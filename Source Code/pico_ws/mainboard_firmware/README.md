@@ -35,4 +35,41 @@ _Usually, I would only use the second method for measuring motor speed; However,
 and accurately measure motor speeds by only using the second method.<br>
 <br>
 In the current implementation, motor speed is measured using the first method as long as the speed measured by the second method is above 10 RPM. When the second method's reading drops below 10 RPM,
-the program starts using the second method's measurement. Thanks to this implementation, we get accurate readings whilst also being able to measure 0 RPM._
+the program starts using the second method's measurement. Thanks to this implementation, we get accurate readings whilst also being able to measure 0 RPM._<br>
+
+<br>
+
+## Important Note 2:
+_This table shows the actual pin numbers to which each motor encoder, driver channel, and microswitch are connected to.<br>
+These may not be the same as the ones that are indicated in the Overall Circuit Diagram or the PCB schematics._<br>
+<br>
+
+#### Motor Encoders
+| Name (definition)        | Encoder locati**on      | Pico GPIO number | PCB connector |
+| ------------------------ | --------------**------- | ---------------- | ------------- |
+| r_motor_1_enc_a          | Front Right (Ch. A)   | GPIO 7           | H19 (Pin 5)   |
+| r_motor_1_enc_b          | Front Right (Ch. B)   | GPIO 8           | H19 (Pin 4)   |
+| r_motor_2_enc_a          | Back Right (Ch. A)    | GPIO 22          | H19 (Pin 1)   |
+| r_motor_2_enc_b          | Back Right (Ch. B)    | GPIO 11          | H24 (Pin 5)   |
+| l_motor_1_enc_a          | Front Left (Ch. A)    | GPIO 12          | H24 (Pin 3)   |
+| l_motor_1_enc_b          | Front Left (Ch. B)    | GPIO 27          | H24 (Pin 4)   |
+| l_motor_2_enc_a          | Back Left (Ch. A)     | GPIO 10          | H19 (Pin 2)   |
+| l_motor_2_enc_b          | Back Left (Ch. B)     | GPIO 9           | H19 (Pin 3)   |
+<br>
+
+#### Motor Driver
+| Name (definition)        | Driver Channel        | Pico GPIO number | PCB connector |
+| ------------------------ | --------------------- | ---------------- | ------------- |
+| r_motor_drive_1          | Out 3 (Right Motors)  | GPIO 20          | H2 (Pin 3)    |
+| r_motor_drive_2          | Out 4 (Right Motors)  | GPIO 21          | H2 (Pin 2)    |
+| l_motor_drive_1          | Out 1 (Left Motors)   | GPIO 18          | H2 (Pin 5)    |
+| l_motor_drive_2          | Out 2 (Left Motors)   | GPIO 19          | H2 (Pin 4)    |
+<br>
+
+#### Microswitches
+| Name (definition) | Location     | Pico GPIO number | PCB connector |
+| ----------------- | ------------ | ---------------- | ------------- |
+| ms_front_r        | Front Right  | GPIO 10          | H1            |
+| ms_front_l        | Front Left   | GPIO 11          | H4            |
+| ms_back_r         | Back Right   | GPIO 13          | H11           |
+| ms_back_l         | Back Left    | GPIO 12          | H8            |****

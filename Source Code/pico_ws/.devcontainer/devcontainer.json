@@ -29,7 +29,6 @@
     "build": {
         "dockerfile": "Dockerfile",
         "args": {
-            "DP_VENDOR_ID": "2e8a",
             "USERNAME": "urosdev",
             "GID": "1000",
             "UID": "1000"
@@ -69,10 +68,10 @@
 
     "runArgs": ["--net=host",
                 "--cap-add=SYS_PTRACE",
-                "--security-opt",
-                "seccomp=unconfined",
-                "--privileged",
-                "-v", "/dev/bus/usb:/dev/bus/usb",
-                "--device=/dev/bus/usb",
-                "--device=/dev/ttyACM0"]
+                "--security-opt", "seccomp=unconfined",
+                "--gpus", "all",
+                "-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw",
+                "--env=DISPLAY",
+                "-v", "/dev:/dev",
+                "--device-cgroup-rule=c *:* rmw"]
 }

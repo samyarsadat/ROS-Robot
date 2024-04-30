@@ -21,9 +21,22 @@ When prompted to select a build kit by the CMake Tools extension, select `GCC [v
 <br>
 
 ## Note On Using Debug Probes
-If you're using a debug probe (such as the Raspberry Pi Debug Probe), make sure to change<br>
-the `DP_VENDOR_ID` argument in `.devcontainer/devcontainer.json` to the<br>
-Vendor ID of your debug probe.<br>
+**NOTE: THIS ONLY APPLIES IF YOUR HOST MACHINE IS RUNNING LINUX!**<br>
+If you're using a debug probe (such as the Raspberry Pi Debug Probe), make sure to create
+a file named `60-openocd.rules` in `/etc/udev/rules.d` on the host machine (not the devcontainer)
+and copy the contents of `https://github.com/raspberrypi/openocd/blob/rp2040-v0.12.0/contrib/60-openocd.rules`
+into it. This is so that the probe can be accessed witout having to use `sudo`, which is needed when using
+the Cortex-Debug extension in VSCode.<br>
 <br>
-You can obtain the Vendor ID by running the `lsusb` command. The Vendor ID is<br>
-the four characters before the colon (VID:PID).
+Run `udevadm control --reload` (again, on the host machine) to make sure that the new rules take effect.
+
+<br>
+
+## Note On GUI Apps & Non-NVIDIA GPUs
+If you're using an NVIDIA GPU and your host machine is running Linux, make sure to install the NVIDIA Container Toolkit
+(https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
+If you aren't using an NVIDIA GPU, please remove the `"--gpus", "all",` line from `"runArgs"` in `devcontainer.json`.<br>
+<br>
+The devcontainer is currently configured for using X11. If you're using Wayland, you will have to change the
+`"-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw",` line from `"runArgs"` in `devcontainer.json`.
+If you don't want GUI support at all, simply remove `"-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw",` and `"--env=DISPLAY",`.

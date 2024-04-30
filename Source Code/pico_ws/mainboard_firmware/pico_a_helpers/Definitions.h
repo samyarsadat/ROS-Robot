@@ -49,18 +49,18 @@
 #define analog_mux_io  26
 
 // ---- Motor encoders & motor driver ----
-#define l_motor_1_enc_b  7
-#define l_motor_1_enc_a  9
-#define l_motor_2_enc_b  8
+#define l_motor_1_enc_b  27
+#define l_motor_1_enc_a  12
+#define l_motor_2_enc_b  9
 #define l_motor_2_enc_a  10
-#define r_motor_1_enc_b  22
-#define r_motor_1_enc_a  11
-#define r_motor_2_enc_b  27
-#define r_motor_2_enc_a  12
-#define l_motor_drive_1  21
-#define l_motor_drive_2  20
-#define r_motor_drive_1  19
-#define r_motor_drive_2  18
+#define r_motor_1_enc_b  8
+#define r_motor_1_enc_a  7
+#define r_motor_2_enc_b  11
+#define r_motor_2_enc_a  22
+#define l_motor_drive_1  18
+#define l_motor_drive_2  19
+#define r_motor_drive_1  20
+#define r_motor_drive_2  21
 
 // ---- I2C ----
 #define i2c_inst   i2c1   // I2C instance (14 & 15 are on I2C1)
@@ -99,6 +99,7 @@
 #define motor_actual_vs_set_extra_timeout   4000   // In milliseconds
 #define motor_single_side_max_difference    10     // In RPM
 #define motor_set_vs_actual_max_difference  60     // In RPM
+#define motor_rpm_method_1_cutoff           18     // In RPM
 #define right_motor_controller_id           0
 #define left_motor_controller_id            1
 

@@ -6,7 +6,6 @@ echo "-> uros_init.sh"
 if ! test -f /not_first_run; then
     echo "-> First container run, running MicroROS tools setup..."
 
-    sudo service udev restart   # Debug probe permission fix
     sudo chown -R urosdev: /home/urosdev/pico_ws/
     cp "/pico/pico-sdk/external/pico_sdk_import.cmake" /home/urosdev/pico_ws/pico_sdk_import.cmake
 

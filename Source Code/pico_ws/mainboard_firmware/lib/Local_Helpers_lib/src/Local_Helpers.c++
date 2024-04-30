@@ -152,6 +152,7 @@ void publish_diag_report(uint8_t level, char *hw_name, char *hw_id, char *msg, d
         In this case, this publish function would also not return RCL_RET_OK, resulting in its
         check_rc() calling publish_diag_report() and then the same thing happening over and over again.
     */
+    // FIXME: rcl_publish takes 1.5 secconds to execute...
     rcl_publish(&diagnostics_pub, &diagnostics_msg, NULL);
 }
 

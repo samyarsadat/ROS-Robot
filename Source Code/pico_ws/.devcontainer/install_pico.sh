@@ -7,7 +7,7 @@
 # Exit on error
 set -e
 
-JNUM=4          # Number of cores when running make
+JNUM=12         # Number of threads (jobs) when running make
 OUTDIR="/pico"  # Where will the output go?
 
 # Dependencies

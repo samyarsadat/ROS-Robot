@@ -24,9 +24,9 @@
 FROM ros:humble
 
 
-# Install git, pip, curl, and udev
+# Install git, pip, and curl
 RUN apt-get update \
-    && apt-get install -y git python3-pip curl udev \
+    && apt-get install -y git python3-pip curl nano \
     && rm -rf /var/lib/apt/lists/* && apt-get autoremove && apt-get autoclean
 
 # Create non-root user
@@ -54,6 +54,7 @@ RUN export NONROOT_USERNAME=${USERNAME} \
 USER ${USERNAME}
 RUN cd /home/$USERNAME && mkdir uros_tools_temp \
     && git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git uros_tools_temp
+COPY uros_agent/* /home/$USERNAME/pico_ws/uros_agent/
 
 # Copy configuration files
 USER ${USERNAME}
@@ -63,11 +64,12 @@ RUN echo "source /opt/ros/"$ROS_DISTRO"/setup.bash" >> /home/$USERNAME/.bashrc \
 
 # OpenOCD Debug Probe permission fix
 USER root
-ARG DP_VENDOR_ID="xxxx"
-RUN mkdir -p /etc/udev/rules.d && cd /etc/udev/rules.d \
-    && touch 99-openocd.rules \
-    && echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="'$DP_VENDOR_ID'", MODE="0666"' > 99-openocd.rules
+RUN usermod -aG plugdev ${USERNAME}
 
+# Raspberry Pi Pico TTY permission fix
+USER root
+RUN usermod -aG dialout ${USERNAME}
+    
 # Environment setup
 COPY entrypoint.sh /entrypoint.sh
 COPY uros_init.sh /uros_init.sh

@@ -72,7 +72,7 @@ class Motor
         void set_pid_ctrl_speed(float rpm);
 
         // Set PWM output for blind PWM control.
-        void set_pwm_ctrl_speed(int pwm_out);
+        void set_pwm_ctrl_speed(uint16_t pwm_out);
 
         // Set motor direction.
         // The actual direction in which the motor is 

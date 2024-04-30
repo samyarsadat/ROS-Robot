@@ -155,7 +155,7 @@ void init_subs_pubs()
     check_rc(rclc_service_init_default(&en_emitters_srv, &rc_node, set_bool_type, "/enable_disable/emitters"), RT_HARD_CHECK);
     check_rc(rclc_service_init_default(&en_relay_srv, &rc_node, set_bool_type, "/enable_disable/pico_a_relay"), RT_HARD_CHECK);
     check_rc(rclc_service_init_default(&set_mtr_pid_tunings_srv, &rc_node, set_pid_tunings_type, "/config/set_motor_pid_tunings"), RT_HARD_CHECK);
-    check_rc(rclc_service_init_default(&run_self_test_srv, &rc_node, run_self_test_type, "/self-test/pico_a"), RT_HARD_CHECK);
+    check_rc(rclc_service_init_default(&run_self_test_srv, &rc_node, run_self_test_type, "/self_test/pico_a"), RT_HARD_CHECK);
 
     // ---- Command velocity topic ----
     check_rc(rclc_subscription_init_default(&cmd_vel_sub, &rc_node, twist_type, "/cmd_vel"), RT_HARD_CHECK);

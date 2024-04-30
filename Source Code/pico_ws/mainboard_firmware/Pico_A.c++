@@ -350,11 +350,16 @@ void cmd_vel_call(const void *msgin)
     float angular = msg->angular.z;     // rad/s
     float linear = msg->linear.x;       // m/s
 
-    float motor_l_speed_ms = linear - (angular * ((wheelbase / 1000) / 2));               // Calculate motor speeds in m/s
+    float motor_l_speed_ms = linear - (angular * ((wheelbase / 1000) / 2));             // Calculate motor speeds in m/s
     float motor_r_speed_ms = linear + (angular * ((wheelbase / 1000) / 2));
 
-    r_motors.set_pid_ctrl_speed((motor_r_speed_ms / (wheel_circumference / 1000)) * 60);  // Convert motor speeds from m/s to RPM
-    l_motors.set_pid_ctrl_speed((motor_l_speed_ms / (wheel_circumference / 1000)) * 60);           
+    float motor_l_speed_rpm = (motor_l_speed_ms / (wheel_circumference / 1000)) * 60;   // Convert motor speeds from m/s to RPM
+    float motor_r_speed_rpm = (motor_r_speed_ms / (wheel_circumference / 1000)) * 60;
+
+    r_motors.set_pid_ctrl_speed(abs(motor_r_speed_rpm));
+    l_motors.set_pid_ctrl_speed(abs(motor_l_speed_rpm)); 
+    r_motors.set_motor_direction((motor_r_speed_rpm > 0) ? Motor::FORWARD : Motor::BACKWARD);
+    l_motors.set_motor_direction((motor_l_speed_rpm > 0) ? Motor::FORWARD : Motor::BACKWARD);         
 }
 
 
@@ -435,7 +440,8 @@ void publish_motor_ctrl_data()
     mtr_ctrl_l_state_msg.total_current = 0;            // TODO: Sensor not installed (for V2)
     mtr_ctrl_l_state_msg.driver_out_voltage = -1.0f;   // TODO: Sensor not installed (for V2)
 
-    check_rc(rcl_publish(&mtr_ctrl_l_state_pub, &mtr_ctrl_l_state_msg, NULL), RT_SOFT_CHECK);
+    // FIXME: rcl_publish is extremely slow and fails here.
+    //check_rc(rcl_publish(&mtr_ctrl_l_state_pub, &mtr_ctrl_l_state_msg, NULL), RT_SOFT_CHECK);
 }
 
 
@@ -503,8 +509,9 @@ void publish_odom_tf()
     odom_baselink_tf_msg.transform.rotation.z = theta;
 
     // Publish
-    check_rc(rcl_publish(&enc_odom_pub, &enc_odom_msg, NULL), RT_SOFT_CHECK);
-    check_rc(rcl_publish(&odom_baselink_tf_pub, &odom_baselink_tf_msg, NULL), RT_SOFT_CHECK);
+    // FIXME: rcl_publish is extremely slow and fails here.
+    //check_rc(rcl_publish(&enc_odom_pub, &enc_odom_msg, NULL), RT_SOFT_CHECK);
+    //check_rc(rcl_publish(&odom_baselink_tf_pub, &odom_baselink_tf_msg, NULL), RT_SOFT_CHECK);
 }
 
 
@@ -524,12 +531,26 @@ bool motor_control_and_odom_timer_callback(struct repeating_timer *rt)
         publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
     }
 
+    // Call the encoder timer callbacks
+    r_motor_1_enc.enc_timer_irq_trigger();
+    r_motor_2_enc.enc_timer_irq_trigger();
+    l_motor_1_enc.enc_timer_irq_trigger();
+    l_motor_2_enc.enc_timer_irq_trigger();
+
     // Calculate and set motor outputs
     r_motors.compute_outputs();
     l_motors.compute_outputs();
 
     publish_motor_ctrl_data();   // Publish motor controller data
     publish_odom_tf();           // Calculate and publish odometry data
+
+    /*char buffer[100];
+    sprintf(buffer, "L1: %.2f, L2: %.2f, R1: %.2f, R2: %.2f", l_motor_1_enc.get_m2_rpm(), l_motor_2_enc.get_m2_rpm(), r_motor_1_enc.get_m2_rpm(), r_motor_2_enc.get_m2_rpm());
+    write_log("mtr_debug", buffer, LOG_LVL_INFO);*/
+
+    /*char buffer[150];
+    sprintf(buffer, "L1: %d, L2: %d, R1: %d, R2: %d", l_motor_1_enc.get_pulse_counter(), l_motor_2_enc.get_pulse_counter(), r_motor_1_enc.get_pulse_counter(), r_motor_2_enc.get_pulse_counter());
+    write_log("mtr_debug", buffer, LOG_LVL_INFO);*/
 
     return true;
 }
@@ -538,16 +559,18 @@ bool motor_control_and_odom_timer_callback(struct repeating_timer *rt)
 // ---- MPU6050 init ----
 bool init_mpu6050()
 {
+    write_log("init_mpu6050", "Skipping MPU6050 init...", LOG_LVL_INFO);
+
     // Init pins
     init_pin(i2c_sda, PROT_I2C);
     init_pin(i2c_scl, PROT_I2C);
-    i2c_init(i2c_inst, 400000);
     gpio_pull_up(i2c_sda);
     gpio_pull_up(i2c_scl);
 
-    write_log("init_mpu6050", "MPU6050 WHOAMI ADDRESS: " + std::to_string(mpu6050_who_am_i(&mpu6050)), LOG_LVL_INFO);
+    write_log("init_mpu6050", "MPU6050 WHO_AM_I ID: " + std::to_string(mpu6050_who_am_i(&mpu6050)), LOG_LVL_INFO);
 
-    if (mpu6050_begin(&mpu6050))
+    // Commented out as my MPU6050 is broken, waiting for the replacement.
+    /*if (mpu6050_begin(&mpu6050))
     {
         mpu6050_set_scale(&mpu6050, MPU6050_SCALE_2000DPS);
         mpu6050_set_range(&mpu6050, MPU6050_RANGE_16G);
@@ -565,7 +588,9 @@ bool init_mpu6050()
 
     write_log("init_mpu6050", "MPU init failed.", LOG_LVL_WARN);
     publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_ENV_SENSORS, DIAG_HWID_ENV_IMU, DIAG_ERR_MSG_INIT_FAILED, NULL);
-    return false;
+    return false;*/
+
+    return true;
 }
 
 
@@ -601,6 +626,14 @@ void setup()
     r_motors_safety.set_set_vs_actual_spd_time_tolerance(motor_actual_vs_set_extra_timeout);
     l_motors_safety.set_set_vs_actual_spd_time_tolerance(motor_actual_vs_set_extra_timeout);
 
+    // Motor Controller init
+    r_motors.set_control_mode(Motor::PID);
+    l_motors.set_control_mode(Motor::PID);
+    r_motor_1_enc.set_method_1_cutoff(motor_rpm_method_1_cutoff);
+    r_motor_2_enc.set_method_1_cutoff(motor_rpm_method_1_cutoff);
+    l_motor_1_enc.set_method_1_cutoff(motor_rpm_method_1_cutoff);
+    l_motor_2_enc.set_method_1_cutoff(motor_rpm_method_1_cutoff);
+
     //stdio_init_all();
     //stdio_filter_driver(&stdio_usb);   // Filter the output of STDIO to USB.
     //write_log("main", "STDIO init!", LOG_LVL_INFO);
@@ -627,6 +660,8 @@ void setup1()
     check_bool(init_mpu6050(), RT_HARD_CHECK);
 
     // Create alarm pool for core 1 timers
+    // FIXME: For some reason, alarm_pool_create() only gets called when this write_log() call is here.
+    write_log("setup1", "We are at alarm_pool_create()!", LOG_LVL_INFO);
     core_1_alarm_pool = alarm_pool_create(4, 3);
 }
 
@@ -686,10 +721,17 @@ int main()
     	        break;
     	    
             case AGENT_AVAILABLE:
-    	        uros_init(UROS_NODE_NAME, UROS_NODE_NAMESPACE);
+    	        // MicroROS init
+                uros_init(UROS_NODE_NAME, UROS_NODE_NAMESPACE);
                 init_subs_pubs();
                 exec_init();
+
+                // Repeating timers
                 start_repeating_timers();
+
+                // Enable the motor controllers.
+                r_motors.enable_controller();
+                l_motors.enable_controller();
 
     	        current_uros_state = AGENT_CONNECTED;
     	        break;

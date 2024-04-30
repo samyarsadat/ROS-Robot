@@ -106,7 +106,7 @@ void init_subs_pubs()
 
     // ---- Services ----
     check_rc(rclc_service_init_default(&en_camera_leds_srv, &rc_node, set_camera_leds_type, "/enable_disable/camera_leds"), RT_HARD_CHECK);
-    check_rc(rclc_service_init_default(&run_self_test_srv, &rc_node, run_self_test_type, "/self-test/pico_b"), RT_HARD_CHECK);
+    check_rc(rclc_service_init_default(&run_self_test_srv, &rc_node, run_self_test_type, "/self_test/pico_b"), RT_HARD_CHECK);
 
     // ---- E-stop topic ----
     check_rc(rclc_subscription_init_default(&e_stop_sub, &rc_node, empty_type, "/e_stop"), RT_HARD_CHECK);

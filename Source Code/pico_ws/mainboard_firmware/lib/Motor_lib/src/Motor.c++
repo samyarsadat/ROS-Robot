@@ -27,6 +27,7 @@
 #include "pid_v1_lib/PID_v1.h"
 #include "helpers_lib/Helpers.h"
 #include "motor_control_lib/Motor.h"
+#include <cmath>
 
 
 /*  Constructor
@@ -93,7 +94,7 @@ void Motor::set_control_mode(control_mode mode)
  */
 void Motor::set_pid_ctrl_speed(float rpm)
 {
-    set_speed_pid = rpm;
+    set_speed_pid = abs(rpm);
 }
 
 
@@ -106,7 +107,7 @@ void Motor::set_pid_ctrl_speed(float rpm)
  *  Returns:
  *    void
  */
-void Motor::set_pwm_ctrl_speed(int pwm_out)
+void Motor::set_pwm_ctrl_speed(uint16_t pwm_out)
 {
     set_speed = pwm_out;
 }

@@ -54,6 +54,9 @@ target_include_directories(${PICO_A_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 # UART Config
 target_compile_definitions(${PICO_A_NAME} PRIVATE
+    PICO_RP2040_B0_SUPPORTED=0
+    PICO_RP2040_B1_SUPPORTED=0
+    PICO_STACK_SIZE=0x1000
     PICO_DEFAULT_UART=0
     PICO_DEFAULT_UART_TX_PIN=16
     PICO_DEFAULT_UART_RX_PIN=17
@@ -92,7 +95,10 @@ target_link_libraries(${PICO_B_NAME} micro_ros
 target_include_directories(${PICO_B_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 # UART Config
-target_compile_definitions(${PICO_A_NAME} PRIVATE
+target_compile_definitions(${PICO_B_NAME} PRIVATE
+    PICO_RP2040_B0_SUPPORTED=0
+    PICO_RP2040_B1_SUPPORTED=0
+    PICO_STACK_SIZE=0x1000
     PICO_DEFAULT_UART=1
     PICO_DEFAULT_UART_TX_PIN=8
     PICO_DEFAULT_UART_RX_PIN=9

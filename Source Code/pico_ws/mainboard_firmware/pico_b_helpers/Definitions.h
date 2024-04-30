@@ -41,10 +41,10 @@
 #define cam_led_4  21
 
 // ---- Micro switches ----
-#define ms_front_l  13
-#define ms_front_r  12
-#define ms_back_l   11
-#define ms_back_r   10
+#define ms_front_l  11
+#define ms_front_r  10
+#define ms_back_l   12
+#define ms_back_r   13
 
 // ---- I2C ----
 #define i2c_inst   i2c0   // I2C instance (0 & 1 are on I2C0)
