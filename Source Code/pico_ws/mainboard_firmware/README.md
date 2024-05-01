@@ -4,7 +4,7 @@ The firmware is written in C++ and uses the micro-ROS library to handle communic
 Pre-built binaries can be found in the `build` directory.<br>
 <br>
 
-**_TODO: Move to using C++ Vectors instead of using C-style arrays._**
+**_TODO: Move to using C++ Vectors instead of using C-style arrays._**<br>
 **_TODO: Extract the execution time/interval checker into its own function._**
 
 ## Important Note #1:
