@@ -66,6 +66,7 @@ UROS_STATE current_uros_state = WAITING_FOR_AGENT;
 
 // ---- Timer execution times storage (milliseconds) ----
 uint32_t last_motor_odom_time, last_ultrasonic_publish_time, last_edge_ir_publish_time, last_other_sensors_publish_time;
+uint32_t last_uros_exec_time;
 
 // ---- Motor encoder counter storage ----
 int32_t enc_r_count_old, enc_l_count_old, total_enc_avg_travel;
@@ -559,7 +560,7 @@ bool motor_control_and_odom_timer_callback(struct repeating_timer *rt)
 // ---- MPU6050 init ----
 bool init_mpu6050()
 {
-    write_log("init_mpu6050", "Skipping MPU6050 init...", LOG_LVL_INFO);
+    write_log("init_mpu6050", "MPU6050 disabled!", LOG_LVL_INFO);
 
     // Init pins
     init_pin(i2c_sda, PROT_I2C);
@@ -619,6 +620,7 @@ void setup()
     adc_init();
     adc_set_temp_sensor_enabled(true);
     set_mux_pins(analog_mux_s0, analog_mux_s1, analog_mux_s2, analog_mux_s3, analog_mux_io);
+    set_ir_en_pin(edge_sens_en);
 
     // MotorSafety init
     r_motors_safety.configure_safety(motor_single_side_max_difference, motor_set_vs_actual_max_difference, motor_safety_trigger_timeout, &motor_safety_callback);
@@ -662,7 +664,7 @@ void setup1()
     // Create alarm pool for core 1 timers
     // FIXME: For some reason, alarm_pool_create() only gets called when this write_log() call is here.
     write_log("setup1", "We are at alarm_pool_create()!", LOG_LVL_INFO);
-    core_1_alarm_pool = alarm_pool_create(4, 3);
+    core_1_alarm_pool = alarm_pool_create(1, 16);
 }
 
 
@@ -721,6 +723,8 @@ int main()
     	        break;
     	    
             case AGENT_AVAILABLE:
+                write_log("main", "MicroROS agent available... initializing MicroROS.", LOG_LVL_INFO);
+
     	        // MicroROS init
                 uros_init(UROS_NODE_NAME, UROS_NODE_NAMESPACE);
                 init_subs_pubs();
@@ -733,6 +737,7 @@ int main()
                 r_motors.enable_controller();
                 l_motors.enable_controller();
 
+                write_log("main", "Initialization completed! State changed to AGENT_CONNECTED.", LOG_LVL_INFO);
     	        current_uros_state = AGENT_CONNECTED;
     	        break;
     	    
@@ -741,6 +746,19 @@ int main()
     	        
                 if (current_uros_state == AGENT_CONNECTED) 
                 {
+                    // Check execution time
+                    uint16_t exec_time_ms = (time_us_32() / 1000) - last_uros_exec_time;
+                    last_uros_exec_time = time_us_32() / 1000;
+                    
+                    if (exec_time_ms > uros_executor_exec_timeout) 
+                    {
+                        char buffer[80];
+                        sprintf(buffer, "MicroROS executor execution time exceeded limits! [act: %ums, lim: %dms]", exec_time_ms, uros_executor_exec_timeout);
+                        write_log("main", buffer, LOG_LVL_WARN);
+
+                        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
+                    }
+
     	            rclc_executor_spin_some(&rc_executor, UROS_EXEC_TIMEOUT_MS * 1000000);
     	        }
     	        
@@ -748,6 +766,7 @@ int main()
     	    
             case AGENT_DISCONNECTED:
                 // TODO: Maybe wait for the agent to connect again?
+                write_log("main", "MicroROS agent disconnected! Shutting down...", LOG_LVL_INFO);
     	        clean_shutdown();
     	        break;
     	}

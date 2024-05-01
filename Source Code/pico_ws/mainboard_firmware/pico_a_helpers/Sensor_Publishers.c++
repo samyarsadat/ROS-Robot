@@ -87,6 +87,10 @@ bool publish_edge_ir(struct repeating_timer *rt)
     
     if (exec_time_ms > (edge_ir_pub_rt_interval + 10)) 
     { 
+        char buffer[80];
+        sprintf(buffer, "Edge IR publish interval time exceeded limits! [act: %ums, lim: %dms]", exec_time_ms, (edge_ir_pub_rt_interval + 10));
+        write_log("publish_edge_ir", buffer, LOG_LVL_WARN);
+
         publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
     }
 
@@ -113,6 +117,7 @@ bool publish_edge_ir(struct repeating_timer *rt)
     falloff_sensor_msg.ir_edge_sens_back_trig[2] = readings[6];
     falloff_sensor_msg.ir_edge_sens_back_trig[3] = readings[7];
 
+    write_log("publish_edge_ir", "publishing", LOG_LVL_INFO);
     check_rc(rcl_publish(&falloff_sensor_pub, &falloff_sensor_msg, NULL), RT_SOFT_CHECK);
     return true;
 }

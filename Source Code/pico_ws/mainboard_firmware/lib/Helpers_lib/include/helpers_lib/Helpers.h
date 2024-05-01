@@ -25,6 +25,8 @@
 
 #include "pico/stdlib.h"
 #include <memory>
+#include <vector>
+using namespace std;
 
 
 // ------- Definitions -------
@@ -52,15 +54,15 @@ float map(float input, int in_min, int in_max, int out_min, int out_max);
 // ---- Adjustable truncate function ----
 float truncate_adj(float input, int trunc_amount);
 
-// ---- Calculates the mean (average) of the numbers in a float array ----
-float calculate_mean(float numbers[], int array_length);
+// ---- Calculates the mean (average) of the numbers in a float vector ----
+float calculate_mean(vector<float> &numbers);
 
-// ---- Calculates the standard deviation of the numbers in a float array ----
-float calculate_standard_deviation(float numbers[], int array_length, float numbers_mean);
+// ---- Calculates the standard deviation of the numbers in a float vector ----
+float calculate_standard_deviation(vector<float> &numbers, float numbers_mean);
 
-// ---- Finds "outliers" in-between the numbers in a float array using the Z-Score (Standard Score) method ----
-// ---- It returns a boolean array (with the same size as the input array) that indicates the "outliers" by returning their array slots as true ----
-std::unique_ptr<bool[]> standard_score_check(float numbers[], int array_length, float z_score_threshhold);
+// ---- Finds "outliers" in-between the numbers in a float vector using the Z-Score (Standard Score) method ----
+// ---- It returns a boolean vector (with the same size as the input vector) that indicates the "outliers" by returning their slots as true ----
+vector<bool> standard_score_check(vector<float> &numbers, float z_score_threshhold);
 
 // ---- Returns the temperature measured by the RP2040's internal sensor in Celsius ----
 // ---- NOTE: The ADC must be initialized and the temperature sensor must be enabled! ----

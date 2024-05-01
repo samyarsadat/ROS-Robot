@@ -21,7 +21,6 @@
 
 
 #pragma once
-
 #include "motor_control_lib/Motor_Driver.h"    // Motor driver interface
 #include "motor_control_lib/Motor_Encoder.h"   // Motor encoder interface
 #include "pid_v1_lib/PID_v1.h"

@@ -27,23 +27,24 @@
 #include <diagnostic_msgs/msg/diagnostic_status.h>
 #include <diagnostic_msgs/msg/key_value.h>
 #include "local_helpers_lib/Local_Helpers.h"
+#include <string>
 
 
 
 // ------- Functions ------- 
 
 // ---- (INTERNAL) Checks whether the measured distance is within limits ----
-float check_return_distance(float dist, char *ultra_hwid)
+float check_return_distance(float dist, std::string_view ultra_hwid)
 {
     if (dist < ultra_min_dist)
     {
-        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_ULTRASONICS, ultra_hwid, DIAG_WARN_MSG_ULTRA_MIN_LIM_EXCEED, NULL);
+        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_ULTRASONICS, std::string{ultra_hwid}, DIAG_WARN_MSG_ULTRA_MIN_LIM_EXCEED, NULL);
         return N_INF;
     }
 
     else if (dist > ultra_max_dist)
     {
-        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_ULTRASONICS, ultra_hwid, DIAG_WARN_MSG_ULTRA_MAX_LIM_EXCEED, NULL);
+        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_ULTRASONICS, std::string{ultra_hwid}, DIAG_WARN_MSG_ULTRA_MAX_LIM_EXCEED, NULL);
         return INF;
     }
 
@@ -55,7 +56,7 @@ float check_return_distance(float dist, char *ultra_hwid)
 
 
 // ---- Dual-pin ultrasonic sensor distance measurement using mux ----
-float get_ultra_dist_mux(uint trig_io, uint echo_io, char *ultra_hwid)
+float get_ultra_dist_mux(uint trig_io, uint echo_io, std::string ultra_hwid)
 {
     set_mux_io_mode(OUTPUT);
     set_mux_addr(trig_io);
@@ -84,7 +85,7 @@ float get_ultra_dist_mux(uint trig_io, uint echo_io, char *ultra_hwid)
 
 
 // ---- Single-pin ultrasonic sensor distance measurement using mux ----
-float get_ultra_dist_single(uint ultra_pin, char *ultra_hwid)
+float get_ultra_dist_single(uint ultra_pin, std::string ultra_hwid)
 {
     gpio_deinit(ultra_pin);
     init_pin(ultra_pin, OUTPUT);

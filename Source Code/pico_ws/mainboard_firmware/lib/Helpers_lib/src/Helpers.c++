@@ -29,6 +29,7 @@
 #include <math.h>
 #include <cmath>
 #include <memory>
+#include <vector>
 #include "helpers_lib/Helpers.h"
 using namespace std;
 
@@ -119,50 +120,56 @@ float truncate_adj(float input, int trunc_amount)
 }
 
 
-// ---- Calculates the mean (average) of the numbers in a float array ----
-float calculate_mean(float numbers[], int array_length)
+// ---- Calculates the mean (average) of the numbers in a float vector ----
+float calculate_mean(vector<float> &numbers)
 {
     float total;
 
-    for (int i = 0; i < array_length; i++)
+    for (auto &num : numbers)
     {
-        total += numbers[i];
+        total += num;
     }
 
-    return total / array_length;
+    return total / numbers.size();
 }
 
 
-// ---- Calculates the standard deviation of the numbers in a float array ----
-float calculate_standard_deviation(float numbers[], int array_length, float numbers_mean)
+// ---- Calculates the standard deviation of the numbers in a float vector ----
+float calculate_standard_deviation(vector<float> &numbers, float numbers_mean)
 {
     float deviation_total;
 
-    for (int i = 0; i < array_length; i++)
+    for (auto &num : numbers)
     {
-        deviation_total += pow(numbers[i] - numbers_mean, 2);
+        deviation_total += pow(num - numbers_mean, 2);
     }
 
-    return sqrt(deviation_total / array_length);
+    return sqrt(deviation_total / numbers.size());
 }
 
 
-// ---- Finds "outliers" in-between the numbers in a float array using the Z-Score (Standard Score) method ----
-// ---- It returns a boolean array (with the same size as the input array) that indicates the "outliers" by returning their array slots as true ----
-unique_ptr<bool[]> standard_score_check(float numbers[], int array_length, float z_score_threshhold)
+// ---- Finds "outliers" in-between the numbers in a float vector using the Z-Score (Standard Score) method ----
+// ---- It returns a boolean vector (with the same size as the input vector) that indicates the "outliers" by returning their slots as true ----
+vector<bool> standard_score_check(vector<float> &numbers, float z_score_threshhold)
 {
-    float mean = calculate_mean(numbers, array_length);
-    float standard_deviation = calculate_standard_deviation(numbers, array_length, mean);
-    unique_ptr<bool[]> outliers(new bool[array_length]);
+    float mean = calculate_mean(numbers);
+    float standard_deviation = calculate_standard_deviation(numbers, mean);
+    vector<bool> outliers;
+    uint16_t loop_index;
     
-    for (int i = 0; i < array_length; i++)
+    for (auto &num : numbers)
     {
-        outliers[i] = false;
-
-        if (abs((numbers[i] - mean) / standard_deviation) > z_score_threshhold)
+        if (abs((num - mean) / standard_deviation) > z_score_threshhold)
         {
-            outliers[i] = true;
+            outliers.push_back(true);
         }
+
+        else
+        {
+            outliers.push_back(false);
+        }
+
+        loop_index ++;
     }
 
     return outliers;

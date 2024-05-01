@@ -207,7 +207,7 @@ void setup()
 void setup1()
 {
     // Create alarm pool for core 1 timers
-    core_1_alarm_pool = alarm_pool_create(4, 3);
+    core_1_alarm_pool = alarm_pool_create(2, 4);
 }
 
 

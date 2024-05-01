@@ -45,7 +45,7 @@
 extern diagnostic_msgs__msg__DiagnosticStatus diagnostics_msg;
 extern rcl_publisher_t diagnostics_pub;
 extern void clean_shutdown();
-void publish_diag_report(uint8_t level, char *hw_name, char *hw_id, char *msg, diagnostic_msgs__msg__KeyValue *key_values);
+void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, diagnostic_msgs__msg__KeyValue *key_values);
 void write_log(std::string src, std::string msg, LOG_LEVEL lvl);
 
 
@@ -122,13 +122,14 @@ bool check_bool(bool function, RT_CHECK_MODE mode)
 
 
 // ---- Diagnostics error reporting ----
-void publish_diag_report(uint8_t level, char *hw_name, char *hw_id, char *msg, diagnostic_msgs__msg__KeyValue *key_values)
+// TODO: We can use std::string_view or std::string& here instead. This would require changing diagnostics definitions.
+void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, diagnostic_msgs__msg__KeyValue *key_values)
 {
-    diagnostics_msg.name.data = hw_name;
+    diagnostics_msg.name.data = hw_name.data();
     diagnostics_msg.name.size = strlen(diagnostics_msg.name.data);
-    diagnostics_msg.hardware_id.data = hw_id;
+    diagnostics_msg.hardware_id.data = hw_id.data();
     diagnostics_msg.hardware_id.size = strlen(diagnostics_msg.hardware_id.data);
-    diagnostics_msg.message.data = msg;
+    diagnostics_msg.message.data = msg.data();
     diagnostics_msg.message.size = strlen(diagnostics_msg.message.data);
     diagnostics_msg.values.data = NULL;
     diagnostics_msg.values.size = 0;

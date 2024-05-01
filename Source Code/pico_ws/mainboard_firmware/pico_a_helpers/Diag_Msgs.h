@@ -23,10 +23,10 @@
 // ---- STATUS OK ----
 
 // ---- STATUS WARM ----
-#define DIAG_WARN_MSG_ULTRA_MIN_LIM_EXCEED  (char*) "Ultrasonic sensor distance reading exceeded ultra_min_dist"
-#define DIAG_WARN_MSG_ULTRA_MAX_LIM_EXCEED  (char*) "Ultrasonic sensor distance reading exceeded ultra_max_dist"
+#define DIAG_WARN_MSG_ULTRA_MIN_LIM_EXCEED  "Ultrasonic sensor distance reading exceeded ultra_min_dist"
+#define DIAG_WARN_MSG_ULTRA_MAX_LIM_EXCEED  "Ultrasonic sensor distance reading exceeded ultra_max_dist"
 
 // ---- STATUS ERROR ----
-#define DIAG_ERR_MSG_MOTOR_SAFETY        (char*) "A MotorSafety condition was triggered"
+#define DIAG_ERR_MSG_MOTOR_SAFETY  "A MotorSafety condition was triggered"
 
 // ---- STATUS STALE ----

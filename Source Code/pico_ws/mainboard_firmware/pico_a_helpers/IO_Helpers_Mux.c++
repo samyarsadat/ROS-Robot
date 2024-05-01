@@ -25,6 +25,7 @@
 #include "helpers_lib/Helpers.h"
 #include "hardware/pwm.h"
 #include "hardware/adc.h"
+#include "pico/multicore.h"
 
 
 

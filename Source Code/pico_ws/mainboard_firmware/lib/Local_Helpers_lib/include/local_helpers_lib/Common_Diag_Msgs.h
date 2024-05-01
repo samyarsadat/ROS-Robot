@@ -25,13 +25,13 @@
 // ---- STATUS OK ----
 
 // ---- STATUS WARM ----
-#define DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER  (char*) "One of the timers' execution intervals exceeded limits"
-#define DIAG_WARN_MSG_UROS_RC_CHECK_FAIL    (char*) "MicroROS RCL return checker fail (Soft Fail)"
-#define DIAG_WARN_MSG_BOOL_RT_CHECK_FAIL    (char*) "Boolean function return checker fail (Soft Fail)"
+#define DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER  "One of the timers' execution intervals exceeded limits"
+#define DIAG_WARN_MSG_UROS_RC_CHECK_FAIL    "MicroROS RCL return checker fail (Soft Fail)"
+#define DIAG_WARN_MSG_BOOL_RT_CHECK_FAIL    "Boolean function return checker fail (Soft Fail)"
 
 // ---- STATUS ERROR ----
-#define DIAG_ERR_MSG_UROS_RC_CHECK_FAIL  (char*) "MicroROS RCL return checker fail (Hard Fail)"
-#define DIAG_ERR_MSG_INIT_FAILED         (char*) "Init. failed"
-#define DIAG_ERR_MSG_BOOL_RT_CHECK_FAIL  (char*) "Boolean function return checker fail (Hard Fail)"
+#define DIAG_ERR_MSG_UROS_RC_CHECK_FAIL  "MicroROS RCL return checker fail (Hard Fail)"
+#define DIAG_ERR_MSG_INIT_FAILED         "Init. failed"
+#define DIAG_ERR_MSG_BOOL_RT_CHECK_FAIL  "Boolean function return checker fail (Hard Fail)"
 
 // ---- STATUS STALE ----

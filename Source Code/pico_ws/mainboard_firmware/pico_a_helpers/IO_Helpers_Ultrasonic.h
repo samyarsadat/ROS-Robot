@@ -22,12 +22,13 @@
 
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
+#include <string>
 
 
 // ------- Functions ------- 
 
 // ---- Dual-pin ultrasonic sensor distance measurement using mux ----
-float get_ultra_dist_mux(uint trig_io, uint echo_io, char *ultra_hwid);
+float get_ultra_dist_mux(uint trig_io, uint echo_io, std::string ultra_hwid);
 
 // ---- Single-pin ultrasonic sensor distance measurement using mux ----
-float get_ultra_dist_single(uint ultra_pin, char *ultra_hwid);
+float get_ultra_dist_single(uint ultra_pin, std::string ultra_hwid);

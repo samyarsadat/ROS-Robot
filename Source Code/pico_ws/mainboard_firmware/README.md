@@ -5,6 +5,7 @@ Pre-built binaries can be found in the `build` directory.<br>
 <br>
 
 **_TODO: Move to using C++ Vectors instead of using C-style arrays._**
+**_TODO: Extract the execution time/interval checker into its own function._**
 
 ## Important Note #1:
 _The motor encoder implementation may look unconventional compared to other robots.<br>
@@ -44,9 +45,9 @@ _This table shows the actual pin numbers to which each motor encoder, driver cha
 These may not be the same as the ones that are indicated in the Overall Circuit Diagram or the PCB schematics._<br>
 <br>
 
-#### Motor Encoders
-| Name (definition)        | Encoder locati**on      | Pico GPIO number | PCB connector |
-| ------------------------ | --------------**------- | ---------------- | ------------- |
+#### Motor Encoders (Pico A)
+| Name (definition)        | Encoder location      | Pico GPIO number | PCB connector |
+| ------------------------ | --------------------- | ---------------- | ------------- |
 | r_motor_1_enc_a          | Front Right (Ch. A)   | GPIO 7           | H19 (Pin 5)   |
 | r_motor_1_enc_b          | Front Right (Ch. B)   | GPIO 8           | H19 (Pin 4)   |
 | r_motor_2_enc_a          | Back Right (Ch. A)    | GPIO 22          | H19 (Pin 1)   |
@@ -57,7 +58,7 @@ These may not be the same as the ones that are indicated in the Overall Circuit 
 | l_motor_2_enc_b          | Back Left (Ch. B)     | GPIO 9           | H19 (Pin 3)   |
 <br>
 
-#### Motor Driver
+#### Motor Driver (Pico A)
 | Name (definition)        | Driver Channel        | Pico GPIO number | PCB connector |
 | ------------------------ | --------------------- | ---------------- | ------------- |
 | r_motor_drive_1          | Out 3 (Right Motors)  | GPIO 20          | H2 (Pin 3)    |
@@ -66,10 +67,10 @@ These may not be the same as the ones that are indicated in the Overall Circuit 
 | l_motor_drive_2          | Out 2 (Left Motors)   | GPIO 19          | H2 (Pin 4)    |
 <br>
 
-#### Microswitches
+#### Microswitches (Pico B)
 | Name (definition) | Location     | Pico GPIO number | PCB connector |
 | ----------------- | ------------ | ---------------- | ------------- |
 | ms_front_r        | Front Right  | GPIO 10          | H1            |
 | ms_front_l        | Front Left   | GPIO 11          | H4            |
 | ms_back_r         | Back Right   | GPIO 13          | H11           |
-| ms_back_l         | Back Left    | GPIO 12          | H8            |****
+| ms_back_l         | Back Left    | GPIO 12          | H8            |

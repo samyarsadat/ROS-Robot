@@ -27,6 +27,8 @@
 #include "IO_Helpers_Mux.h"
 #include "Definitions.h"
 #include <memory>
+#include <vector>
+#include "pico/multicore.h"
 
 
 
@@ -50,7 +52,7 @@ void set_ir_en_pin(uint en_pin)
 // TODO: Self-check function.
 char* ir_self_test()
 {
-    float readings[num_ir_sensors];
+    std::vector<float> readings;
     gpio_put(ir_en_pin, LOW);
     set_mux_io_mode(INPUT_ADC);
     sleep_us(10);
@@ -58,12 +60,12 @@ char* ir_self_test()
     for (int i = 0; i < num_ir_sensors; i++)
     {
         set_mux_addr(i + 8);
-        readings[i] = (float) adc_read();
+        readings.push_back((float) adc_read());
     }
 
-    std::unique_ptr<bool[]> results = standard_score_check(readings, num_ir_sensors, ir_self_test_z_score_threshhold);
+    std::vector<bool> results = standard_score_check(readings, ir_self_test_z_score_threshhold);
 
-    for (int i = 0; i < num_ir_sensors; i++)
+    for (auto res : results)
     {
         
     }

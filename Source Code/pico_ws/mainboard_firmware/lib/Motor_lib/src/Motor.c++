@@ -28,6 +28,7 @@
 #include "helpers_lib/Helpers.h"
 #include "motor_control_lib/Motor.h"
 #include <cmath>
+#include <vector>
 
 
 /*  Constructor
@@ -187,14 +188,14 @@ void Motor::disable_controller()
  */
 float Motor::get_avg_rpm()
 {
-    float measured_speeds[number_of_encoders_defined];
+    std::vector<float> measured_speeds;
 
     for (int i = 0; i < number_of_encoders_defined; i++)
     {
-        measured_speeds[i] = encoders[i]->get_rpm();
+        measured_speeds.push_back(encoders[i]->get_rpm());
     }
 
-    return calculate_mean(measured_speeds, number_of_encoders_defined);
+    return calculate_mean(measured_speeds);
 }
 
 

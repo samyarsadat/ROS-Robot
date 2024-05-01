@@ -18,6 +18,7 @@
 */
 
 #pragma once
+#include <string>
 #include "local_helpers_lib/Common_Definitions.h"
 #include "Diag_Msgs.h"
 
@@ -71,9 +72,10 @@
 // ------- Other definitions -------
 
 // ---- MicroROS node config ----
-#define UROS_NODE_NAME        "pico_a"
-#define UROS_NODE_NAMESPACE   "io"
-#define UROS_EXEC_TIMEOUT_MS  80   // In milliseconds
+#define UROS_NODE_NAME              "pico_a"
+#define UROS_NODE_NAMESPACE         "io"
+#define UROS_EXEC_TIMEOUT_MS        80   // In milliseconds
+#define uros_executor_exec_timeout  50
 
 // ---- Repeating timer intervals ----
 #define motor_odom_rt_interval    50    // In milliseconds
