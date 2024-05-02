@@ -517,7 +517,7 @@ void publish_odom_tf()
 
 
 // ----- Compute motor PID outputs and publish odometry data (timer callback) -----
-bool motor_control_and_odom_timer_callback(struct repeating_timer *rt)
+bool motor_ctrl_odom_timer_call(struct repeating_timer *rt)
 {
     // Check execution time
     uint16_t exec_time_ms = (time_us_32() / 1000) - last_motor_odom_time;
@@ -527,7 +527,7 @@ bool motor_control_and_odom_timer_callback(struct repeating_timer *rt)
     {
         char buffer[80];
         sprintf(buffer, "Timer function execution time exceeded limits! [act: %ums, lim: %dms]", exec_time_ms, (motor_odom_rt_interval + 10));
-        write_log("motor_control_and_odom_timer_callback", buffer, LOG_LVL_WARN);
+        write_log("motor_ctrl_odom_timer_call", buffer, LOG_LVL_WARN);
 
         publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
     }
@@ -598,7 +598,7 @@ bool init_mpu6050()
 // ---- Setup repeating timers ----
 void start_repeating_timers()
 {
-    add_repeating_timer_ms(motor_odom_rt_interval, motor_control_and_odom_timer_callback, NULL, &motor_odom_rt);
+    add_repeating_timer_ms(motor_odom_rt_interval, motor_ctrl_odom_timer_call, NULL, &motor_odom_rt);
     alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, edge_ir_pub_rt_interval, publish_edge_ir, NULL, &edge_ir_publish_rt);
     alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, ultra_pub_rt_interval, publish_ultra, NULL, &ultrasonic_publish_rt);
     alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, sensors_pub_rt_interval, publish_misc_sens, NULL, &other_sensors_publish_rt);
@@ -636,6 +636,7 @@ void setup()
     l_motor_1_enc.set_method_1_cutoff(motor_rpm_method_1_cutoff);
     l_motor_2_enc.set_method_1_cutoff(motor_rpm_method_1_cutoff);
 
+    // UART & USB STDIO outputs
     //stdio_init_all();
     //stdio_filter_driver(&stdio_usb);   // Filter the output of STDIO to USB.
     //write_log("main", "STDIO init!", LOG_LVL_INFO);
@@ -668,6 +669,73 @@ void setup1()
 }
 
 
+// ---- Core 0 loop ----
+void loop()
+{
+    switch (current_uros_state) 
+    {
+        case WAITING_FOR_AGENT:
+            current_uros_state = ping_agent() ? AGENT_AVAILABLE:WAITING_FOR_AGENT;
+            break;
+        
+        case AGENT_AVAILABLE:
+            write_log("main", "MicroROS agent available... initializing MicroROS.", LOG_LVL_INFO);
+
+            // MicroROS init
+            uros_init(UROS_NODE_NAME, UROS_NODE_NAMESPACE);
+            init_subs_pubs();
+            exec_init();
+
+            // Repeating timers
+            start_repeating_timers();
+
+            // Enable the motor controllers.
+            r_motors.enable_controller();
+            l_motors.enable_controller();
+
+            write_log("main", "Initialization completed! State changed to AGENT_CONNECTED.", LOG_LVL_INFO);
+            current_uros_state = AGENT_CONNECTED;
+            break;
+        
+        case AGENT_CONNECTED:
+            current_uros_state = ping_agent() ? AGENT_CONNECTED:AGENT_DISCONNECTED;
+            
+            if (current_uros_state == AGENT_CONNECTED) 
+            {
+                // Check execution time
+                uint16_t exec_time_ms = (time_us_32() / 1000) - last_uros_exec_time;
+                last_uros_exec_time = time_us_32() / 1000;
+                
+                if (exec_time_ms > uros_executor_exec_timeout) 
+                {
+                    char buffer[80];
+                    sprintf(buffer, "MicroROS executor execution time exceeded limits! [act: %ums, lim: %dms]", exec_time_ms, uros_executor_exec_timeout);
+                    write_log("main", buffer, LOG_LVL_WARN);
+
+                    publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
+                }
+
+                rclc_executor_spin_some(&rc_executor, RCL_MS_TO_NS(UROS_EXEC_TIMEOUT_MS));
+            }
+            
+            break;
+        
+        case AGENT_DISCONNECTED:
+            // TODO: Maybe wait for the agent to connect again?
+            write_log("main", "MicroROS agent disconnected! Shutting down...", LOG_LVL_INFO);
+            clean_shutdown();
+            break;
+    }
+}
+
+
+// ---- Core 1 loop ----
+void loop_1()
+{
+
+}
+
+
 
 // ******** END OF MAIN PROGRAM *********
 // *********** STARTUP & INIT ***********
@@ -678,7 +746,9 @@ void main_core_1()
     setup1();
 
     // Core 1 loop
-    while (true);   // All core 1 functions run on timers. Nothing needs to be run in a loop.
+    while (true) { loop_1(); };
+
+    write_log("main_core_1", "Core 1 exit!", LOG_LVL_INFO);
 }
 
 
@@ -687,16 +757,16 @@ int main()
 {
     multicore_reset_core1();
 
-    // UART output
+    // UART & USB STDIO outputs
     stdio_init_all();
     stdio_filter_driver(&stdio_usb);   // Filter the output of STDIO to USB.
     write_log("main", "STDIO init, program starting...", LOG_LVL_INFO);
 
-    // Wait for 5 seconds
+    // Wait for 3 seconds
     init_pin(power_led, OUTPUT);
     init_pin(onboard_led, OUTPUT);
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 3; i++)
     {
         write_log("main", "Waiting...", LOG_LVL_INFO);
         gpio_put(power_led, HIGH);
@@ -714,63 +784,7 @@ int main()
     gpio_put(power_led, HIGH);
 
     // Core 0 loop
-    while (!halt_core_0)
-    {
-        switch (current_uros_state) 
-        {
-    	    case WAITING_FOR_AGENT:
-    	        current_uros_state = ping_agent() ? AGENT_AVAILABLE:WAITING_FOR_AGENT;
-    	        break;
-    	    
-            case AGENT_AVAILABLE:
-                write_log("main", "MicroROS agent available... initializing MicroROS.", LOG_LVL_INFO);
-
-    	        // MicroROS init
-                uros_init(UROS_NODE_NAME, UROS_NODE_NAMESPACE);
-                init_subs_pubs();
-                exec_init();
-
-                // Repeating timers
-                start_repeating_timers();
-
-                // Enable the motor controllers.
-                r_motors.enable_controller();
-                l_motors.enable_controller();
-
-                write_log("main", "Initialization completed! State changed to AGENT_CONNECTED.", LOG_LVL_INFO);
-    	        current_uros_state = AGENT_CONNECTED;
-    	        break;
-    	    
-            case AGENT_CONNECTED:
-    	        current_uros_state = ping_agent() ? AGENT_CONNECTED:AGENT_DISCONNECTED;
-    	        
-                if (current_uros_state == AGENT_CONNECTED) 
-                {
-                    // Check execution time
-                    uint16_t exec_time_ms = (time_us_32() / 1000) - last_uros_exec_time;
-                    last_uros_exec_time = time_us_32() / 1000;
-                    
-                    if (exec_time_ms > uros_executor_exec_timeout) 
-                    {
-                        char buffer[80];
-                        sprintf(buffer, "MicroROS executor execution time exceeded limits! [act: %ums, lim: %dms]", exec_time_ms, uros_executor_exec_timeout);
-                        write_log("main", buffer, LOG_LVL_WARN);
-
-                        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
-                    }
-
-    	            rclc_executor_spin_some(&rc_executor, UROS_EXEC_TIMEOUT_MS * 1000000);
-    	        }
-    	        
-                break;
-    	    
-            case AGENT_DISCONNECTED:
-                // TODO: Maybe wait for the agent to connect again?
-                write_log("main", "MicroROS agent disconnected! Shutting down...", LOG_LVL_INFO);
-    	        clean_shutdown();
-    	        break;
-    	}
-    }
+    while (!halt_core_0) { loop(); }
 
     write_log("main", "Program exit.", LOG_LVL_INFO);
     return 0;

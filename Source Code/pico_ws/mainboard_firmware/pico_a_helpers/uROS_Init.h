@@ -50,6 +50,11 @@ extern rcl_node_t rc_node;
 extern rclc_executor_t rc_executor;
 
 
+// ---- Executor Timers ----
+extern rcl_timer_t motor_odom_timer, ultrasonic_publish_timer;
+extern rcl_timer_t edge_ir_publish_timer, other_sensors_publish_rt;
+
+
 // ---- Subscribers ----
 
 // Misc.

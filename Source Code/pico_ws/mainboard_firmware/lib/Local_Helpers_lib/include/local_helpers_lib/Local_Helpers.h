@@ -60,3 +60,8 @@ void write_log(std::string src, std::string msg, LOG_LEVEL lvl);
 
 // ---- Pings the MicroROS agent ----
 bool ping_agent();
+
+// ---- Execution interval checker ----
+// ---- Checks the amount of time passed since the last time it was called (with the specific time storage varialble provided) ----
+// ---- Returns false if the execution time has exceeded the specified limit ----
+bool check_exec_interval(uint32_t &last_call_time_ms, uint16_t max_exec_time_ms, std::string log_msg);

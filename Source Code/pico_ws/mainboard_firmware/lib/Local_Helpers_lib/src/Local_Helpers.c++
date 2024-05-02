@@ -49,7 +49,7 @@ void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, 
 void write_log(std::string src, std::string msg, LOG_LEVEL lvl);
 
 
-// --- RCL return checker ---
+// ---- RCL return checker ----
 bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode)
 {
     if (rctc != RCL_RET_OK)
@@ -90,7 +90,7 @@ bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode)
 }
 
 
-// --- Return checker, except for functions that return a boolean ---
+// ---- Return checker, except for functions that return a boolean ----
 bool check_bool(bool function, RT_CHECK_MODE mode)
 {
     if (!function)
@@ -171,8 +171,8 @@ void write_log(std::string src, std::string msg, LOG_LEVEL lvl)
     else if (lvl == LOG_LVL_FATAL) { level = "FATAL"; }
 
     // This is quite ugly, but it works.
-    std::string log_msg = "[" + std::to_string(timestamp_sec) + "." + std::to_string(timestamp_nanosec) + "] [" + level + "] [" + src + "]: " + msg + "\r\n";
-    stdio_uart.out_chars(log_msg.c_str(), log_msg.length());
+    msg = "[" + std::to_string(timestamp_sec) + "." + std::to_string(timestamp_nanosec) + "] [" + level + "] [" + src + "]: " + msg + "\r\n";
+    stdio_uart.out_chars(msg.c_str(), msg.length());
 }
 
 
@@ -181,4 +181,25 @@ bool ping_agent()
 {
     bool success = (rmw_uros_ping_agent(uros_agent_find_timeout_ms, uros_agent_find_attempts) == RMW_RET_OK);
     return success;
+}
+
+
+// ---- Execution interval checker ----
+// ---- Checks the amount of time passed since the last time it was called (with the specific time storage varialble provided) ----
+// ---- Returns false if the execution time has exceeded the specified limit ----
+bool check_exec_interval(uint32_t &last_call_time_ms, uint16_t max_exec_time_ms, std::string log_msg)
+{
+    uint32_t time_ms = time_us_32() / 1000;
+    uint32_t exec_time_ms = time_ms - last_call_time_ms;
+    last_call_time_ms = time_ms;
+    
+    if (exec_time_ms > max_exec_time_ms) 
+    {
+        // This is also quite ugly, but it also works.
+        log_msg = log_msg + " [act: " + std::to_string(exec_time_ms) + "ms, lim: " + std::to_string(max_exec_time_ms) + "ms]";
+        write_log("check_exec_interval", log_msg, LOG_LVL_WARN);
+        return false;
+    }
+
+    return true;
 }
