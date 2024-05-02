@@ -14,8 +14,8 @@
 </p>
 
 ----
-### Disclaimer: Robot is under development.
-The ROS Robot project.
+### Raspberry Pi Pico FreeRTOS Branch
+This branch is for the development of new firmware for the Raspberry Pi Picos based on the FreeRTOS kernel. The need for FreeRTOS came about as a result of a need for multithreading.
 <br>
 <br>
 <br>
