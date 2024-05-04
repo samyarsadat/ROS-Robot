@@ -8,13 +8,6 @@ if ! test -f /not_first_run; then
 
     sudo chown -R urosdev: /home/urosdev/pico_ws/
     cp "/pico/pico-sdk/external/pico_sdk_import.cmake" /home/urosdev/pico_ws/pico_sdk_import.cmake
-
-    mkdir -p /home/urosdev/pico_ws/uros_ws/src && cd /home/urosdev/pico_ws/uros_ws/src \
-    && rm -rf micro_ros_setup \
-    && mkdir micro_ros_setup \
-    && cp -a /home/urosdev/uros_tools_temp/. ./micro_ros_setup/ \
-    && rm -rf /home/urosdev/uros_tools_temp \
-    && echo "-> File prep complete."
     
     sudo apt-get update \
     && rosdep update \

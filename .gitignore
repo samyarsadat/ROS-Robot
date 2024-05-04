@@ -4,7 +4,6 @@
 /CAD Files/~$*.sldasm
 /CAD Files/**/~$*.sldprt
 /CAD Files/**/~$*.sldasm
-/Source Code/pico_ws/libmicroros/src/micro_ros_setup
 /Source Code/pico_ws/build/*
 !/Source Code/pico_ws/build/src/
 /Source Code/pico_ws/build/src/*
