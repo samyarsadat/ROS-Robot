@@ -22,3 +22,4 @@
 /Circuit Diagrams & PCB Files/**/*.PrjPcbStructure
 /Testing Data
 **/desktop.ini
+/Source Code/pico_ws/libmicroros/src/micro_ros_setup
