@@ -43,3 +43,8 @@ If you aren't using an NVIDIA GPU, please remove the `"--gpus", "all",` line fro
 For GUI support, the devcontainer is currently configured for using X11. If you're using Wayland, you will have to change the
 `"-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw",` line from `"runArgs"` in `devcontainer.json`.
 If you don't want GUI support at all, simply remove `"-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw",` and `"--env=DISPLAY",`.
+
+<br>
+
+## To update MicroROS Tools or the FreeRTOS Kernel:
+Discard all changes to the submodule repository, pull the latest version, and rebuild the devcontainer.

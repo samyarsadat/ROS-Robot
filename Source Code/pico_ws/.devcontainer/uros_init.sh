@@ -8,12 +8,12 @@ if ! test -f /not_first_run; then
 
     sudo chown -R urosdev: /home/urosdev/pico_ws/
     cp "/pico/pico-sdk/external/pico_sdk_import.cmake" /home/urosdev/pico_ws/pico_sdk_import.cmake
+    cp "/home/urosdev/pico_ws/freertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" /home/urosdev/pico_ws/FreeRTOS_Kernel_import.cmake
     
     sudo apt-get update \
     && rosdep update \
     && cd /home/urosdev/pico_ws/uros_ws \
     && sudo rosdep install --from-paths src --ignore-src -y \
-    && sudo rm -rf /var/lib/apt/lists/* \
     && sudo apt-get autoremove && sudo apt-get autoclean \
     && echo "-> Tools installed!"
 

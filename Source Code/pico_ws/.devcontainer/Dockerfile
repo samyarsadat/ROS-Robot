@@ -50,11 +50,8 @@ RUN export NONROOT_USERNAME=${USERNAME} \
     && bash /pico_setup.sh \
     && rm -rf /var/lib/apt/lists/* && apt-get autoremove && apt-get autoclean
 
-# Download MicroROS tools (this is done here to save some time when running uros_init.sh)
+# MicroROS agent helpers
 USER ${USERNAME}
-RUN cd /home/$USERNAME && mkdir github_temp \
-    && git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git ./github_temp/uros_tools \
-    && git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git ./github_temp/uros_tools
 COPY uros_agent/* /home/$USERNAME/pico_ws/uros_agent/
 
 # Copy configuration files

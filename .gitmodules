@@ -1,12 +1,15 @@
 [submodule "MicroROS Tools"]
 	path = Source Code/pico_ws/libmicroros/src/micro_ros_setup
 	url = https://github.com/micro-ROS/micro_ros_setup
+
 [submodule "FreeRTOS Kernel"]
 	path = Source Code/pico_ws/libfreertos/FreeRTOS-Kernel
 	url = https://github.com/FreeRTOS/FreeRTOS-Kernel
+
 [submodule "Pico PID Library"]
 	path = Source Code/pico_ws/firmware_src/lib/PID_lib
 	url = https://github.com/samyarsadat/Pico-PID-Library
+
 [submodule "MPU6050 Library"]
 	path = Source Code/pico_ws/firmware_src/lib/MPU_lib
 	url = https://github.com/HumansAreWeak/rpi-pico-mpu6050
