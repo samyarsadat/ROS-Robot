@@ -35,6 +35,12 @@ set(CMAKE_CXX_STANDARD 17)
 # Initialize the Pico SDK
 pico_sdk_init()
 
+# Include the FreeRTOS Kernel
+set(FREERTOS_KERNEL_PATH "${CMAKE_CURRENT_LIST_DIR}/freertos/FreeRTOS-Kernel" CACHE STRING "FreeRTOS Kernel Path")
+set(FREERTOS_CONFIG_DIR "${CMAKE_CURRENT_LIST_DIR}/freertos")
+include_directories("${FREERTOS_CONFIG_DIR}") 
+include(FreeRTOS_Kernel_import.cmake)
+
 # Include MicroROS
 set(MICRO_ROS_PATH "${CMAKE_CURRENT_LIST_DIR}/uros_ws/firmware/build" CACHE STRING "MicroROS Library Path")
 include(micro_ros.cmake)

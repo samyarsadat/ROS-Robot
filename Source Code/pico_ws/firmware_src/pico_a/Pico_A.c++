@@ -21,6 +21,7 @@
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
+#include "pico/binary_info.h"
 #include "hardware/adc.h"
 #include "hardware/pwm.h"
 #include <geometry_msgs/msg/twist.h>
@@ -50,6 +51,20 @@
 #include <iterator>
 #include <vector>
 #include <cmath>
+#include <FreeRTOS.h>
+#include <task.h>
+
+
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
+{
+    panic("Stack overflow. Task: %s\n", pcTaskName);
+}
+
+void vApplicationMallocFailedHook()
+{
+    panic("malloc failed");
+}
+
 
 
 
@@ -567,6 +582,7 @@ bool init_mpu6050()
     init_pin(i2c_scl, PROT_I2C);
     gpio_pull_up(i2c_sda);
     gpio_pull_up(i2c_scl);
+    bi_decl(bi_2pins_with_func(i2c_sda, i2c_scl, GPIO_FUNC_I2C));   // For Picotool
 
     write_log("init_mpu6050", "MPU6050 WHO_AM_I ID: " + std::to_string(mpu6050_who_am_i(&mpu6050)), LOG_LVL_INFO);
 

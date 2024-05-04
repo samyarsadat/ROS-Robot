@@ -38,6 +38,8 @@ target_link_libraries(${PICO_B_NAME} micro_ros
                                      hardware_gpio
                                      helpers_lib
                                      local_helpers_lib
+                                     FreeRTOS-Kernel
+                                     FreeRTOS-Kernel-Heap4
 )
 
 # Link to include directories
@@ -54,6 +56,10 @@ target_compile_definitions(${PICO_B_NAME} PRIVATE
     PICO_DEFAULT_UART_RX_PIN=9
 )
 
-# Enable USB, disable UART
+# PicoTool binary information
+pico_set_program_name(${PICO_A_NAME} ${PICO_A_NAME})
+pico_set_program_version(${PICO_A_NAME} ${PROJECT_VERSION})
+
+# Enable STDIO over USB and UART
 pico_enable_stdio_usb(${PICO_B_NAME} 1)
 pico_enable_stdio_uart(${PICO_B_NAME} 1)

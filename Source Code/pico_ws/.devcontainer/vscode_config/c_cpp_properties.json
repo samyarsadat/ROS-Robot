@@ -1,6 +1,12 @@
 {
     "configurations": [
         {
+            "name": "Pico",
+            "intelliSenseMode": "linux-gcc-arm",
+            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "cStandard": "gnu11",
+            "cppStandard": "gnu++17",
+            
             "browse": {
                 "databaseFilename": "${default}",
                 "limitSymbolsToIncludedHeaders": false
@@ -12,13 +18,7 @@
                 "${PICO_SDK_PATH}/**",
                 "${workspaceFolder}/src/**",
                 "${workspaceFolder}/uros_ws/firmware/build/**"
-            ],
-
-            "name": "MicroROS",
-            "intelliSenseMode": "linux-gcc-arm",
-            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
-            "cStandard": "gnu11",
-            "cppStandard": "gnu++17"
+            ]
         }
     ],
 

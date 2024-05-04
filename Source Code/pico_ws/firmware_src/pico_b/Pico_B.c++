@@ -37,6 +37,20 @@
 #include "../uart_transport/pico_uart_transports.h"
 #include <rmw_microros/rmw_microros.h>
 #include <iterator>
+#include <FreeRTOS.h>
+#include <task.h>
+
+
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
+{
+    panic("Stack overflow. Task: %s\n", pcTaskName);
+}
+
+void vApplicationMallocFailedHook()
+{
+    panic("malloc failed");
+}
+
 
 
 

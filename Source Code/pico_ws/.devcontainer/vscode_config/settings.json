@@ -11,12 +11,17 @@
     "cmake.parallelJobs": 12,
     "cmake.buildDirectory": "${workspaceFolder}/build",
     "cmake.buildBeforeRun": true,
+    "cmake.configureOnOpen": true,
     "cortex-debug.openocdPath": "openocd",
 
-    "cmake.touchbar.advanced": {
-        "debug": "hidden",
-        "launch": "hidden",
-        "build": "default",
-        "buildTarget": "hidden"
+    "cmake.options.statusBarVisibility": "hidden",
+    "cmake.options.advanced": {
+        "build": {"statusBarVisibility": "visible"},
+        "buildTarget": {"statusBarVisibility": "hidden"},
+        "launch": {"statusBarVisibility": "hidden"},
+        "launchTarget": {"statusBarVisibility": "visible"},
+        "debug": {"statusBarVisibility": "hidden"},
+        "variant": {"statusBarVisibility": "icon"},
+        "kit": {"statusBarVisibility": "icon"}
     }
 }
