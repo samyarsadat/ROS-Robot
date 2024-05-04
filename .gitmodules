@@ -1,6 +1,7 @@
 [submodule "FreeRTOS Kernel"]
 	path = Source Code/pico_ws/libfreertos/FreeRTOS-Kernel
 	url = https://github.com/FreeRTOS/FreeRTOS-Kernel
+	ignore = all
 
 [submodule "Pico PID Library"]
 	path = Source Code/pico_ws/firmware_src/lib/PID_lib
@@ -14,3 +15,4 @@
 	path = Source Code/pico_ws/libmicroros/src/micro_ros_setup
 	url = https://github.com/micro-ROS/micro_ros_setup
 	branch = humble
+	ignore = all
