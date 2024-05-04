@@ -46,5 +46,5 @@ If you don't want GUI support at all, simply remove `"-v", "/tmp/.X11-unix:/tmp/
 
 <br>
 
-## To update MicroROS Tools or the FreeRTOS Kernel:
+## Updating MicroROS Tools or the FreeRTOS Kernel
 Discard all changes to the submodule repository, pull the latest version, and rebuild the devcontainer.
