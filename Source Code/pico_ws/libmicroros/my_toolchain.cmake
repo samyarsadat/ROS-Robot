@@ -1,3 +1,5 @@
+# THE MICROROS LIBRARY DOES NOT SUCCESSFULLY BUILD AT THE MOMENT, THIS IS W.I.P.!
+
 include($ENV{PICO_SDK_PATH}/cmake/preload/toolchains/find_compiler.cmake)
 
 set(CMAKE_SYSTEM_NAME Generic)
@@ -27,3 +29,11 @@ set(FLAGS "-O2 -march=armv6-m -mcpu=cortex-m0plus -mthumb -ffunction-sections -f
 
 set(CMAKE_C_FLAGS_INIT "-std=c11 ${FLAGS} -DCLOCK_MONOTONIC=0 -D'__attribute__(x)='" CACHE STRING "" FORCE)
 set(CMAKE_CXX_FLAGS_INIT "-std=c++14 ${FLAGS} -fno-rtti -DCLOCK_MONOTONIC=0 -D'__attribute__(x)='" CACHE STRING "" FORCE)
+
+# FreeRTOS Kernel
+add_compile_definitions(PLATFORM_NAME_FREERTOS)
+set(FREERTOS_KERNEL_PATH "${CMAKE_CURRENT_LIST_DIR}/../freertos/FreeRTOS-Kernel")
+set(FREERTOS_CONFIG_DIR "${CMAKE_CURRENT_LIST_DIR}/../freertos")
+include_directories("${FREERTOS_CONFIG_DIR}") 
+include_directories("${FREERTOS_KERNEL_PATH}/include") 
+include_directories("${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include")
