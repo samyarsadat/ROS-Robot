@@ -26,7 +26,11 @@ add_executable(${PICO_A_NAME} Pico_A.c++
                helpers/IO_Helpers_Edge.c++
                helpers/IO_Helpers_Ultrasonic.c++
                helpers/uROS_Init.c++
-               ../uart_transport/pico_uart_transport.c)
+               ../uart_transport/pico_uart_transport.c
+               ${FREERTOS_POSIX_SRC_PREFIX}_clock.c
+               ${FREERTOS_POSIX_SRC_PREFIX}_sched.c
+               ${FREERTOS_POSIX_SRC_PREFIX}_unistd.c
+               ${FREERTOS_POSIX_SRC_PREFIX}_utils.c)
 
 # Create map/bin/hex/uf2 files
 pico_add_extra_outputs(${PICO_A_NAME})

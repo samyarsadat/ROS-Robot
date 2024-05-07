@@ -41,6 +41,15 @@ set(FREERTOS_CONFIG_DIR "${CMAKE_CURRENT_LIST_DIR}/freertos")
 include_directories("${FREERTOS_CONFIG_DIR}") 
 include(FreeRTOS_Kernel_import.cmake)
 
+# FreeRTOS + POSIX
+set(FREERTOS_POSIX_PATH "${CMAKE_CURRENT_LIST_DIR}/freertos/FreeRTOS-POSIX")
+set(FREERTOS_POSIX_SRC_PREFIX "${FREERTOS_POSIX_PATH}/FreeRTOS-Plus-POSIX/source/FreeRTOS_POSIX")
+include_directories("${FREERTOS_POSIX_PATH}/include")
+include_directories("${FREERTOS_POSIX_PATH}/include/FreeRTOS_POSIX")
+include_directories("${FREERTOS_POSIX_PATH}/include/private")
+include_directories("${FREERTOS_POSIX_PATH}/FreeRTOS-Plus-POSIX/include")
+include_directories("${FREERTOS_POSIX_PATH}/FreeRTOS-Plus-POSIX/include/portable")
+
 # Include MicroROS
 set(MICRO_ROS_PATH "${CMAKE_CURRENT_LIST_DIR}/uros_ws/firmware/build" CACHE STRING "MicroROS Library Path")
 include(micro_ros.cmake)

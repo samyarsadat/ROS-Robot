@@ -24,7 +24,11 @@ message("Configuring Pico B firmware build... (${PICO_B_NAME})")
 add_executable(${PICO_B_NAME} Pico_B.c++ 
                helpers/uROS_Init.c++
                helpers/IO_Helpers_General.c++
-               ../uart_transport/pico_uart_transport.c)
+               ../uart_transport/pico_uart_transport.c
+               ${FREERTOS_POSIX_SRC_PREFIX}_clock.c
+               ${FREERTOS_POSIX_SRC_PREFIX}_sched.c
+               ${FREERTOS_POSIX_SRC_PREFIX}_unistd.c
+               ${FREERTOS_POSIX_SRC_PREFIX}_utils.c)
 
 # Create map/bin/hex/uf2 files
 pico_add_extra_outputs(${PICO_B_NAME})
