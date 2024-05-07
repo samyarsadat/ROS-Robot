@@ -16,3 +16,6 @@
 	url = https://github.com/micro-ROS/micro_ros_setup
 	branch = humble
 	ignore = all
+[submodule "FreeRTOS POSIX Extension"]
+	path = Source Code/pico_ws/libfreertos/FreeRTOS-POSIX
+	url = https://github.com/FreeRTOS/Lab-Project-FreeRTOS-POSIX
