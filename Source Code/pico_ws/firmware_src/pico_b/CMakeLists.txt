@@ -70,8 +70,9 @@ target_compile_definitions(${PICO_B_NAME} PRIVATE
 )
 
 # PicoTool binary information
-pico_set_program_name(${PICO_A_NAME} ${PICO_A_NAME})
-pico_set_program_version(${PICO_A_NAME} ${PROJECT_VERSION})
+pico_set_program_name(${PICO_B_NAME} ${PICO_B_NAME})
+pico_set_program_version(${PICO_B_NAME} ${PROJECT_VERSION})
+pico_set_program_description(${PICO_B_NAME} "The ROS Robot Project - Main Board Pico B Firmware")
 
 # Enable STDIO over USB and UART
 pico_enable_stdio_usb(${PICO_B_NAME} 1)
