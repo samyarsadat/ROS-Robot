@@ -1,5 +1,5 @@
 ## How To Build MicroROS
-Run `bash ~/pico_ws/uros_ws/build_uros.sh` as `urosdev` inside of the devcontainer to build the MicroROS library.
+Run `bash ~/pico_ws/uros_ws/build_uros.sh -f` as `urosdev` inside of the devcontainer to build the MicroROS library.
 
 <br>
 

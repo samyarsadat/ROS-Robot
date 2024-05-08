@@ -4,7 +4,8 @@
 #include <uxr/client/profile/transport/custom/custom_transport.h>
 
 
-void usleep(uint64_t us)
+// POSIX functions are now provided by FreeRTOS + POSIX.
+/*void usleep(uint64_t us)
 {
     sleep_us(us);
 }
@@ -15,7 +16,7 @@ int clock_gettime(clockid_t unused, struct timespec *tp)
     tp->tv_sec = m / 1000000;
     tp->tv_nsec = (m % 1000000) * 1000;
     return 0;
-}
+}*/
 
 bool pico_serial_transport_open(struct uxrCustomTransport *transport)
 {

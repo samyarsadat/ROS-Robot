@@ -36,22 +36,23 @@ set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 
 # Include the FreeRTOS Kernel
-set(FREERTOS_KERNEL_PATH "${CMAKE_CURRENT_LIST_DIR}/freertos/FreeRTOS-Kernel" CACHE STRING "FreeRTOS Kernel Path")
-set(FREERTOS_CONFIG_DIR "${CMAKE_CURRENT_LIST_DIR}/freertos")
-include_directories("${FREERTOS_CONFIG_DIR}") 
+set(FREERTOS_KERNEL_PATH "${CMAKE_CURRENT_LIST_DIR}/freertos/FreeRTOS-Kernel" CACHE STRING "FreeRTOS Kernel Path" FORCE)
 include(FreeRTOS_Kernel_import.cmake)
 
 # FreeRTOS + POSIX
-set(FREERTOS_POSIX_PATH "${CMAKE_CURRENT_LIST_DIR}/freertos/FreeRTOS-POSIX")
+set(FREERTOS_POSIX_PATH "${CMAKE_CURRENT_LIST_DIR}/freertos/FreeRTOS-POSIX" CACHE STRING "FreeRTOS + POSIX Path" FORCE)
 set(FREERTOS_POSIX_SRC_PREFIX "${FREERTOS_POSIX_PATH}/FreeRTOS-Plus-POSIX/source/FreeRTOS_POSIX")
 include_directories("${FREERTOS_POSIX_PATH}/include")
-include_directories("${FREERTOS_POSIX_PATH}/include/FreeRTOS_POSIX")
 include_directories("${FREERTOS_POSIX_PATH}/include/private")
 include_directories("${FREERTOS_POSIX_PATH}/FreeRTOS-Plus-POSIX/include")
 include_directories("${FREERTOS_POSIX_PATH}/FreeRTOS-Plus-POSIX/include/portable")
 
+# FreeRTOS & FreeRTOS + POSIX config
+set(FREERTOS_CONFIG_DIR "${CMAKE_CURRENT_LIST_DIR}/freertos/Config" CACHE STRING "FreeRTOS Config Path" FORCE)
+include_directories("${FREERTOS_CONFIG_DIR}") 
+
 # Include MicroROS
-set(MICRO_ROS_PATH "${CMAKE_CURRENT_LIST_DIR}/uros_ws/firmware/build" CACHE STRING "MicroROS Library Path")
+set(MICRO_ROS_PATH "${CMAKE_CURRENT_LIST_DIR}/uros_ws/firmware/build" CACHE STRING "MicroROS Library Path" FORCE)
 include(micro_ros.cmake)
 
 # Add our source directory

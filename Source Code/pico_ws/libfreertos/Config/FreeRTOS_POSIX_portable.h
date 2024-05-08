@@ -32,7 +32,19 @@
 #ifndef _FREERTOS_POSIX_PORTABLE_H_
 #define _FREERTOS_POSIX_PORTABLE_H_
 
-/* This port uses the defaults in FreeRTOS_POSIX_portable_default.h, so this
- * file is empty. */
+#include <sys/types.h>
+
+#define posixconfigENABLE_TIMESPEC               0  /**< struct timespec in time.h */
+#define posixconfigENABLE_ITIMERSPEC             0  /**< struct itimerspec in time.h */
+#define posixconfigENABLE_PTHREAD_T              0  /**< pthread_t in sys/types.h */
+#define posixconfigENABLE_PTHREAD_CONDATTR_T     0  /**< pthread_condattr_t in sys/types.h */
+#define posixconfigENABLE_PTHREAD_COND_T         0  /**< pthread_cond_t in sys/types.h */
+#define posixconfigENABLE_PTHREAD_ATTR_T         0  /**< pthread_attr_t in sys/types.h */
+#define posixconfigENABLE_PTHREAD_MUTEXATTR_T    0  /**< pthread_mutexattr_t in sys/types.h */
+#define posixconfigENABLE_PTHREAD_MUTEX_T        0  /**< pthread_mutex_t in sys/types.h */
+#define posixconfigENABLE_TIMER_T                0  /**< timer_t in sys/types.h */
+#define posixconfigENABLE_CLOCKID_T              0  /**< clockid_t in sys/types.h */
+#define posixconfigENABLE_MODE_T                 0  /**< mode_t in sys/types.h */
+#define posixconfigENABLE_SCHED_PARAM            0  /**< sched_param in sched.h */
 
 #endif /* _FREERTOS_POSIX_PORTABLE_H_ */

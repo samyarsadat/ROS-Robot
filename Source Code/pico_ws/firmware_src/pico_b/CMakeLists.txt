@@ -21,14 +21,23 @@
 message("Configuring Pico B firmware build... (${PICO_B_NAME})")
 
 # Add source files
-add_executable(${PICO_B_NAME} Pico_B.c++ 
+add_executable(${PICO_B_NAME}
+               ${FREERTOS_POSIX_SRC_PREFIX}_clock.c
+               #${FREERTOS_POSIX_SRC_PREFIX}_mqueue.c
+               #${FREERTOS_POSIX_SRC_PREFIX}_pthread_barrier.c
+               #${FREERTOS_POSIX_SRC_PREFIX}_pthread_cond.c
+               #${FREERTOS_POSIX_SRC_PREFIX}_pthread_mutex.c
+               #${FREERTOS_POSIX_SRC_PREFIX}_pthread.c
+               ${FREERTOS_POSIX_SRC_PREFIX}_sched.c
+               #${FREERTOS_POSIX_SRC_PREFIX}_semaphore.c
+               #${FREERTOS_POSIX_SRC_PREFIX}_timer.c
+               ${FREERTOS_POSIX_SRC_PREFIX}_unistd.c
+               ${FREERTOS_POSIX_SRC_PREFIX}_utils.c
+               Pico_B.c++ 
                helpers/uROS_Init.c++
                helpers/IO_Helpers_General.c++
                ../uart_transport/pico_uart_transport.c
-               ${FREERTOS_POSIX_SRC_PREFIX}_clock.c
-               ${FREERTOS_POSIX_SRC_PREFIX}_sched.c
-               ${FREERTOS_POSIX_SRC_PREFIX}_unistd.c
-               ${FREERTOS_POSIX_SRC_PREFIX}_utils.c)
+               )
 
 # Create map/bin/hex/uf2 files
 pico_add_extra_outputs(${PICO_B_NAME})
