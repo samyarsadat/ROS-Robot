@@ -33,12 +33,13 @@ add_executable(${PICO_A_NAME}
                #${FREERTOS_POSIX_SRC_PREFIX}_timer.c
                ${FREERTOS_POSIX_SRC_PREFIX}_unistd.c
                ${FREERTOS_POSIX_SRC_PREFIX}_utils.c
+               ../uros_allocators/uros_allocators.c
+               ../uart_transport/pico_uart_transport.c
                Pico_A.c++
                helpers/IO_Helpers_Mux.c++
                helpers/IO_Helpers_Edge.c++
                helpers/IO_Helpers_Ultrasonic.c++
                helpers/uROS_Init.c++
-               ../uart_transport/pico_uart_transport.c
                )
 
 # Create map/bin/hex/uf2 files

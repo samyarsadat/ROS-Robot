@@ -123,6 +123,7 @@
 #define configUSE_CORE_AFFINITY                 1
 #define configUSE_TASK_PREEMPTION_DISABLE       0
 #define configUSE_PASSIVE_IDLE_HOOK             0
+#define portSUPPORT_SMP                         1
 
 
 /* RP2040 specific */
