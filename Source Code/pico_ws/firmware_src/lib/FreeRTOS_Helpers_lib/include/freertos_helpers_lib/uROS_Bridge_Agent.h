@@ -1,9 +1,12 @@
 /*
     The ROS robot project
-    Helper functions for using MicroROS with FreeRTOS.  
+    uROS Bridge singleton object for managing uROS and uROS comms.
+    This object handles the MicroROS executor and the MicroROS node.
+    It also provides a method for adding messaged to its publishing queue.
     
     Copyright 2024 Samyar Sadat Akhavi
     Written by Samyar Sadat Akhavi, 2024.
+    Heavily inspired by: https://github.com/jondurrant/RPIPicoFreeRTOSuROSPubSub
  
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,4 +23,4 @@
 */
 
 
-#include "freertos_helpers_lib/FreeRTOS_Helpers.h"
+#pragma once
