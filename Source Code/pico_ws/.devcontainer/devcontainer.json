@@ -60,9 +60,9 @@
     },
 
     "workspaceFolder": "/home/urosdev/pico_ws",
-    "mounts": [{"source": "${localWorkspaceFolder}/firmware_src", "target": "/home/urosdev/pico_ws/src", "type": "bind"},
-               {"source": "${localWorkspaceFolder}/libmicroros", "target": "/home/urosdev/pico_ws/uros_ws", "type": "bind"},
-               {"source": "${localWorkspaceFolder}/libfreertos", "target": "/home/urosdev/pico_ws/freertos", "type": "bind"},
+    "mounts": [{"source": "${localWorkspaceFolder}/src", "target": "/home/urosdev/pico_ws/src", "type": "bind"},
+               {"source": "${localWorkspaceFolder}/libmicroros", "target": "/home/urosdev/pico_ws/libmicroros", "type": "bind"},
+               {"source": "${localWorkspaceFolder}/libfreertos", "target": "/home/urosdev/pico_ws/libfreertos", "type": "bind"},
                {"source": "${localWorkspaceFolder}/CMakeLists.txt", "target": "/home/urosdev/pico_ws/CMakeLists.txt", "type": "bind"},
                {"source": "${localWorkspaceFolder}/micro_ros.cmake", "target": "/home/urosdev/pico_ws/micro_ros.cmake", "type": "bind"},
                {"source": "${localWorkspaceFolder}/build", "target": "/home/urosdev/pico_ws/build", "type": "bind"}],

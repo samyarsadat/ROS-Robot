@@ -3,7 +3,7 @@
 
 # A short script for building the MicroROS library.
 # Written by Samyar Sadat Akhavi, 2024.
-# NOTE: DO NOT RUN AS ROOT, RUN AS "urosdev"!
+# NOTE: DO NOT RUN AS ROOT, RUN AS NON-ROOT USER!
 
 set -e
 echo "MicroROS Library Build Script."
@@ -24,7 +24,7 @@ if [ "$FULL_REBUILD" == "true" ]; then
 
     case $confirm in 
         [yY]) 
-            cd ~/pico_ws/uros_ws \
+            cd ~/pico_ws/libmicroros \
             && echo "Removing directories..." && rm -rf ./build && rm -rf ./firmware && rm -rf ./install && rm -rf ./log \
             && echo "Building..." && colcon build --packages-select rrp_pico_coms \
             && source install/local_setup.bash \
@@ -47,7 +47,7 @@ fi
 
 if [ "$FULL_REBUILD" == "false" ]; then
     echo "Re-building firmware only..."
-    cd ~/pico_ws/uros_ws \
+    cd ~/pico_ws/libmicroros \
     && ros2 run micro_ros_setup build_firmware.sh "$(pwd)/my_toolchain.cmake" "$(pwd)/my_colcon.meta"
     echo "Build completed successfully (probably)!"
 fi

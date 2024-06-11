@@ -17,7 +17,7 @@
                 "/usr/include/**",
                 "${PICO_SDK_PATH}/**",
                 "${workspaceFolder}/src/**",
-                "${workspaceFolder}/uros_ws/firmware/build/**"
+                "${workspaceFolder}/libmicroros/firmware/build/**"
             ]
         }
     ],

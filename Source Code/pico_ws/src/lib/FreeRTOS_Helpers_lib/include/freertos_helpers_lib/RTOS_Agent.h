@@ -45,7 +45,7 @@ class Agent
         // ---- Functions ----
 
         // Start the agent (FreeRTOS task)
-        virtual bool start(UBaseType_t priority = tskIDLE_PRIORITY);
+        virtual bool start(UBaseType_t priority);
 
         // Stop the agent (FreeRTOS task)
         virtual void stop();

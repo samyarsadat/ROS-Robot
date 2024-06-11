@@ -23,7 +23,8 @@ cmake_minimum_required(VERSION 3.12)
 
 # Add source files
 add_library(${PROJECT_NAME} FreeRTOS_Helpers.c++
-                            RTOS_Agent.c++)
+                            RTOS_Agent.c++
+                            uROS_Bridge_Agent.c++)
 
 # Include header files
 target_include_directories(${PROJECT_NAME} PUBLIC ../include)

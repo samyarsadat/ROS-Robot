@@ -23,6 +23,7 @@ cmake_minimum_required(VERSION 3.12)
 set(PROJ_NAME ROS_Robot)
 set(PICO_A_NAME ${PROJ_NAME}_Pico_A)
 set(PICO_B_NAME ${PROJ_NAME}_Pico_B)
+set(PICO_A_MT_NAME ${PROJ_NAME}_Multithread_Test)
 
 # Include build functions from the Pico SDK
 include(pico_sdk_import.cmake)
@@ -36,11 +37,11 @@ set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 
 # Include the FreeRTOS Kernel
-set(FREERTOS_KERNEL_PATH "${CMAKE_CURRENT_LIST_DIR}/freertos/FreeRTOS-Kernel" CACHE STRING "FreeRTOS Kernel Path" FORCE)
+set(FREERTOS_KERNEL_PATH "${CMAKE_CURRENT_LIST_DIR}/libfreertos/FreeRTOS-Kernel" CACHE STRING "FreeRTOS Kernel Path" FORCE)
 include(FreeRTOS_Kernel_import.cmake)
 
 # FreeRTOS + POSIX
-set(FREERTOS_POSIX_PATH "${CMAKE_CURRENT_LIST_DIR}/freertos/FreeRTOS-POSIX" CACHE STRING "FreeRTOS + POSIX Path" FORCE)
+set(FREERTOS_POSIX_PATH "${CMAKE_CURRENT_LIST_DIR}/libfreertos/FreeRTOS-POSIX" CACHE STRING "FreeRTOS + POSIX Path" FORCE)
 set(FREERTOS_POSIX_SRC_PREFIX "${FREERTOS_POSIX_PATH}/FreeRTOS-Plus-POSIX/source/FreeRTOS_POSIX")
 include_directories("${FREERTOS_POSIX_PATH}/include")
 include_directories("${FREERTOS_POSIX_PATH}/include/private")
@@ -48,11 +49,11 @@ include_directories("${FREERTOS_POSIX_PATH}/FreeRTOS-Plus-POSIX/include")
 include_directories("${FREERTOS_POSIX_PATH}/FreeRTOS-Plus-POSIX/include/portable")
 
 # FreeRTOS & FreeRTOS + POSIX config
-set(FREERTOS_CONFIG_DIR "${CMAKE_CURRENT_LIST_DIR}/freertos/Config" CACHE STRING "FreeRTOS Config Path" FORCE)
+set(FREERTOS_CONFIG_DIR "${CMAKE_CURRENT_LIST_DIR}/libfreertos/Config" CACHE STRING "FreeRTOS Config Path" FORCE)
 include_directories("${FREERTOS_CONFIG_DIR}") 
 
 # Include MicroROS
-set(MICRO_ROS_PATH "${CMAKE_CURRENT_LIST_DIR}/uros_ws/firmware/build" CACHE STRING "MicroROS Library Path" FORCE)
+set(MICRO_ROS_PATH "${CMAKE_CURRENT_LIST_DIR}/libmicroros/firmware/build" CACHE STRING "MicroROS Library Path" FORCE)
 include(micro_ros.cmake)
 
 # Add our source directory

@@ -25,6 +25,9 @@ add_subdirectory(pico_a)
 # Pico B firmware
 add_subdirectory(pico_b)
 
+# Multithread MicroROS test firmware
+add_subdirectory(multithread_test)
+
 # CMake flags
 set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")

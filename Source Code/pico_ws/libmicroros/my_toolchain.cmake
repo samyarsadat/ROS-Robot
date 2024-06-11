@@ -48,19 +48,19 @@ set(CMAKE_CXX_FLAGS_INIT "-std=c++14 ${FLAGS} -fno-rtti -DCLOCK_MONOTONIC=0 -D'_
 
 # FreeRTOS Kernel
 add_compile_definitions(PLATFORM_NAME_FREERTOS)
-set(FREERTOS_KERNEL_PATH "${CMAKE_CURRENT_LIST_DIR}/../freertos/FreeRTOS-Kernel")
+set(FREERTOS_KERNEL_PATH "${CMAKE_CURRENT_LIST_DIR}/../libfreertos/FreeRTOS-Kernel")
 include_directories("${FREERTOS_KERNEL_PATH}/include") 
 include_directories("${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include")
 
 # FreeRTOS + POSIX
-set(FREERTOS_POSIX_PATH "${CMAKE_CURRENT_LIST_DIR}/../freertos/FreeRTOS-POSIX")
+set(FREERTOS_POSIX_PATH "${CMAKE_CURRENT_LIST_DIR}/../libfreertos/FreeRTOS-POSIX")
 include_directories("${FREERTOS_POSIX_PATH}/include")
 include_directories("${FREERTOS_POSIX_PATH}/include/private")
 include_directories("${FREERTOS_POSIX_PATH}/FreeRTOS-Plus-POSIX/include")
 include_directories("${FREERTOS_POSIX_PATH}/FreeRTOS-Plus-POSIX/include/portable")
 
 # FreeRTOS & FreeRTOS + POSIX config
-set(FREERTOS_CONFIG_DIR "${CMAKE_CURRENT_LIST_DIR}/../freertos/Config")
+set(FREERTOS_CONFIG_DIR "${CMAKE_CURRENT_LIST_DIR}/../libfreertos/Config")
 include_directories("${FREERTOS_CONFIG_DIR}")
 
 # Raspberry Pi Pico SDK headers
