@@ -13,9 +13,11 @@
 	path = Source Code/pico_ws/libfreertos/FreeRTOS-POSIX
 	url = https://github.com/FreeRTOS/Lab-Project-FreeRTOS-POSIX
 	ignore = all
+
 [submodule "Pico PID Library"]
 	path = Source Code/pico_ws/src/lib/PID_lib
 	url = https://github.com/samyarsadat/Pico-PID-Library
+
 [submodule "MPU6050 Library"]
 	path = Source Code/pico_ws/src/lib/MPU_lib
 	url = https://github.com/HumansAreWeak/rpi-pico-mpu6050
