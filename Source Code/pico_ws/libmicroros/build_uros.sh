@@ -7,7 +7,7 @@
 
 set -e
 echo "MicroROS Library Build Script."
-echo "NOTE: DO NOT RUN AS ROOT, RUN AS 'urosdev'!"
+echo "NOTE: DO NOT RUN AS ROOT, RUN AS 'nonroot'!"
 echo ""
 
 while getopts bf flag

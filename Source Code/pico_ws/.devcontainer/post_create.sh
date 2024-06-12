@@ -7,7 +7,7 @@ echo "--> post_create.sh started!"
 echo "-> First container run, running MicroROS tools setup..."
 
 echo "-> Setting folder permissions and copying files..."
-sudo chown -R urosdev: $HOME/pico_ws/
+sudo chown -R nonroot: $HOME/pico_ws/
 cp "/pico/pico-sdk/external/pico_sdk_import.cmake" $HOME/pico_ws/pico_sdk_import.cmake
 cp "$HOME/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" $HOME/pico_ws/FreeRTOS_Kernel_import.cmake
     
