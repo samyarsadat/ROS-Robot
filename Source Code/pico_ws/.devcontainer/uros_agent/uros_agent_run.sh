@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Temporary script for running the MicroROS agent.
-# DO NOT RUN AS ROOT, RUN AS UROSDEV!
+# DO NOT RUN AS ROOT, RUN AS NON-ROOT USER!
 
 cd ~/pico_ws/uros_agent \
 && source install/local_setup.bash \
