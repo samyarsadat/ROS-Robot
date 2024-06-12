@@ -6,7 +6,7 @@
     
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "C_Cpp.errorSquiggles": "enabled",
-    "cmake.sourceDirectory": "/home/urosdev/pico_ws",
+    "cmake.sourceDirectory": "${workspaceFolder}",
     "cmake.generator": "Unix Makefiles",
     "cmake.parallelJobs": 12,
     "cmake.buildDirectory": "${workspaceFolder}/build",

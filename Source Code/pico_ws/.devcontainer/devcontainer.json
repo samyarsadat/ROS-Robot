@@ -24,7 +24,9 @@
 {
     "name": "MicroROS Workspace",
     "remoteUser": "urosdev",
-    "overrideCommand": false,
+    "overrideCommand": true,
+    "postCreateCommand": "/devcon_post_create.sh",
+    "postStartCommand": "/devcon_post_start.sh",
     
     "build": {
         "dockerfile": "Dockerfile",
