@@ -41,11 +41,15 @@ jobs:
               with:
                   source_dir: "Source\ Code/pico_ws"
 
+            - name: Rename Source Code Directory
+              run: |
+                  mv "$GITHUB_WORKSPACE/Source Code/" "$GITHUB_WORKSPACE/source_code/"
+
             - name: Build MicroROS Library
               id: build
               uses: samyarsadat/MicroROS-Build-Action@v1
               with:
-                  microros_dir: "Source\ Code/pico_ws/libmicroros"
+                  microros_dir: "source_code/pico_ws/libmicroros"
                   clone_microros_setup: "false"
                   extra_build_packages: "rrp_pico_coms"
 
