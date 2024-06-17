@@ -33,7 +33,7 @@ jobs:
 
             - name: Copy Required Files
               run: |
-                  cp "$GITHUB_WORKSPACE/Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" "$GITHUB_WORKSPACE/Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
+                  cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
 
             - name: Generate Pico SDK Headers
               continue-on-error: true
@@ -43,9 +43,9 @@ jobs:
 
             - name: Rename Source Code Directory
               run: |
-                  mv "$GITHUB_WORKSPACE/Source Code/" "$GITHUB_WORKSPACE/source_code/"
+                  mv "Source Code/" "source_code/"
                   sudo apt-get install -y tree
-                  tree "$GITHUB_WORKSPACE/source_code/"
+                  tree "source_code/"
 
             - name: Build MicroROS Library
               id: build
