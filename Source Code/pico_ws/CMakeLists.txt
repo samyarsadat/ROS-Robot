@@ -26,7 +26,7 @@ set(PICO_B_NAME ${PROJ_NAME}_Pico_B)
 set(PICO_A_MT_NAME ${PROJ_NAME}_Multithread_Test)
 
 # Include build functions from the Pico SDK
-include(pico_sdk_import.cmake)
+include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 
 # Set project name and C/C++ standards
 project(${PROJ_NAME} VERSION 0.1.0 LANGUAGES C CXX ASM)

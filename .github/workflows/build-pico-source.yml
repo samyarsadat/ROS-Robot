@@ -33,7 +33,6 @@ jobs:
 
             - name: Copy Required Files
               run: |
-                  cp "$PICO_SDK_PATH/external/pico_sdk_import.cmake" "$GITHUB_WORKSPACE/Source Code/pico_ws/pico_sdk_import.cmake"
                   cp "$GITHUB_WORKSPACE/Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" "$GITHUB_WORKSPACE/Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
 
             - name: Generate Pico SDK Headers
@@ -78,7 +77,6 @@ jobs:
 
             - name: Copy Required Files
               run: |
-                  cp "$PICO_SDK_PATH/external/pico_sdk_import.cmake" "$GITHUB_WORKSPACE/Source Code/pico_ws/pico_sdk_import.cmake"
                   cp "$GITHUB_WORKSPACE/Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" "$GITHUB_WORKSPACE/Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
 
             - name: Build Pico Source Code
