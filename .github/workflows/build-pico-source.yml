@@ -33,7 +33,8 @@ jobs:
 
             - name: Copy Required Files
               run: |
-                  cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
+                  cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
+                  "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
 
             - name: Generate Pico SDK Headers
               continue-on-error: true
@@ -85,13 +86,15 @@ jobs:
 
             - name: Copy Required Files
               run: |
-                  cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
+                  cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
+                  "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
 
             - name: Build Pico Source Code
               id: build
               uses: samyarsadat/Pico-Build-Action@v1
               with:
                   source_dir: "Source Code/pico_ws"
+                  output_dir: "build"
                   output_ext: "*.uf2 *.elf *.elf.map *.hex *.bin *.dis"
                   output_ignored_dirs: "lib"
 
