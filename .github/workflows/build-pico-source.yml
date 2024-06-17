@@ -39,13 +39,15 @@ jobs:
               continue-on-error: true
               uses: samyarsadat/Pico-Build-Action@v1
               with:
-                  source_dir: "Source\ Code/pico_ws"
+                  source_dir: "Source Code/pico_ws"
+                  output_dir: "build"
+                  cmake_config_only: "true"
 
             - name: Rename Source Code Directory
               run: |
+                  tree -a "Source Code/pico_ws/build"
                   mv "Source Code/" "source_code/"
-                  sudo apt-get install -y tree
-                  tree "source_code/"
+                  tree -a "source_code/pico_ws/build"
 
             - name: Build MicroROS Library
               id: build
@@ -79,17 +81,17 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   name: uros_library_artifacts
-                  path: "Source\ Code/pico_ws/libmicroros/firmware/build"
+                  path: "Source Code/pico_ws/libmicroros/firmware/build"
 
             - name: Copy Required Files
               run: |
-                  cp "$GITHUB_WORKSPACE/Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" "$GITHUB_WORKSPACE/Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
+                  cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
 
             - name: Build Pico Source Code
               id: build
               uses: samyarsadat/Pico-Build-Action@v1
               with:
-                  source_dir: "Source\ Code/pico_ws"
+                  source_dir: "Source Code/pico_ws"
                   output_ext: "*.uf2 *.elf *.elf.map *.hex *.bin *.dis"
                   output_ignored_dirs: "lib"
 
