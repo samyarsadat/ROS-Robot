@@ -62,6 +62,6 @@ ament_package()
 
 install(
     PROGRAMS
-        scripts/create_fwws.sh
+        scripts/create_firmware_ws.sh
     DESTINATION lib/${PROJECT_NAME}
 )
