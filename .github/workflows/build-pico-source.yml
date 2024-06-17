@@ -31,6 +31,11 @@ jobs:
               with:
                   submodules: recursive
 
+            - name: Copy Required Files
+              run: |
+                  cp "$PICO_SDK_PATH/external/pico_sdk_import.cmake" "$GITHUB_WORKSPACE/Source Code/pico_ws/pico_sdk_import.cmake"
+                  cp "$GITHUB_WORKSPACE/Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" "$GITHUB_WORKSPACE/Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
+
             - name: Generate Pico SDK Headers
               continue-on-error: true
               uses: samyarsadat/Pico-Build-Action@v1
@@ -70,6 +75,11 @@ jobs:
               with:
                   name: uros_library_artifacts
                   path: "Source\ Code/pico_ws/libmicroros/firmware/build"
+
+            - name: Copy Required Files
+              run: |
+                  cp "$PICO_SDK_PATH/external/pico_sdk_import.cmake" "$GITHUB_WORKSPACE/Source Code/pico_ws/pico_sdk_import.cmake"
+                  cp "$GITHUB_WORKSPACE/Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" "$GITHUB_WORKSPACE/Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
 
             - name: Build Pico Source Code
               id: build
