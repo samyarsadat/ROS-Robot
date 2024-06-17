@@ -35,13 +35,13 @@ jobs:
               continue-on-error: true
               uses: samyarsadat/Pico-Build-Action@v1
               with:
-                  source_dir: "Source Code/pico_ws/src"
+                  source_dir: "Source\ Code/pico_ws"
 
             - name: Build MicroROS Library
               id: build
               uses: samyarsadat/MicroROS-Build-Action@v1
               with:
-                  microros_dir: "Source Code/pico_ws/libmicroros"
+                  microros_dir: "Source\ Code/pico_ws/libmicroros"
                   clone_microros_setup: "false"
                   extra_build_packages: "rrp_pico_coms"
 
@@ -69,13 +69,13 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   name: uros_library_artifacts
-                  path: "Source Code/pico_ws/libmicroros/firmware/build"
+                  path: "Source\ Code/pico_ws/libmicroros/firmware/build"
 
             - name: Build Pico Source Code
               id: build
               uses: samyarsadat/Pico-Build-Action@v1
               with:
-                  source_dir: "Source Code/pico_ws/src"
+                  source_dir: "Source\ Code/pico_ws"
                   output_ext: "*.uf2 *.elf *.elf.map *.hex *.bin *.dis"
                   output_ignored_dirs: "lib"
 
