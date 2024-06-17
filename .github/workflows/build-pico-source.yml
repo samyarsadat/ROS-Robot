@@ -44,6 +44,7 @@ jobs:
             - name: Rename Source Code Directory
               run: |
                   mv "$GITHUB_WORKSPACE/Source Code/" "$GITHUB_WORKSPACE/source_code/"
+                  ls "$GITHUB_WORKSPACE/source_code/"
 
             - name: Build MicroROS Library
               id: build
