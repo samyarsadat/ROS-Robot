@@ -1,0 +1,74 @@
+#  The ROS robot project - Reusable workflow for building Raspberry Pi Pico source code.
+#  Copyright 2024 Samyar Sadat Akhavi
+#  Written by Samyar Sadat Akhavi, 2024.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https: www.gnu.org/licenses/>.
+
+name: Build The Pico Source Code
+on: 
+    workflow_call:
+        inputs:
+            microros_artifact_name:
+                description: The name of the artifact containing the micro-ROS library.
+                required: true
+                type: string
+                default: uros_library_artifacts
+        outputs:
+            build_artifact_name:
+                description: The name of the artifact containing the built binaries.
+                value: $BUILD_ARTIFACT_NAME
+
+env:
+    BUILD_ARTIFACT_NAME: pico_binary_artifacts
+    PICO_WS_PATH: "Source Code/pico_ws"
+
+jobs:
+    build_pico:
+        name: Build the Pico source code
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Download MicroROS Library Artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  name: ${{inputs.microros_artifact_name}}
+                  path: "$PICO_WS_PATH/libmicroros/firmware/build"
+
+            - name: Copy FreeRTOS Kernel Import File
+              run: |
+                  cp "$PICO_WS_PATH/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
+                  "$PICO_WS_PATH/FreeRTOS_Kernel_import.cmake"
+
+            - name: Build Pico Source Code
+              id: build
+              uses: samyarsadat/Pico-Build-Action@v1
+              with:
+                  source_dir: "$PICO_WS_PATH"
+                  output_dir: "build"
+                  output_ext: "*.uf2 *.elf *.elf.map *.hex *.bin *.dis"
+                  output_ignored_dirs: "src/lib"
+
+            - name: Upload Pico Source Code Artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: $BUILD_ARTIFACT_NAME
+                  path: ${{steps.build.outputs.output_dir}}
+                  if-no-files-found: error

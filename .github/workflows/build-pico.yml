@@ -1,0 +1,35 @@
+#  The ROS robot project - Raspberry Pi Pico source code build workflow.
+#  Copyright 2024 Samyar Sadat Akhavi
+#  Written by Samyar Sadat Akhavi, 2024.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https: www.gnu.org/licenses/>.
+
+name: Build Pico Source Code
+on: push
+
+jobs:
+    build_pico:
+        name: Build the Pico source code
+        runs-on: ubuntu-latest
+        
+        steps:
+            - name: Build micro-ROS library
+              id: uros_build
+              uses: ./.github/workflows/reusable_workflows/build-microros.yml
+
+            - name: Build Pico source code
+              id: pico_build
+              uses: ./.github/workflows/reusable_workflows/build-pico-source.yml
+              with:
+                  microros_artifact_name: ${{steps.uros_build.outputs.library_artifact_name}}
