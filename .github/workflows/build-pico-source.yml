@@ -31,7 +31,7 @@ jobs:
               with:
                   submodules: recursive
 
-            - name: Copy Required Files
+            - name: Copy FreeRTOS Kernel Import File
               run: |
                   cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
                   "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
@@ -44,11 +44,11 @@ jobs:
                   output_dir: "build"
                   cmake_config_only: "true"
 
+            # This step is required because of a bug in micro_ros_setup's firmware workspace creation script.
+            # This bug causes the script to fail if the path to the script's working directory contains spaces.
             - name: Rename Source Code Directory
               run: |
-                  tree -a "Source Code/pico_ws/build"
                   mv "Source Code/" "source_code/"
-                  tree -a "source_code/pico_ws/build"
 
             - name: Build MicroROS Library
               id: build
@@ -84,7 +84,7 @@ jobs:
                   name: uros_library_artifacts
                   path: "Source Code/pico_ws/libmicroros/firmware/build"
 
-            - name: Copy Required Files
+            - name: Copy FreeRTOS Kernel Import File
               run: |
                   cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
                   "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
