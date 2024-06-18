@@ -19,9 +19,12 @@ name: Build Pico Source Code
 on: push
 
 jobs:
-    build_pico:
+    build_uros:
         name: Build the Pico source code
         runs-on: ubuntu-latest
+
+        outputs:
+            library_artifact_name: ${{steps.uros_build.outputs.library_artifact_name}}
         
         steps:
             - name: Checkout
@@ -33,8 +36,19 @@ jobs:
               id: uros_build
               uses: ./.github/workflows/build-microros-action
 
+    build_pico:
+        name: Build the Pico source code
+        needs: build_uros
+        runs-on: ubuntu-latest
+        
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
             - name: Build Pico source code
               id: pico_build
               uses: ./.github/workflows/build-pico-action
               with:
-                  microros_artifact_name: ${{steps.uros_build.outputs.library_artifact_name}}
+                  microros_artifact_name: ${{needs.build_uros.outputs.library_artifact_name}}

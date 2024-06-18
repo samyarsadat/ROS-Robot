@@ -55,7 +55,8 @@ runs:
         - name: Rename Source Code Directory
           shell: bash
           run: |
-              mv "/github/workspace/${{inputs.pico_ws_path}}" "/github/workspace/source_code/pico_ws"
+              mkdir -p source_code/pico_ws
+              mv "${{inputs.pico_ws_path}}" "source_code/pico_ws"
 
         - name: Build MicroROS Library
           id: build
