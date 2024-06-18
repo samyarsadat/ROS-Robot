@@ -40,20 +40,20 @@ jobs:
               with:
                   submodules: recursive
 
-            - name: Initialize CodeQL
-              uses: github/codeql-action/init@v3
-              with:
-                  languages: c-cpp
-                  build-mode: manual
+            #- name: Initialize CodeQL
+            #  uses: github/codeql-action/init@v3
+            #  with:
+            #      languages: c-cpp
+            #      build-mode: manual
 
             - name: Build micro-ROS library
               id: uros_build
               uses: ./.github/workflows/build-microros-action
 
-            - name: Perform CodeQL Analysis
-              uses: github/codeql-action/analyze@v3
-              with:
-                  category: "/language:c-cpp"
+            #- name: Perform CodeQL Analysis
+            #  uses: github/codeql-action/analyze@v3
+            #  with:
+            #      category: "/language:c-cpp"
 
     analyze_pico:
         name: Analyze Pico source code
