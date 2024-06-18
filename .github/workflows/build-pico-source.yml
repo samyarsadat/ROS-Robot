@@ -96,7 +96,7 @@ jobs:
                   source_dir: "Source Code/pico_ws"
                   output_dir: "build"
                   output_ext: "*.uf2 *.elf *.elf.map *.hex *.bin *.dis"
-                  output_ignored_dirs: "lib"
+                  output_ignored_dirs: "src/lib"
 
             - name: Upload Pico Source Code Artifacts
               uses: actions/upload-artifact@v4
