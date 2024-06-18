@@ -56,7 +56,7 @@ runs:
           shell: bash
           run: |
               mkdir -p source_code/pico_ws
-              mv "${{inputs.pico_ws_path}}" "source_code/pico_ws"
+              mv "${{inputs.pico_ws_path}}" "source_code/"
               ls source_code/pico_ws
 
         - name: Build MicroROS Library
