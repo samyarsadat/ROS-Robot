@@ -26,10 +26,10 @@ jobs:
         steps:
             - name: Build micro-ROS library
               id: uros_build
-              uses: ./.github/workflows/reusable_workflows/build-microros.yml
+              uses: ./.github/workflows/reusable_workflows/build-microros.yml@main
 
             - name: Build Pico source code
               id: pico_build
-              uses: ./.github/workflows/reusable_workflows/build-pico-source.yml
+              uses: ./.github/workflows/reusable_workflows/build-pico-source.yml@main
               with:
                   microros_artifact_name: ${{steps.uros_build.outputs.library_artifact_name}}
