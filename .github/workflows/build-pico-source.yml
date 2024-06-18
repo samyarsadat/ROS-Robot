@@ -97,7 +97,6 @@ jobs:
                   output_dir: "build"
                   output_ext: "*.uf2 *.elf *.elf.map *.hex *.bin *.dis"
                   output_ignored_dirs: "lib"
-                  cmake_args: '-G "Unix Makefiles"'
 
             - name: Upload Pico Source Code Artifacts
               uses: actions/upload-artifact@v4
