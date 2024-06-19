@@ -1,5 +1,8 @@
 #!/bin/bash
-#  Pico Build Action - Entrypoint script, this builds the code.
+#  The ROS Robot Project - Raspberry Pi Pico build script for CodeQL analysis.
+#  This is a modified version of the script from the Pico Build Action.
+#  This workaround is necessary because CodeQL needs run in the same environment as the build script.
+#
 #  Copyright 2024 Samyar Sadat Akhavi
 #  Written by Samyar Sadat Akhavi, 2024.
 #
