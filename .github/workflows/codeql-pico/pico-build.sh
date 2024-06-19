@@ -18,25 +18,12 @@
 
 set -e
 
-# Define binary file extensions and build directories to ignore
-DEFAULT_IGNORED_BUILD_DIRS=("CMakeFiles" "elf2uf2" "pico-sdk" "pioasm")
-
 # Get arguments
 SOURCE_DIR=$1
 OUTPUT_DIR="build"
-OUTPUT_EXT=".uf2 .elf .elf.map .bin .hex .dis"
 BOARD_NAME="pico"
 CMAKE_ARGS=""
-OUTPUT_IGNORED_DIRS="src/lib"
-CMAKE_CONFIG_ONLY="false"
 MAKEFILES_GENERATOR="Unix Makefiles"
-
-# Split output extensions and into array
-IFS=" " read -r -a BINARY_EXTENSIONS <<< "$OUTPUT_EXT"
-
-# Split ignored build directories into array and append to IGNORED_BUILD_DIRS
-IFS=" " read -r -a IGNORED_BUILD_DIRS <<< "$OUTPUT_IGNORED_DIRS"
-IGNORED_BUILD_DIRS=("${DEFAULT_IGNORED_BUILD_DIRS[@]}" "${IGNORED_BUILD_DIRS[@]}")
 
 # Validate arguments
 if [ -z "$SOURCE_DIR" ]; then
@@ -57,10 +44,6 @@ if [ -z "$MAKEFILES_GENERATOR" ]; then
     MAKEFILES_GENERATOR="Ninja"
 fi
 
-if [ -z "$BINARY_EXTENSIONS" ]; then
-    BINARY_EXTENSIONS=("*.uf2" "*.elf" "*.elf.map")
-fi
-
 # Check if the source directory exists
 if [ ! -d "$SOURCE_DIR" ]; then
     echo "ERROR: Source directory does not exist."
@@ -76,11 +59,8 @@ OUTPUT_DIR="$SOURCE_DIR/$OUTPUT_DIR"
 echo "Configuration:"
 echo "SOURCE_DIR=$SOURCE_DIR"
 echo "OUTPUT_DIR=$OUTPUT_DIR"
-echo "BINARY_EXTENSIONS=${BINARY_EXTENSIONS[@]}"
 echo "BOARD_NAME=$BOARD_NAME"
 echo "CMAKE_ARGS=$CMAKE_ARGS"
-echo "IGNORED_BUILD_DIRS=${IGNORED_BUILD_DIRS[@]}"
-echo "CMAKE_CONFIG_ONLY=$CMAKE_CONFIG_ONLY"
 echo "MAKEFILES_GENERATOR=$MAKEFILES_GENERATOR"
 
 # Build the project
@@ -88,39 +68,5 @@ echo "Generating build files..."
 mkdir "$OUTPUT_DIR" && cd "$OUTPUT_DIR"
 cmake -DPICO_BOARD="$BOARD_NAME" -S "$SOURCE_DIR" -B "$OUTPUT_DIR" -G "$MAKEFILES_GENERATOR" $CMAKE_ARGS
 
-if [ "$CMAKE_CONFIG_ONLY" = "false" ]; then
-    echo "Building project..."
-    cd "$OUTPUT_DIR" && make -j$(nproc)
-
-    # Remove ignored build directories
-    echo "Removing unnecessary build directories..."
-    for dir in "${IGNORED_BUILD_DIRS[@]}"; do
-        if [ -d "$OUTPUT_DIR/$dir" ]; then
-            echo "Removing $dir..."
-            rm -rf "$OUTPUT_DIR/$dir"
-        fi
-    done
-
-    # Move the build artifacts to temporary directory
-    echo "Moving build artifacts to temporary directory..."
-    COPY_DEST_DIR="/tmp/make_build"
-    for ext in "${BINARY_EXTENSIONS[@]}"; do
-        find "$OUTPUT_DIR" -name "$ext" -print0 | while IFS= read -r -d '' file; do
-            echo "Copying $file..."
-            relative_path="${file#$OUTPUT_DIR/}"
-            mkdir -p "$COPY_DEST_DIR/$(dirname "$relative_path")"
-            cp "$file" "$COPY_DEST_DIR/$relative_path"
-        done
-    done
-
-    # Clear the build directory
-    echo "Clearing the build directory..."
-    rm -rf "$OUTPUT_DIR" && mkdir "$OUTPUT_DIR"
-
-    # Move the build artifacts back to the output directory
-    echo "Moving build artifacts back to the output directory..."
-    mv /tmp/make_build/* "$OUTPUT_DIR"
-fi
-
-# Add output directory path to GITHUB_OUTPUT
-echo "output_dir=$OUTPUT_DIR_RELATIVE" >> $GITHUB_OUTPUT
+echo "Building project..."
+cd "$OUTPUT_DIR" && make -j$(nproc)
