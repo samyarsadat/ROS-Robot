@@ -74,7 +74,7 @@ jobs:
               id: build
               shell: bash
               run: |
-                  bash ".github/workflows/codeql-pico/uros-build.sh" "${{inputs.microros_dir}}"
+                  bash ".github/workflows/codeql-pico-scripts/uros-build.sh" "${{inputs.microros_dir}}"
 
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v3
