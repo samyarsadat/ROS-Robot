@@ -15,47 +15,19 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-name: "Pico CodeQL Analysis"
+name: CodeQL Analysis - Pico Source
 
 on:
     push:
-        branches: ["stage-1-pico-rtos"]
     schedule:
-        - cron: "50 16 * * MON" # Every Monday at 4:50 PM UTC
+        - cron: "50 16 * * MON"   # Every Monday at 4:50 PM UTC
 
 jobs:
     analyze_uros:
-        name: Analyze micro-ROS library
-        runs-on: ubuntu-latest
-
-        permissions:
-            security-events: write
-            contents: read
-        outputs:
-            library_artifact_name: ${{steps.uros_build.outputs.library_artifact_name}}
-
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-              with:
-                  submodules: recursive
-
-            #- name: Initialize CodeQL
-            #  uses: github/codeql-action/init@v3
-            #  with:
-            #      languages: c-cpp
-            #      build-mode: manual
-
-            - name: Build micro-ROS library
-              id: uros_build
-              uses: ./.github/workflows/build-microros-action
-
-            #- name: Perform CodeQL Analysis
-            #  uses: github/codeql-action/analyze@v3
-            #  with:
-            #      category: "/language:c-cpp"
+        name: MicroROS CodeQL
+        uses: ./.github/workflows/analyze-uros.yml
 
     analyze_pico:
-        name: Analyze Pico source code
+        name: Pico CodeQL
         needs: analyze_uros
         uses: ./.github/workflows/analyze-pico.yml
