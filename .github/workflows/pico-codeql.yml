@@ -56,4 +56,6 @@ jobs:
             #      category: "/language:c-cpp"
 
     analyze_pico:
+        name: Analyze Pico source code
+        needs: analyze_uros
         uses: ./.github/workflows/analyze-pico.yml
