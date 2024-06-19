@@ -16,19 +16,7 @@
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
 name: "Pico CodeQL Analysis"
-on: 
-    workflow_call:
-        inputs:
-            microros_artifact_name:
-                description: "The name of the artifact containing the micro-ROS library."
-                required: false
-                default: uros_library_artifacts
-                type: string
-            pico_ws_path:
-                description: "The path to the Pico workspace directory."
-                required: false
-                default: "Source Code/pico_ws"
-                type: string
+on: workflow_call
 
 jobs:
     analyze_pico:
@@ -49,14 +37,14 @@ jobs:
             - name: Download MicroROS Library Artifacts
               uses: actions/download-artifact@v4
               with:
-                  name: ${{inputs.microros_artifact_name}}
-                  path: "${{inputs.pico_ws_path}}/libmicroros/firmware/build"
+                  name: uros_library_artifacts
+                  path: "Source Code/pico_ws/libmicroros/firmware/build"
 
             - name: Copy FreeRTOS Kernel Import File
               shell: bash
               run: |
-                  cp "${{inputs.pico_ws_path}}/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
-                  "${{inputs.pico_ws_path}}/FreeRTOS_Kernel_import.cmake"
+                  cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
+                  "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
 
             - name: Initialize CodeQL
               uses: github/codeql-action/init@v3
@@ -68,7 +56,7 @@ jobs:
               id: build
               shell: bash
               run: |
-                  bash ".github/workflows/codeql-pico-scripts/pico-build.sh" "${{inputs.pico_ws_path}}"
+                  bash ".github/workflows/codeql-pico-scripts/pico-build.sh" "Source Code/pico_ws"
 
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v3

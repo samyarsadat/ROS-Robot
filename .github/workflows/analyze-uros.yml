@@ -16,24 +16,7 @@
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
 name: "Pico CodeQL Analysis"
-on: 
-    workflow_call:
-        inputs:
-            microros_artifact_name:
-                description: "The name of the artifact containing the micro-ROS library."
-                required: false
-                default: uros_library_artifacts
-                type: string
-            pico_ws_path:
-                description: "The path to the Pico workspace directory."
-                required: false
-                default: "Source Code/pico_ws"
-                type: string
-            microros_dir:
-                description: "The path to the MicroROS directory."
-                required: false
-                default: "Source Code/pico_ws/libmicroros"
-                type: string
+on: workflow_call
 
 jobs:
     analyze_pico:
@@ -54,13 +37,13 @@ jobs:
             - name: Copy FreeRTOS Kernel Import File
               shell: bash
               run: |
-                  cp "${{inputs.pico_ws_path}}/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
-                  "${{inputs.pico_ws_path}}/FreeRTOS_Kernel_import.cmake"
+                  cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
+                  "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
 
             - name: Generate Pico SDK Headers
               uses: samyarsadat/Pico-Build-Action@v1
               with:
-                  source_dir: "${{inputs.pico_ws_path}}"
+                  source_dir: "Source Code/pico_ws"
                   output_dir: "build"
                   cmake_config_only: "true"
 
@@ -70,11 +53,17 @@ jobs:
                   languages: c-cpp
                   build-mode: manual
 
+            # This step is required because of a bug in micro_ros_setup's firmware workspace creation script.
+            # This bug causes the script to fail if the path to the script's working directory contains spaces.
+            - name: Rename Source Code Directory
+              run: |
+                  mv "Source Code/" "source_code/"
+
             - name: Build MicroROS Library
               id: build
               shell: bash
               run: |
-                  bash ".github/workflows/codeql-pico-scripts/uros-build.sh" "${{inputs.microros_dir}}"
+                  bash ".github/workflows/codeql-pico-scripts/uros-build.sh" "source_code/pico_ws/libmicroros"
 
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v3
@@ -84,6 +73,6 @@ jobs:
             - name: Upload MicroROS Library Artifacts
               uses: actions/upload-artifact@v4
               with:
-                  name: ${{inputs.microros_artifact_name}}
+                  name: uros_library_artifacts
                   path: ${{steps.build.outputs.library_build_dir}}
                   if-no-files-found: error
