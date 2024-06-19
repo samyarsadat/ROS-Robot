@@ -56,12 +56,4 @@ jobs:
             #      category: "/language:c-cpp"
 
     analyze_pico:
-        name: Analyze Pico source code
-        needs: analyze_uros
-        runs-on: ubuntu-latest
-
-        steps:
-            - uses: ./.github/workflows/codeql-pico/analyze-pico.yml
-              with:
-                  microros_artifact_name: ${{needs.analyze_uros.outputs.library_artifact_name}}
-                  pico_ws_path: "Source Code/pico_ws"
+        uses: ./.github/workflows/codeql-pico/analyze-pico.yml
