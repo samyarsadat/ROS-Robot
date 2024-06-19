@@ -19,7 +19,7 @@ name: MicroROS CodeQL Analysis
 on: workflow_call
 
 jobs:
-    analyze_pico:
+    analyze_uros:
         name: Analyze MicroROS library
         runs-on: ubuntu-latest
         container: samyarsadat/service_images:microros-build-action-latest
