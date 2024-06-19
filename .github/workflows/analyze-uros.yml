@@ -47,17 +47,18 @@ jobs:
                   output_dir: "build"
                   cmake_config_only: "true"
 
-            - name: Initialize CodeQL
-              uses: github/codeql-action/init@v3
-              with:
-                  languages: c-cpp
-                  build-mode: manual
-
             # This step is required because of a bug in micro_ros_setup's firmware workspace creation script.
             # This bug causes the script to fail if the path to the script's working directory contains spaces.
             - name: Rename Source Code Directory
               run: |
                   mv "Source Code/" "source_code/"
+
+            - name: Initialize CodeQL
+              uses: github/codeql-action/init@v3
+              with:
+                  languages: c-cpp
+                  build-mode: manual
+                  queries: security-and-quality
 
             - name: Build MicroROS Library
               id: build

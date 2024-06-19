@@ -51,6 +51,7 @@ jobs:
               with:
                   languages: c-cpp
                   build-mode: manual
+                  queries: security-and-quality
 
             - name: Build Pico Source Code
               id: build
