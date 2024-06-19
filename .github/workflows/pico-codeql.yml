@@ -56,4 +56,4 @@ jobs:
             #      category: "/language:c-cpp"
 
     analyze_pico:
-        uses: ./.github/workflows/codeql-pico/analyze-pico.yml
+        uses: ./.github/workflows/analyze-pico.yml
