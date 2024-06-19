@@ -61,24 +61,7 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-              with:
-                  submodules: recursive
-
-            - name: Initialize CodeQL
-              uses: github/codeql-action/init@v3
-              with:
-                  languages: c-cpp
-                  build-mode: manual
-
-            - name: Build Pico source code
-              id: pico_build
-              uses: ./.github/workflows/build-pico-action
+            - uses: ./.github/workflows/codeql-pico/analyze-pico.yml
               with:
                   microros_artifact_name: ${{needs.analyze_uros.outputs.library_artifact_name}}
-
-            - name: Perform CodeQL Analysis
-              uses: github/codeql-action/analyze@v3
-              with:
-                  category: "/language:c-cpp"
+                  pico_ws_path: "Source Code/pico_ws"

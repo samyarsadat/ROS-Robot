@@ -15,40 +15,92 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-name: Build Pico Source Code
+name: Build Pico Source Code - Monolithic
 on: push
 
 jobs:
     build_uros:
-        name: Build the Pico source code
+        name: Build the micro-ROS library
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
 
-        outputs:
-            library_artifact_name: ${{steps.uros_build.outputs.library_artifact_name}}
-        
         steps:
             - name: Checkout
               uses: actions/checkout@v4
               with:
                   submodules: recursive
 
-            - name: Build micro-ROS library
-              id: uros_build
-              uses: ./.github/workflows/build-microros-action
+            - name: Copy FreeRTOS Kernel Import File
+              run: |
+                  cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
+                  "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
+
+            - name: Generate Pico SDK Headers
+              continue-on-error: true
+              uses: samyarsadat/Pico-Build-Action@v1
+              with:
+                  source_dir: "Source Code/pico_ws"
+                  output_dir: "build"
+                  cmake_config_only: "true"
+
+            # This step is required because of a bug in micro_ros_setup's firmware workspace creation script.
+            # This bug causes the script to fail if the path to the script's working directory contains spaces.
+            - name: Rename Source Code Directory
+              run: |
+                  mv "Source Code/" "source_code/"
+
+            - name: Build MicroROS Library
+              id: build
+              uses: samyarsadat/MicroROS-Build-Action@v1
+              with:
+                  microros_dir: "source_code/pico_ws/libmicroros"
+                  clone_microros_setup: "false"
+                  extra_build_packages: "rrp_pico_coms"
+
+            - name: Upload MicroROS Library Artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: uros_library_artifacts
+                  path: ${{steps.build.outputs.library_build_dir}}
+                  if-no-files-found: error
 
     build_pico:
         name: Build the Pico source code
-        needs: build_uros
         runs-on: ubuntu-latest
-        
+        needs: build_uros
+        permissions:
+            contents: read
+
         steps:
             - name: Checkout
               uses: actions/checkout@v4
               with:
                   submodules: recursive
 
-            - name: Build Pico source code
-              id: pico_build
-              uses: ./.github/workflows/build-pico-action
+            - name: Download MicroROS Library Artifacts
+              uses: actions/download-artifact@v4
               with:
-                  microros_artifact_name: ${{needs.build_uros.outputs.library_artifact_name}}
+                  name: uros_library_artifacts
+                  path: "Source Code/pico_ws/libmicroros/firmware/build"
+
+            - name: Copy FreeRTOS Kernel Import File
+              run: |
+                  cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
+                  "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
+
+            - name: Build Pico Source Code
+              id: build
+              uses: samyarsadat/Pico-Build-Action@v1
+              with:
+                  source_dir: "Source Code/pico_ws"
+                  output_dir: "build"
+                  output_ext: "*.uf2 *.elf *.elf.map *.hex *.bin *.dis"
+                  output_ignored_dirs: "src/lib"
+
+            - name: Upload Pico Source Code Artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: pico_binary_artifacts
+                  path: ${{steps.build.outputs.output_dir}}
+                  if-no-files-found: error
