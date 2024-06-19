@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-name: "Pico CodeQL Analysis"
+name: Pico CodeQL Analysis
 
 on:
     push:
@@ -24,8 +24,10 @@ on:
 
 jobs:
     analyze_uros:
+        name: MicroROS CodeQL
         uses: ./.github/workflows/analyze-uros.yml
 
     analyze_pico:
+        name: Pico CodeQL
         needs: analyze_uros
         uses: ./.github/workflows/analyze-pico.yml
