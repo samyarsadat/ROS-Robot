@@ -8,6 +8,10 @@ Run `bash ~/pico_ws/libmicroros/build_uros.sh -f` as `nonroot` inside of the dev
 Please take a look at the [`pico-build` workflow](https://github.com/samyarsadat/ROS-Robot/actions/workflows/pico-build.yml) artifact called 
 `pico_binary_artifacts` for the latest binary builds.
 
+#### Action Status
+[![Build Pico Source Code](https://github.com/samyarsadat/ROS-Robot/actions/workflows/pico-build.yml/badge.svg)](https://github.com/samyarsadat/ROS-Robot/actions/workflows/pico-build.yml)<br>
+[![CodeQL Analysis - Pico Source](https://github.com/samyarsadat/ROS-Robot/actions/workflows/pico-codeql.yml/badge.svg)](https://github.com/samyarsadat/ROS-Robot/actions/workflows/pico-codeql.yml)
+
 <br>
 <br>
 
