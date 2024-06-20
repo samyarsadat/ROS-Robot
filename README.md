@@ -64,13 +64,13 @@ ROS is used to handle communications between multiple nodes either on the same m
 or between external nodes (i.e. the two Raspberry Pi Picos running microROS). 
 Both Raspberry Pi Picos are connected to the Pi 4 via USB cables.<br>
 <br>
-More details regarding the electronics design [here]("https://github.com/samyarsadat/ROS-Robot/tree/stage-1-pico-rtos/Circuit%20Diagrams%20%26%20PCB%20Files/").<br>
+More details regarding the electronics design [here](Circuit%20Diagrams%20%26%20PCB%20Files/).<br>
 <br>
 
 #### Mechanical Design Overview
 The mechanical design of the robot is quite simple. 
 The chassis of the robot is 3D printed in two halves using PLA filament (more details regarding 3D printing 
-[here]("https://github.com/samyarsadat/ROS-Robot/tree/stage-1-pico-rtos/CAD%20Files/STL%20files")) and the robot uses four geared DC motors 
+[here](CAD%20Files/STL%20files/)) and the robot uses four geared DC motors 
 (Namiki 22CL-3501PG) in a differential drive configuration.<be>
 
 <br>
