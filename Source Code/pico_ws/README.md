@@ -4,7 +4,9 @@ Run `bash ~/pico_ws/libmicroros/build_uros.sh -f` as `nonroot` inside of the dev
 <br>
 
 ## Pico Firmware Pre-built Binaries
-If you don't want to build MicroROS and the Pico firmware from source, pre-built `.uf2` binaries can be found in the `build/src` folder.
+~~If you don't want to build MicroROS and the Pico firmware from source, pre-built `.uf2` binaries can be found in the `build/src` folder.~~<br>
+Please take a look at the [`pico-build` workflow](https://github.com/samyarsadat/ROS-Robot/actions/workflows/pico-build.yml) artifact called 
+`pico_binary_artifacts` for the latest binary builds.
 
 <br>
 <br>
