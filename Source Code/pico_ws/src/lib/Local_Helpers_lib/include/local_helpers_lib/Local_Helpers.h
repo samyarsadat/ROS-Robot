@@ -38,6 +38,7 @@
 // ------- Enums -------
 enum RT_CHECK_MODE {RT_HARD_CHECK, RT_SOFT_CHECK, RT_LOG_ONLY_CHECK};
 enum LOG_LEVEL {LOG_LVL_INFO, LOG_LVL_WARN, LOG_LVL_ERROR, LOG_LVL_FATAL};
+enum LOG_SOURCE_VERBOSITY {FUNCNAME_ONLY, FILENAME_LINE_ONLY, FILENAME_LINE_FUNCNAME};
 
 
 
@@ -57,7 +58,7 @@ bool check_bool(bool function, RT_CHECK_MODE mode);
 void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values);
 
 // ---- Logging functions ----
-void write_log(const char *src_function, std::string msg, LOG_LEVEL lvl);
+void write_log(std::string msg, LOG_LEVEL lvl, LOG_SOURCE_VERBOSITY src_verb);
 
 // ---- Pings the MicroROS agent ----
 bool ping_agent();

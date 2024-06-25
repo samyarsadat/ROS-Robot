@@ -280,12 +280,12 @@ void uRosBridgeAgent::execute()
         switch (current_uros_state) 
         {
             case WAITING_FOR_AGENT:
-                write_log(__FUNCTION__, "Waiting for agent...", LOG_LVL_INFO);
+                write_log("Waiting for agent...", LOG_LVL_INFO, FUNCNAME_ONLY);
                 current_uros_state = ping_agent() ? AGENT_AVAILABLE:WAITING_FOR_AGENT;
                 break;
             
             case AGENT_AVAILABLE:
-                write_log(__FUNCTION__, "Agent available!", LOG_LVL_INFO);
+                write_log("Agent available!", LOG_LVL_INFO, FUNCNAME_ONLY);
                 check_bool(init_func(), RT_HARD_CHECK);
                 current_uros_state = AGENT_CONNECTED;
                 last_exec_time = time_us_32() / 1000;
@@ -304,7 +304,7 @@ void uRosBridgeAgent::execute()
                 break;
             
             case AGENT_DISCONNECTED:
-                write_log(__FUNCTION__, "Agent disconnected!", LOG_LVL_INFO);
+                write_log("Agent disconnected!", LOG_LVL_INFO, FUNCNAME_ONLY);
                 // TODO: Maybe wait for the agent to connect again?
                 uros_fini();
                 break;

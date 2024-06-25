@@ -156,7 +156,7 @@ void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, 
 
 
 // ---- Logging function (outputs to STDIO UART) ----
-void write_log(const char *src_function, std::string msg, LOG_LEVEL lvl)
+void write_log(std::string msg, LOG_LEVEL lvl, LOG_SOURCE_VERBOSITY src_verb, const char *func=__builtin_FUNCTION(), const char *file=__builtin_FILE(), uint16_t line=__builtin_LINE())
 {
     uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
     uint16_t timestamp_millisec = to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000);
@@ -167,8 +167,17 @@ void write_log(const char *src_function, std::string msg, LOG_LEVEL lvl)
     else if (lvl == LOG_LVL_ERROR) { level = "ERROR"; }
     else if (lvl == LOG_LVL_FATAL) { level = "FATAL"; }
 
+    // This is rather unfortunate, but its the easiest way.
+    std::string filename(file);
+    std::string funcname(func);
+
+    std::string src;
+    if (src_verb == FUNCNAME_ONLY) { src = func; }
+    else if (src_verb == FILENAME_LINE_ONLY) { src = filename + ":" + std::to_string(line); }
+    else if (src_verb == FILENAME_LINE_FUNCNAME) { src = funcname + "@" + filename + ":" + std::to_string(line); }
+
     // This is quite ugly, but it works.
-    msg = "[" + std::to_string(timestamp_sec) + "." + std::to_string(timestamp_millisec) + "] [" + level + "] [" + src_function + "]: " + msg + "\r\n";
+    msg = "[" + std::to_string(timestamp_sec) + "." + std::to_string(timestamp_millisec) + "] [" + level + "] [" + src + "]: " + msg + "\r\n";
     stdio_uart.out_chars(msg.c_str(), msg.length());
 }
 
