@@ -9,11 +9,6 @@
 	branch = humble
 	ignore = all
 
-[submodule "FreeRTOS POSIX Extension"]
-	path = Source Code/pico_ws/libfreertos/FreeRTOS-POSIX
-	url = https://github.com/FreeRTOS/Lab-Project-FreeRTOS-POSIX
-	ignore = all
-
 [submodule "Pico PID Library"]
 	path = Source Code/pico_ws/src/lib/PID_lib
 	url = https://github.com/samyarsadat/Pico-PID-Library
