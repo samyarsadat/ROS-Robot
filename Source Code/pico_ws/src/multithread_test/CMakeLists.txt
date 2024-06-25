@@ -22,20 +22,10 @@ message("Configuring Multithread Test (Pico A) firmware build... (${PICO_A_MT_NA
 
 # Add source files
 add_executable(${PICO_A_MT_NAME} 
-               ${FREERTOS_POSIX_SRC_PREFIX}_clock.c
-               #${FREERTOS_POSIX_SRC_PREFIX}_mqueue.c
-               #${FREERTOS_POSIX_SRC_PREFIX}_pthread_barrier.c
-               #${FREERTOS_POSIX_SRC_PREFIX}_pthread_cond.c
-               #${FREERTOS_POSIX_SRC_PREFIX}_pthread_mutex.c
-               #${FREERTOS_POSIX_SRC_PREFIX}_pthread.c
-               ${FREERTOS_POSIX_SRC_PREFIX}_sched.c
-               #${FREERTOS_POSIX_SRC_PREFIX}_semaphore.c
-               #${FREERTOS_POSIX_SRC_PREFIX}_timer.c
-               ${FREERTOS_POSIX_SRC_PREFIX}_unistd.c
-               ${FREERTOS_POSIX_SRC_PREFIX}_utils.c
-               ../uros_allocators/uros_allocators.c
-               ../uart_transport/pico_uart_transport.c
-               Test.c++
+               utils/pico_uart_transport.c
+               utils/uros_allocators.c
+               ../posix/functions.c
+               Test_Standalone.c++
                )
 
 # Create map/bin/hex/uf2 files
@@ -43,13 +33,15 @@ pico_add_extra_outputs(${PICO_A_MT_NAME})
 
 # Link to libraries
 target_link_libraries(${PICO_A_MT_NAME} micro_ros
-                                     pico_stdlib
-                                     pico_multicore
-                                     hardware_gpio
-                                     helpers_lib
-                                     local_helpers_lib
-                                     FreeRTOS-Kernel
-                                     FreeRTOS-Kernel-Heap4
+                                        pico_stdlib
+                                        pico_stdio_uart
+                                        pico_multicore
+                                        hardware_gpio
+                                        helpers_lib
+                                        local_helpers_lib
+                                        freertos_helpers_lib
+                                        FreeRTOS-Kernel
+                                        FreeRTOS-Kernel-Heap4
 )
 
 # Link to include directories
@@ -57,9 +49,6 @@ target_include_directories(${PICO_A_MT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 # UART Config
 target_compile_definitions(${PICO_A_MT_NAME} PRIVATE
-    PICO_DEOPTIMIZED_DEBUG=1
-    PICO_RP2040_B0_SUPPORTED=0
-    PICO_RP2040_B1_SUPPORTED=0
     PICO_STACK_SIZE=0x1000
     PICO_DEFAULT_UART=0
     PICO_DEFAULT_UART_TX_PIN=16
@@ -74,3 +63,13 @@ pico_set_program_description(${PICO_A_MT_NAME} "The ROS Robot Project - Main Boa
 # Enable STDIO over USB and UART
 pico_enable_stdio_usb(${PICO_A_MT_NAME} 1)
 pico_enable_stdio_uart(${PICO_A_MT_NAME} 1)
+
+# CMake flags
+set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
+
+# Compile definitions & options
+add_compile_definitions(PICO_UART_ENABLE_CRLF_SUPPORT=0)
+add_compile_definitions(PICO_STDIO_ENABLE_CRLF_SUPPORT=0)
+add_compile_definitions(PICO_STDIO_DEFAULT_CRLF=0)
+add_compile_options(-Wall -Wextra -Wpedantic)

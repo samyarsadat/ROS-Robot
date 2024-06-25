@@ -56,7 +56,7 @@ bool publish_ultra(struct repeating_timer *rt)
     
     if (exec_time_ms > (ultra_pub_rt_interval + 10)) 
     { 
-        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
+        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, DIAG_KV_EMPTY());
     }
 
     uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
@@ -91,7 +91,7 @@ bool publish_edge_ir(struct repeating_timer *rt)
         sprintf(buffer, "Edge IR publish interval time exceeded limits! [act: %ums, lim: %dms]", exec_time_ms, (edge_ir_pub_rt_interval + 10));
         write_log("publish_edge_ir", buffer, LOG_LVL_WARN);
 
-        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
+        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, DIAG_KV_EMPTY());
     }
 
     uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
@@ -132,7 +132,7 @@ bool publish_misc_sens(struct repeating_timer *rt)
     
     if (exec_time_ms > (sensors_pub_rt_interval + 10)) 
     { 
-        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
+        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, DIAG_KV_EMPTY());
     }
 
     uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;

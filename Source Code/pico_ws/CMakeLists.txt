@@ -40,15 +40,7 @@ pico_sdk_init()
 set(FREERTOS_KERNEL_PATH "${CMAKE_CURRENT_LIST_DIR}/libfreertos/FreeRTOS-Kernel" CACHE STRING "FreeRTOS Kernel Path" FORCE)
 include(FreeRTOS_Kernel_import.cmake)
 
-# FreeRTOS + POSIX
-set(FREERTOS_POSIX_PATH "${CMAKE_CURRENT_LIST_DIR}/libfreertos/FreeRTOS-POSIX" CACHE STRING "FreeRTOS + POSIX Path" FORCE)
-set(FREERTOS_POSIX_SRC_PREFIX "${FREERTOS_POSIX_PATH}/FreeRTOS-Plus-POSIX/source/FreeRTOS_POSIX")
-include_directories("${FREERTOS_POSIX_PATH}/include")
-include_directories("${FREERTOS_POSIX_PATH}/include/private")
-include_directories("${FREERTOS_POSIX_PATH}/FreeRTOS-Plus-POSIX/include")
-include_directories("${FREERTOS_POSIX_PATH}/FreeRTOS-Plus-POSIX/include/portable")
-
-# FreeRTOS & FreeRTOS + POSIX config
+# FreeRTOS config
 set(FREERTOS_CONFIG_DIR "${CMAKE_CURRENT_LIST_DIR}/libfreertos/Config" CACHE STRING "FreeRTOS Config Path" FORCE)
 include_directories("${FREERTOS_CONFIG_DIR}") 
 

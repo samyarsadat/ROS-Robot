@@ -20,20 +20,10 @@
 add_subdirectory(lib)
 
 # Pico A firmware
-add_subdirectory(pico_a)
+#add_subdirectory(pico_a)
 
 # Pico B firmware
-add_subdirectory(pico_b)
+#add_subdirectory(pico_b)
 
 # Multithread MicroROS test firmware
 add_subdirectory(multithread_test)
-
-# CMake flags
-set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
-
-# Compile definitions & options
-add_compile_definitions(PICO_UART_ENABLE_CRLF_SUPPORT=0)
-add_compile_definitions(PICO_STDIO_ENABLE_CRLF_SUPPORT=0)
-add_compile_definitions(PICO_STDIO_DEFAULT_CRLF=0)
-add_compile_options(-Wall -Wextra -Wpedantic)

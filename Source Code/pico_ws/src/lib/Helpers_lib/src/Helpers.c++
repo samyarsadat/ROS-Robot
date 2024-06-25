@@ -155,7 +155,6 @@ vector<bool> standard_score_check(vector<float> &numbers, float z_score_threshho
     float mean = calculate_mean(numbers);
     float standard_deviation = calculate_standard_deviation(numbers, mean);
     vector<bool> outliers;
-    uint16_t loop_index;
     
     for (auto &num : numbers)
     {
@@ -168,8 +167,6 @@ vector<bool> standard_score_check(vector<float> &numbers, float z_score_threshho
         {
             outliers.push_back(false);
         }
-
-        loop_index ++;
     }
 
     return outliers;

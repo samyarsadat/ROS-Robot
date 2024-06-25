@@ -235,17 +235,17 @@ void motor_safety_callback(MotorSafety::safety_trigger_conditions condition, int
             if (id == right_motor_controller_id)
             {
                 write_log("motor_safety_callback", "Critical Motor Safety condition triggered! Shutting down. [Right]", LOG_LVL_FATAL);
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_DRV_R, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R1, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R2, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_DRV_R, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_EMPTY());
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R1, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_EMPTY());
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R2, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_EMPTY());
             }
             
             else
             {
                 write_log("motor_safety_callback", "Critical Motor Safety condition triggered! Shutting down. [Left]", LOG_LVL_FATAL);
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_DRV_L, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L1, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L2, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_DRV_L, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_EMPTY());
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L1, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_EMPTY());
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L2, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_EMPTY());
             }
 
             clean_shutdown();  // This is a critical failure, so we'll call the shutdown function without waiting for an e-stop signal.
@@ -544,7 +544,7 @@ bool motor_ctrl_odom_timer_call(struct repeating_timer *rt)
         sprintf(buffer, "Timer function execution time exceeded limits! [act: %ums, lim: %dms]", exec_time_ms, (motor_odom_rt_interval + 10));
         write_log("motor_ctrl_odom_timer_call", buffer, LOG_LVL_WARN);
 
-        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
+        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, DIAG_KV_EMPTY());
     }
 
     // Call the encoder timer callbacks
@@ -728,7 +728,7 @@ void loop()
                     sprintf(buffer, "MicroROS executor execution time exceeded limits! [act: %ums, lim: %dms]", exec_time_ms, uros_executor_exec_timeout);
                     write_log("main", buffer, LOG_LVL_WARN);
 
-                    publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, NULL);
+                    publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, DIAG_KV_EMPTY());
                 }
 
                 rclc_executor_spin_some(&rc_executor, RCL_MS_TO_NS(UROS_EXEC_TIMEOUT_MS));

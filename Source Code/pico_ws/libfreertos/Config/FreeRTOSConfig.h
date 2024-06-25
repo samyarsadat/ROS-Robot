@@ -60,7 +60,7 @@
 /* Synchronization Related */
 #define configUSE_MUTEXES                       1
 #define configUSE_RECURSIVE_MUTEXES             1
-#define configUSE_APPLICATION_TASK_TAG          1   // FreeRTOS + POSIX
+#define configUSE_APPLICATION_TASK_TAG          0   // FreeRTOS + POSIX
 #define configUSE_COUNTING_SEMAPHORES           1
 #define configQUEUE_REGISTRY_SIZE               8
 #define configUSE_QUEUE_SETS                    1
@@ -84,7 +84,7 @@
 
 
 /* Hook function related definitions. */
-#define configCHECK_FOR_STACK_OVERFLOW          1
+#define configCHECK_FOR_STACK_OVERFLOW          2
 #define configUSE_MALLOC_FAILED_HOOK            1
 #define configUSE_DAEMON_TASK_STARTUP_HOOK      0
 
@@ -137,7 +137,7 @@
 
 
 /* FreeRTOS + POSIX related configuration. */
-#define configUSE_POSIX_ERRNO                   1
+#define configUSE_POSIX_ERRNO                   0
 
 
 /* Set the following definitions to 1 to include the API function, or zero to exclude the API function. */

@@ -4,32 +4,19 @@
 #include <uxr/client/profile/transport/custom/custom_transport.h>
 
 
-// POSIX functions are now provided by FreeRTOS + POSIX.
-/*void usleep(uint64_t us)
-{
-    sleep_us(us);
-}
-
-int clock_gettime(clockid_t unused, struct timespec *tp)
-{
-    uint64_t m = time_us_64();
-    tp->tv_sec = m / 1000000;
-    tp->tv_nsec = (m % 1000000) * 1000;
-    return 0;
-}*/
-
 bool pico_serial_transport_open(struct uxrCustomTransport *transport)
 {
     // Ensure that stdio_init_all is only called once on the runtime
-    static bool require_init = true;
+    // We initialize STDIO in our own program anyway, so this is not needed.
+    /*static bool require_init = true;
     
     if(require_init)
     {
-        // stdio_init_all(); - We do this in our own program.
+        stdio_init_all();
         require_init = false;
-    }
+    }*/
 
-    return true;
+    return stdio_usb_connected();
 }
 
 bool pico_serial_transport_close(struct uxrCustomTransport *transport)

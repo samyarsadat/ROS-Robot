@@ -83,3 +83,13 @@ pico_set_program_description(${PICO_A_NAME} "The ROS Robot Project - Main Board 
 # Enable STDIO over USB and UART
 pico_enable_stdio_usb(${PICO_A_NAME} 1)
 pico_enable_stdio_uart(${PICO_A_NAME} 1)
+
+# CMake flags
+set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
+
+# Compile definitions & options
+add_compile_definitions(PICO_UART_ENABLE_CRLF_SUPPORT=0)
+add_compile_definitions(PICO_STDIO_ENABLE_CRLF_SUPPORT=0)
+add_compile_definitions(PICO_STDIO_DEFAULT_CRLF=0)
+add_compile_options(-Wall -Wextra -Wpedantic)

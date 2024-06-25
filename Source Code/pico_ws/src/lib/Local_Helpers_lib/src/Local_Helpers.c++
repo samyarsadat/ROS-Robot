@@ -27,6 +27,7 @@
 #include "pico/stdlib.h"
 #include <rcl/rcl.h>
 #include <string>
+#include <vector>
 #include <rmw_microros/rmw_microros.h>
 #include <diagnostic_msgs/msg/diagnostic_status.h>
 #include "pico/stdio_uart.h"
@@ -45,7 +46,7 @@
 extern diagnostic_msgs__msg__DiagnosticStatus diagnostics_msg;
 extern rcl_publisher_t diagnostics_pub;
 extern void clean_shutdown();
-void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, diagnostic_msgs__msg__KeyValue *key_values);
+void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values);
 void write_log(std::string src, std::string msg, LOG_LEVEL lvl);
 
 
@@ -61,23 +62,20 @@ bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode)
             case RT_HARD_CHECK:
                 sprintf(buffer, "RCL Return check failed: [code: %d, RT_HARD_CHECK]", rctc);
                 write_log("check_rc", buffer, LOG_LVL_FATAL);
-                
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_UROS, DIAG_HWID_UROS, DIAG_ERR_MSG_UROS_RC_CHECK_FAIL, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_UROS, DIAG_HWID_UROS, DIAG_ERR_MSG_UROS_RC_CHECK_FAIL, DIAG_KV_EMPTY());
                 clean_shutdown();
                 break;
 
             case RT_SOFT_CHECK:
                 sprintf(buffer, "RCL Return check failed: [code: %d, RT_SOFT_CHECK]", rctc);
                 write_log("check_rc", buffer, LOG_LVL_ERROR);
-                
-                publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UROS, DIAG_HWID_UROS, DIAG_WARN_MSG_UROS_RC_CHECK_FAIL, NULL);
+                publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UROS, DIAG_HWID_UROS, DIAG_WARN_MSG_UROS_RC_CHECK_FAIL, DIAG_KV_EMPTY());
                 return false;
                 break;
             
             case RT_LOG_ONLY_CHECK:
                 sprintf(buffer, "RCL Return check failed: [code: %d, RT_LOG_ONLY_CHECK]", rctc);
                 write_log("check_rc", buffer, LOG_LVL_WARN);
-
                 return false;
                 break;
 
@@ -99,13 +97,13 @@ bool check_bool(bool function, RT_CHECK_MODE mode)
         {
             case RT_HARD_CHECK:
                 write_log("check_bool", "BOOL Return check failed: [RT_HARD_CHECK]", LOG_LVL_FATAL);
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_ERR_MSG_BOOL_RT_CHECK_FAIL, NULL);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_ERR_MSG_BOOL_RT_CHECK_FAIL, DIAG_KV_EMPTY());
                 clean_shutdown();
                 break;
 
             case RT_SOFT_CHECK:
                 write_log("check_bool", "BOOL Return check failed: [RT_SOFT_CHECK]", LOG_LVL_ERROR);
-                publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_BOOL_RT_CHECK_FAIL, NULL);
+                publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_BOOL_RT_CHECK_FAIL, DIAG_KV_EMPTY());
                 break;
             
             case RT_LOG_ONLY_CHECK:
@@ -123,7 +121,7 @@ bool check_bool(bool function, RT_CHECK_MODE mode)
 
 // ---- Diagnostics error reporting ----
 // TODO: We can use std::string_view or std::string& here instead. This would require changing diagnostics definitions.
-void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, diagnostic_msgs__msg__KeyValue *key_values)
+void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values)
 {
     diagnostics_msg.name.data = hw_name.data();
     diagnostics_msg.name.size = strlen(diagnostics_msg.name.data);
@@ -140,10 +138,10 @@ void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, 
     sprintf(buffer, "Publishing diagnostics report: [hwname: %d, hwid: %s, lvl: %u]", hw_name);
     write_log("publish_diag_report", buffer, LOG_LVL_FATAL);*/
     
-    if (key_values != NULL)
+    if (!key_values.empty())
     {
-        diagnostics_msg.values.data = key_values;
-        diagnostics_msg.values.size = sizeof(key_values) / sizeof(key_values[0]);
+        diagnostics_msg.values.data = key_values.data();
+        diagnostics_msg.values.size = key_values.size();
     }
 
     /* 
@@ -153,16 +151,15 @@ void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, 
         In this case, this publish function would also not return RCL_RET_OK, resulting in its
         check_rc() calling publish_diag_report() and then the same thing happening over and over again.
     */
-    // FIXME: rcl_publish takes 1.5 secconds to execute...
     rcl_publish(&diagnostics_pub, &diagnostics_msg, NULL);
 }
 
 
 // ---- Logging function (outputs to STDIO UART) ----
-void write_log(std::string src, std::string msg, LOG_LEVEL lvl)
+void write_log(const char *src_function, std::string msg, LOG_LEVEL lvl)
 {
     uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
-    uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;
+    uint16_t timestamp_millisec = to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000);
 
     std::string level;
     if (lvl == LOG_LVL_INFO) { level = "INFO"; }
@@ -171,7 +168,7 @@ void write_log(std::string src, std::string msg, LOG_LEVEL lvl)
     else if (lvl == LOG_LVL_FATAL) { level = "FATAL"; }
 
     // This is quite ugly, but it works.
-    msg = "[" + std::to_string(timestamp_sec) + "." + std::to_string(timestamp_nanosec) + "] [" + level + "] [" + src + "]: " + msg + "\r\n";
+    msg = "[" + std::to_string(timestamp_sec) + "." + std::to_string(timestamp_millisec) + "] [" + level + "] [" + src_function + "]: " + msg + "\r\n";
     stdio_uart.out_chars(msg.c_str(), msg.length());
 }
 

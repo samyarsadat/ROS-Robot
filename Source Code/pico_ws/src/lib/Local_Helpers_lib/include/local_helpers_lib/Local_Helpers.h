@@ -31,6 +31,7 @@
 #include <diagnostic_msgs/msg/diagnostic_status.h>
 #include <rcl/rcl.h>
 #include <string>
+#include <vector>
 
 
 
@@ -53,10 +54,10 @@ bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode);
 bool check_bool(bool function, RT_CHECK_MODE mode);
 
 // ---- Diagnostics error reporting ----
-void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, diagnostic_msgs__msg__KeyValue *key_values);
+void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values);
 
 // ---- Logging functions ----
-void write_log(std::string src, std::string msg, LOG_LEVEL lvl);
+void write_log(const char *src_function, std::string msg, LOG_LEVEL lvl);
 
 // ---- Pings the MicroROS agent ----
 bool ping_agent();

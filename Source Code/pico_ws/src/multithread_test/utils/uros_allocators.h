@@ -21,44 +21,21 @@
 */
 
 
-#include "uros_allocators.h"
-#include "pico/stdlib.h"
-#include "FreeRTOS.h"
-#include <string.h>
-//#include <rcutils/allocator.h>
+#pragma once
 
-
-
-// Allocator functions
-void *uros_rtos_allocate(size_t size, void *state)
+#ifdef __cplusplus
+extern "C"
 {
-    return (void *)pvPortMalloc(size);
+#endif
+
+    #include "pico/stdlib.h"
+
+    // Allocator functions
+    void *uros_rtos_allocate(size_t size, void *state);
+    void uros_rtos_deallocate(void *pointer, void *state);
+    void *uros_rtos_reallocate(void *pointer, size_t size, void *state);
+    void *uros_rtos_zero_allocate(size_t number_of_elements, size_t size_of_element, void *state);
+
+#ifdef __cplusplus
 }
-
-
-void uros_rtos_deallocate(void *pointer, void *state)
-{
-    vPortFree(pointer);
-}
-
-
-void *uros_rtos_reallocate(void *pointer, size_t size, void *state)
-{
-    if (pointer == NULL)
-    {
-        return (void *)pvPortMalloc(size);
-    } 
-    
-    else 
-    {
-        vPortFree(pointer);
-        return (void *)pvPortMalloc(size);
-    }
-}
-
-
-void *uros_rtos_zero_allocate(size_t number_of_elements, size_t size_of_element, void *state)
-{
-    void *res = (void *)pvPortMalloc(number_of_elements * size_of_element);
-    return memset(res, 0, number_of_elements * size_of_element);   // memset() returns 'res' unmodified.
-}
+#endif
