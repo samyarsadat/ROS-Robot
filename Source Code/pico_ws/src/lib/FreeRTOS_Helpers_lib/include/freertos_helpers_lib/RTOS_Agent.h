@@ -27,7 +27,7 @@
 
 
 // Max agent name length
-#define MAX_NAME_LENGTH  20
+#define MAX_NAME_LENGTH  25
 
 
 // Agent class
@@ -45,7 +45,7 @@ class Agent
         // ---- Functions ----
 
         // Start the agent (FreeRTOS task)
-        virtual bool start(UBaseType_t priority);
+        virtual bool start(UBaseType_t priority, UBaseType_t core_affinity_mask, bool set_core_affinity);
 
         // Stop the agent (FreeRTOS task)
         virtual void stop();

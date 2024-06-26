@@ -1,12 +1,12 @@
 /*
     The ROS robot project
-    uROS Bridge singleton object for managing uROS and uROS comms.
+    uROS Bridge singleton object for managing MicroROS and MicroROS comms.
     This object handles the MicroROS executor and the MicroROS node.
-    It also provides a method for adding messaged to its publishing queue.
+    It also provides methods for initializing publishers, subscribers, and services.
     
     Copyright 2024 Samyar Sadat Akhavi
     Written by Samyar Sadat Akhavi, 2024.
-    Heavily inspired by: https://github.com/jondurrant/RPIPicoFreeRTOSuROSPubSub
+    Inspired by: https://github.com/jondurrant/RPIPicoFreeRTOSuROSPubSub
  
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,10 +44,10 @@
 #define MAX_EXEC_TIME    200
 
 // Misc.
-#define EXECUTE_DELAY_MS       75
-#define EXECUTOR_TIMEOUT_MS    80
-#define AGENT_MEMORY_WORDS     1048
-#define AGENT_NAME             "uROS_Bridge_Agent"
+#define EXECUTE_DELAY_MS           75
+#define EXECUTOR_TIMEOUT_MS        80
+#define BRIDGE_AGENT_MEMORY_WORDS  2048
+#define BRIDGE_AGENT_NAME          "uROS_Bridge_Agent"
 
 
 // uROS Bridge Agent class
@@ -57,11 +57,14 @@ class uRosBridgeAgent : public Agent
         // MicroROS init (pubs, subs, services, timers, executor, node, etc.) function typedef
         typedef bool (*uros_init_function)(void);
 
+        // MicroROS agent state enum
+        enum UROS_STATE {WAITING_FOR_AGENT, AGENT_AVAILABLE, AGENT_CONNECTED, AGENT_DISCONNECTED};
+
         // Get the singleton instance
         static uRosBridgeAgent *get_instance();
 
         // Pre-init configuration
-        void pre_init(uros_init_function init_function);
+        void pre_init(uros_init_function init_function, uros_init_function fini_function);
 
         // Initialize MicroROS node.
         // This function should be called before any other uROS-related functions.
@@ -101,6 +104,10 @@ class uRosBridgeAgent : public Agent
         // TODO: Implement timers
         //bool init_timer(rcl_timer_t *timer, uint64_t period, rcl_timer_callback_t callback);
 
+        // Add n amount of handles to the executor.
+        // This function is only effective before the executor is started.
+        void add_executor_handles(int num_handles);
+        
         // Get the MicroROS allocator.
         rcl_allocator_t* get_allocator();
 
@@ -113,6 +120,9 @@ class uRosBridgeAgent : public Agent
         // Get the MicroROS executor.
         rclc_executor_t* get_executor();
 
+        // Get the MicroROS agent state.
+        uRosBridgeAgent::UROS_STATE get_agent_state();
+
 
     private:
         // Constructor & Destructor
@@ -121,9 +131,10 @@ class uRosBridgeAgent : public Agent
 
         // Initialize function
         uros_init_function init_func;
+        uros_init_function fini_func;
 
         // MicroROS agent state
-        enum UROS_STATE {WAITING_FOR_AGENT, AGENT_AVAILABLE, AGENT_CONNECTED, AGENT_DISCONNECTED};
+        UROS_STATE current_uros_state;
 
         static uRosBridgeAgent *instance;
         rcl_allocator_t rcl_allocator;

@@ -55,9 +55,16 @@ Agent::~Agent()
 // ---- Functions ----
 
 // Start the agent (FreeRTOS task)
-bool Agent::start(UBaseType_t priority = tskIDLE_PRIORITY)
+// Pass false to set_core_affinity to let FreeRTOS decide.
+bool Agent::start(UBaseType_t priority = tskIDLE_PRIORITY, UBaseType_t core_affinity_mask = (1 << 0), bool set_core_affinity = false)
 {
     BaseType_t res = xTaskCreate(Agent::vTask, agent_name, stack_depth, (void *) this, priority, &task_handle);
+
+    if (set_core_affinity && res == pdPASS)
+    {
+        vTaskCoreAffinitySet(task_handle, core_affinity_mask);
+    }
+
     return (res == pdPASS);
 }
 

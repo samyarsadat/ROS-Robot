@@ -1,12 +1,12 @@
 /*
     The ROS robot project
-    uROS Bridge singleton object for managing uROS and uROS comms.
+    uROS Bridge singleton object for managing MicroROS and MicroROS comms.
     This object handles the MicroROS executor and the MicroROS node.
-    It also provides a method for adding messaged to its publishing queue.
+    It also provides methods for initializing publishers, subscribers, and services.
     
     Copyright 2024 Samyar Sadat Akhavi
     Written by Samyar Sadat Akhavi, 2024.
-    Heavily inspired by: https://github.com/jondurrant/RPIPicoFreeRTOSuROSPubSub
+    Inspired by: https://github.com/jondurrant/RPIPicoFreeRTOSuROSPubSub
  
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,13 +41,18 @@
 
 
 // Constructor
-uRosBridgeAgent::uRosBridgeAgent() : Agent(AGENT_NAME, AGENT_MEMORY_WORDS)
+uRosBridgeAgent::uRosBridgeAgent() : Agent(BRIDGE_AGENT_NAME, BRIDGE_AGENT_MEMORY_WORDS)
 {}
 
 
 // Destructor
 uRosBridgeAgent::~uRosBridgeAgent()
-{}
+{
+    if (instance != NULL)
+    {
+        delete instance;
+    }
+}
 
 
 // ---- Functions ----
@@ -66,9 +71,10 @@ uRosBridgeAgent *uRosBridgeAgent::get_instance()
 
 
 // Pre-init configuration
-void uRosBridgeAgent::pre_init(uros_init_function init_function)
+void uRosBridgeAgent::pre_init(uros_init_function init_function, uros_init_function fini_function)
 {
     uRosBridgeAgent::get_instance()->init_func = init_function;
+    uRosBridgeAgent::get_instance()->fini_func = fini_function;
 
     // Set MicroROS default allocators
     rcl_allocator_t rtos_allocators = rcutils_get_zero_initialized_allocator();
@@ -240,6 +246,17 @@ bool uRosBridgeAgent::add_service(rcl_service_t *service, void *request, void *r
 }
 
 
+// Add n amount of handles to the executor.
+// This function is only effective before the executor is started.
+void uRosBridgeAgent::add_executor_handles(int num_handles)
+{
+    if (!executor_initialized)
+    {
+        executor_handles += num_handles;
+    }
+}
+
+
 // Get the MicroROS allocator.
 rcl_allocator_t* uRosBridgeAgent::get_allocator()
 {
@@ -268,12 +285,19 @@ rclc_executor_t* uRosBridgeAgent::get_executor()
 }
 
 
+// Get the MicroROS agent state.
+uRosBridgeAgent::UROS_STATE uRosBridgeAgent::get_agent_state()
+{
+    return current_uros_state;
+}
+
+
 // Execution function.
 // Call this after you've initialized everything.
 void uRosBridgeAgent::execute()
 {
     uint32_t last_exec_time;
-    UROS_STATE current_uros_state = WAITING_FOR_AGENT;
+    current_uros_state = WAITING_FOR_AGENT;
 
     while (true)
     {
@@ -298,7 +322,7 @@ void uRosBridgeAgent::execute()
                 {
                     check_bool(check_exec_interval(last_exec_time, MAX_EXEC_TIME + EXECUTE_DELAY_MS, "Executor execution time exceeded limits!"), RT_SOFT_CHECK);
                     check_rc(rclc_executor_spin_some(&rc_executor, RCL_MS_TO_NS(EXECUTOR_TIMEOUT_MS)), RT_LOG_ONLY_CHECK);
-                    vTaskDelay(pdMS_TO_TICKS(EXECUTE_DELAY_MS));
+                    vTaskDelay(EXECUTE_DELAY_MS / portTICK_PERIOD_MS);
                 }
                 
                 break;
@@ -306,7 +330,7 @@ void uRosBridgeAgent::execute()
             case AGENT_DISCONNECTED:
                 write_log("Agent disconnected!", LOG_LVL_INFO, FUNCNAME_ONLY);
                 // TODO: Maybe wait for the agent to connect again?
-                uros_fini();
+                fini_func();
                 break;
         }
     }

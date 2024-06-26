@@ -38,7 +38,7 @@
 // ------- Enums -------
 enum RT_CHECK_MODE {RT_HARD_CHECK, RT_SOFT_CHECK, RT_LOG_ONLY_CHECK};
 enum LOG_LEVEL {LOG_LVL_INFO, LOG_LVL_WARN, LOG_LVL_ERROR, LOG_LVL_FATAL};
-enum LOG_SOURCE_VERBOSITY {FUNCNAME_ONLY, FILENAME_LINE_ONLY, FILENAME_LINE_FUNCNAME};
+enum LOG_SOURCE_VERBOSITY {FUNCNAME_ONLY, FILENAME_LINE_ONLY, FUNCNAME_LINE_ONLY, FILENAME_LINE_FUNCNAME};
 
 
 
@@ -49,16 +49,19 @@ enum LOG_SOURCE_VERBOSITY {FUNCNAME_ONLY, FILENAME_LINE_ONLY, FILENAME_LINE_FUNC
 // Note: diagnostics_msg (type: diagnostic_msgs__msg__DiagnosticStatus) must be defined eslewhere!
 
 // --- RCL return checker ---
-bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode);
+bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode, const char *func=__builtin_FUNCTION());
 
 // --- Return checker, except for functions that return a boolean ---
-bool check_bool(bool function, RT_CHECK_MODE mode);
+bool check_bool(bool function, RT_CHECK_MODE mode, const char *func=__builtin_FUNCTION());
 
 // ---- Diagnostics error reporting ----
 void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values);
 
+// ---- Print to STDIO UART function ----
+void print_uart(std::string msg);
+
 // ---- Logging functions ----
-void write_log(std::string msg, LOG_LEVEL lvl, LOG_SOURCE_VERBOSITY src_verb);
+void write_log(std::string msg, LOG_LEVEL lvl, LOG_SOURCE_VERBOSITY src_verb, const char *func=__builtin_FUNCTION(), const char *file=__builtin_FILE(), uint16_t line=__builtin_LINE());
 
 // ---- Pings the MicroROS agent ----
 bool ping_agent();
@@ -66,4 +69,4 @@ bool ping_agent();
 // ---- Execution interval checker ----
 // ---- Checks the amount of time passed since the last time it was called (with the specific time storage varialble provided) ----
 // ---- Returns false if the execution time has exceeded the specified limit ----
-bool check_exec_interval(uint32_t &last_call_time_ms, uint16_t max_exec_time_ms, std::string log_msg);
+bool check_exec_interval(uint32_t &last_call_time_ms, uint16_t max_exec_time_ms, std::string log_msg, const char *func=__builtin_FUNCTION());

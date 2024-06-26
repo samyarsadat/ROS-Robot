@@ -22,10 +22,11 @@ message("Configuring Multithread Test (Pico A) firmware build... (${PICO_A_MT_NA
 
 # Add source files
 add_executable(${PICO_A_MT_NAME} 
-               utils/pico_uart_transport.c
-               utils/uros_allocators.c
+               #utils/pico_uart_transport.c
+               #utils/uros_allocators.c
+               #Test_Standalone.c++
+               Test.c++
                ../posix/functions.c
-               Test_Standalone.c++
                )
 
 # Create map/bin/hex/uf2 files
@@ -36,7 +37,6 @@ target_link_libraries(${PICO_A_MT_NAME} micro_ros
                                         pico_stdlib
                                         pico_stdio_uart
                                         pico_multicore
-                                        hardware_gpio
                                         helpers_lib
                                         local_helpers_lib
                                         freertos_helpers_lib

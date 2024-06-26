@@ -7,23 +7,10 @@
 
 
 // POSIX microsecond delay function.
-void usleep(uint64_t us)
+int usleep(uint64_t us)
 {
-    // If the delay is less than 1ms, use busy_wait_us instead of vTaskDelay.
-	if (us < 1000)
-    {
-		busy_wait_us(us);
-		return;
-	}
-
-    TickType_t ticks = pdMS_TO_TICKS(us / 1000);
-
-    if (ticks < 1)
-    {
-	    ticks = 1;
-    }
-
-    vTaskDelay(ticks);
+    vTaskDelay(pdMS_TO_TICKS(us / 1000 + (us % 1000 != 0)));
+    return 0;
 }
 
 

@@ -26,7 +26,8 @@ add_library(${PROJECT_NAME} FreeRTOS_Helpers.c++
                             RTOS_Agent.c++
                             utils/pico_uart_transport.c
                             utils/uros_allocators.c
-                            uROS_Bridge_Agent.c++)
+                            uROS_Bridge_Agent.c++
+                            uROS_Publishing_Handler.c++)
 
 # Include header files
 target_include_directories(${PROJECT_NAME} PUBLIC ../include)
