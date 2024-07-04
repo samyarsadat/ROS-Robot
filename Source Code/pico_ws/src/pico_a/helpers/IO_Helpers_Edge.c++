@@ -20,20 +20,16 @@
 
 // ------- Libraries & Modules -------
 #include "IO_Helpers_Edge.h"
-#include "pico/stdlib.h"
-#include "helpers_lib/Helpers.h"
+#include "local_helpers_lib/Local_Helpers.h"
+#include "IO_Helpers_Mux.h"
 #include "hardware/pwm.h"
 #include "hardware/adc.h"
-#include "IO_Helpers_Mux.h"
 #include "Definitions.h"
-#include <memory>
-#include <vector>
-#include "pico/multicore.h"
 
 
 
 // ------- Global variables -------
-uint ir_en_pin;
+uint8_t ir_en_pin;
 uint16_t ambient_reading;
 
 
@@ -41,70 +37,87 @@ uint16_t ambient_reading;
 // ------- Functions ------- 
 
 // ---- Sets the IR enable pin ----
-void set_ir_en_pin(uint en_pin)
+void set_ir_en_pin(uint8_t en_pin)
 {
     ir_en_pin = en_pin;
     init_pin(ir_en_pin, OUTPUT);
-    adc_init();
 }
 
 
-// TODO: Self-check function.
-char* ir_self_test()
+// ---- Self-check function ----
+std::vector<bool> ir_self_test()
 {
-    std::vector<float> readings;
-    gpio_put(ir_en_pin, LOW);
-    set_mux_io_mode(INPUT_ADC);
-    sleep_us(10);
-
-    for (int i = 0; i < num_ir_sensors; i++)
+    if (check_bool((take_mux_mutex() && adc_take_mutex()), RT_LOG_ONLY_CHECK))
     {
-        set_mux_addr(i + 8);
-        readings.push_back((float) adc_read());
+        std::vector<float> readings;
+        gpio_put(ir_en_pin, LOW);
+        set_mux_io_mode(INPUT_ADC);
+        sleep_us(10);
+
+        for (int i = 0; i < num_ir_sensors; i++)
+        {
+            set_mux_addr(i + 8);
+            readings.push_back((float) adc_read());
+        }
+
+        adc_release_mutex();
+        release_mux_mutex();
+
+        return standard_score_check(readings, ir_self_test_z_score_threshhold);
     }
-
-    std::vector<bool> results = standard_score_check(readings, ir_self_test_z_score_threshhold);
-
-    for (auto res : results)
-    {
-        
-    }
-
-    return NULL;
+    
+    return std::vector<bool>();
 }
 
 
 // ---- Take ambient IR reading with emitters off and set reading offset ----
-void calibrate_ir_offset()
+bool calibrate_ir_offset()
 {
-    uint32_t readings_total;
-    gpio_put(ir_en_pin, LOW);
-    set_mux_io_mode(INPUT_ADC);
-    sleep_us(10);
-
-    for (int i = 0; i < num_ir_sensors; i++)
+    if (check_bool((take_mux_mutex() && adc_take_mutex()), RT_LOG_ONLY_CHECK))
     {
-        set_mux_addr(i + 8);
-        readings_total = readings_total + adc_read();
+        uint32_t readings_total;
+        gpio_put(ir_en_pin, LOW);
+        set_mux_io_mode(INPUT_ADC);
+        sleep_us(50);
+
+        for (int i = 0; i < num_ir_sensors; i++)
+        {
+            set_mux_addr(i + 8);
+            readings_total = readings_total + adc_read();
+        }
+
+        adc_release_mutex();
+        release_mux_mutex();
+
+        ambient_reading = (4095 - (readings_total / num_ir_sensors));
+        return true;
     }
 
-    ambient_reading = readings_total / num_ir_sensors;
+    return false;
 }
 
 
 // ---- Return the status of each sensor as true or false (triggered or not), as an array ----
 bool* get_ir_status()
 {
-    static bool readings[num_ir_sensors];
-    gpio_put(ir_en_pin, HIGH);
-    set_mux_io_mode(INPUT_ADC);
-    sleep_us(10);
-
-    for (int i = 0; i < num_ir_sensors; i++)
+    if (check_bool((take_mux_mutex() && adc_take_mutex()), RT_LOG_ONLY_CHECK))
     {
-        set_mux_addr(i + 8);
-        readings[i] = !((adc_read() - ambient_reading) > ir_trigger_limit);
+        static bool readings[num_ir_sensors];
+        gpio_put(ir_en_pin, HIGH);
+        set_mux_io_mode(INPUT_ADC);
+        sleep_us(5);
+
+        for (int i = 0; i < num_ir_sensors; i++)
+        {
+            set_mux_addr(i + 8);
+            readings[i] = ((adc_read() - ambient_reading) > ir_trigger_limit);
+        }
+
+        adc_release_mutex();
+        release_mux_mutex();
+
+        return readings;
     }
 
-    return readings;
+    return NULL;
 }

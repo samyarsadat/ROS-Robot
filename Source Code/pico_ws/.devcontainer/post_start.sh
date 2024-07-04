@@ -10,8 +10,8 @@ echo "-> Sourcing ROS..."
 source /opt/ros/"$ROS_DISTRO"/setup.bash
 
 echo "-> Colcon build..."
-cd $HOME/pico_ws/libmicroros/src/micro_ros_setup && colcon build
-source $HOME/pico_ws/libmicroros/src/micro_ros_setup/install/local_setup.bash
+cd $HOME/pico_ws/libmicroros/src && colcon build
+source $HOME/pico_ws/libmicroros/src/install/local_setup.bash
 cd $HOME/pico_ws
 
 echo "--> post_start.sh done!"

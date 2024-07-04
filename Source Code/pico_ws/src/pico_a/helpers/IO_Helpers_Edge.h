@@ -22,23 +22,23 @@
 
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
+#include <vector>
 
 
 // ------- Global variables -------
-extern uint ir_en_pin;
 extern uint16_t ambient_reading;
 
 
 // ------- Functions ------- 
 
 // ---- Sets the IR enable pin ----
-void set_ir_en_pin(uint en_pin);
+void set_ir_en_pin(uint8_t en_pin);
 
-// TODO: Self-check function.
-char* ir_self_test();
+// ---- Self-check function ----
+std::vector<bool> ir_self_test();
 
 // ---- Take ambient IR reading with emitters off and set reading offset ----
-void calibrate_ir_offset();
+bool calibrate_ir_offset();
 
 // ---- Return the status of each sensor as true or false (triggered or not), as an array ----
 bool* get_ir_status();

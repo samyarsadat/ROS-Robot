@@ -1,7 +1,7 @@
 #  The ROS robot project - Raspberry Pi Pico Communication Messages Package
 #  Miscellaneous Sensor(s) State Message (Pico B)
 #  Copyright 2024 Samyar Sadat Akhavi
-#  Written by Samyar Sadat Akhavi, 2022-2024.
+#  Written by Samyar Sadat Akhavi, 2024.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@ float32 env_humidity  # Relative Humidity %
 
 # ---- Battery Power ----
 float32 battery_voltage  # Volts
-int16 battery_current    # Milliamps
+uint16 battery_current   # Milliamps
 
 # ---- Misc. ----
-# uint16[4] camera_led_vals  # Any value between 0-65535 (PWM value).
+uint16[4] camera_led_vals    # Any value between 0-65535 (PWM value).
 float32 cpu_temp             # RP2040 temperature, Celsius

@@ -21,9 +21,8 @@
 */
 
 
-#include "pico/stdlib.h"
-#include "helpers_lib/Helpers.h"
 #include "motor_control_lib/Motor_Driver.h"
+#include "helpers_lib/Helpers.h"
 
 
 /*  Constructor
@@ -33,7 +32,7 @@
  *    int number_of_pins: the number of pins that have been passed in the array.
  *    driver_type drv_type: type of driver used (e.g. GENERIC_PWM for L298, L293, etc.)
  */
-MotorDriver::MotorDriver(uint drv_pins[], int number_of_pins, driver_type drv_type)
+MotorDriver::MotorDriver(uint8_t drv_pins[], uint8_t number_of_pins, driver_type drv_type)
 {
     MotorDriver::disable();
     MotorDriver::set_input_limits(input_limit_min, input_limit_max);
@@ -159,7 +158,7 @@ void MotorDriver::set_input_limits(int min, int max)
  *  Returns:
  *    void
  */
-void MotorDriver::set_speed(int speed)
+void MotorDriver::set_speed(uint16_t speed)
 {
     input = speed;
     MotorDriver::set_driver_outputs();
@@ -218,8 +217,8 @@ void MotorDriver::disable()
 
 // ------ Public status functions ------
 
-int MotorDriver::get_speed()                         { return input; }            // Returns current set driver output/speed.
+uint16_t MotorDriver::get_speed()                    { return input; }            // Returns current set driver output/speed.
 MotorDriver::direction MotorDriver::get_direction()  { return input_direction; }  // Returns current driver direction
 bool MotorDriver::is_enabled()                       { return driver_enabled; }   // Returns true if the driver is enabled, false if it is not.
-int MotorDriver::get_input_limit_min()               { return input_limits[0]; }  // Returns minimum set speed input limit.
-int MotorDriver::get_input_limit_max()               { return input_limits[1]; }  // Returns maximum set speed input limit.
+uint16_t MotorDriver::get_input_limit_min()          { return input_limits[0]; }  // Returns minimum set speed input limit.
+uint16_t MotorDriver::get_input_limit_max()          { return input_limits[1]; }  // Returns maximum set speed input limit.

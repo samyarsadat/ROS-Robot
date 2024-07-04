@@ -52,8 +52,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
                             "msg/FalloffSensors.msg"
                             "msg/MicroSwSensors.msg"
                             "msg/UltrasonicSensors.msg"
+                            "msg/FastOdometry.msg"
                             "srv/SetCameraLeds.srv"
                             "srv/SetPidTunings.srv"
+                            "srv/RunCalibrationsA.srv"
+                            "srv/GetConfigA.srv"
                             DEPENDENCIES builtin_interfaces geometry_msgs
                           )
 

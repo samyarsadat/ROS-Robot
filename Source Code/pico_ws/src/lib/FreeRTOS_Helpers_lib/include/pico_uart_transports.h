@@ -5,9 +5,6 @@ extern "C"
 {
 #endif
 
-    #include <stdio.h>
-    #include <stdint.h>
-
     #include <uxr/client/profile/transport/custom/custom_transport.h>
 
     bool pico_serial_transport_open(struct uxrCustomTransport *transport);

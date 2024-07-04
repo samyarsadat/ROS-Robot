@@ -10,11 +10,12 @@ echo "MicroROS Library Build Script."
 echo "NOTE: DO NOT RUN AS ROOT, RUN AS 'nonroot'!"
 echo ""
 
-while getopts bf flag
+while getopts bfr flag
 do
     case "${flag}" in
         b) FULL_REBUILD="false";;
         f) FULL_REBUILD="true";;
+        r) REINSTALL_PACKAGES="true";;
         *) echo "Invalid flags! (-b: firmware build only, -f: full re-build)" && exit 1;;
     esac
 done
@@ -50,4 +51,13 @@ if [ "$FULL_REBUILD" == "false" ]; then
     cd ~/pico_ws/libmicroros \
     && ros2 run micro_ros_setup build_firmware.sh "$(pwd)/my_toolchain.cmake" "$(pwd)/my_colcon.meta"
     echo "Build completed successfully (probably)!"
+fi
+
+if [ "$REINSTALL_PACKAGES" == "true" ]; then
+    echo "Re-building and re-installing packages..."
+    echo "Removing directories..." && rm -rf ./build && rm -rf ./install && rm -rf ./log
+    cd ~/pico_ws/libmicroros/src && colcon build
+    source ~/pico_ws/libmicroros/src/install/local_setup.bash
+    source ~/.bashrc
+    echo "Packages re-installed successfully!"
 fi

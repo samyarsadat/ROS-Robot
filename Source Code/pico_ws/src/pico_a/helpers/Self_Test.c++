@@ -23,13 +23,36 @@
 #include "pico/stdlib.h"
 #include "helpers_lib/Helpers.h"
 #include "IO_Helpers_Mux.h"
-#include "Definitions.h"
+#include "IO_Helpers_Edge.h"
+#include "local_helpers_lib/Local_Helpers.h"
+#include <diagnostic_msgs/msg/diagnostic_status.h>
+#include <diagnostic_msgs/srv/self_test.h>
 
 
-
-// ------- Definitions -------
-
-
+// ------- Global variables -------
+extern bool self_test_mode;
 
 
-// ------- Functions ------- 
+// ---- Run self-test functions service callback ----
+void run_self_test_callback(const void *req, void *res)
+{
+    diagnostic_msgs__srv__SelfTest_Request *req_in = (diagnostic_msgs__srv__SelfTest_Request *) req;
+    diagnostic_msgs__srv__SelfTest_Response *res_in = (diagnostic_msgs__srv__SelfTest_Response *) res;
+    std::vector<diagnostic_msgs__msg__DiagnosticStatus> diag_status_reports;
+
+    write_log("Received self-test request.", LOG_LVL_INFO, FUNCNAME_ONLY);
+    self_test_mode = true;
+
+    // Perform IR edge sensor self-test
+    write_log("Performing IR edge sensor self-test...", LOG_LVL_INFO, FUNCNAME_ONLY);
+    std::vector<bool> ir_test_results = ir_self_test();
+
+    for (auto result : ir_test_results)
+    {
+        if (result)
+        {
+            //std::string message = "IR edge sensor self-test passed. Sensor ID: " + std::to_string(result);
+            //diag_status_reports.push_back(create_diag_msg(DIAG_LVL_OK, DIAG_HWNAME_IR_EDGE_FRONT, DIAG_HWID_IR_EDGE_B1, ))
+        }
+    }
+}

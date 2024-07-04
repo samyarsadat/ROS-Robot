@@ -26,7 +26,6 @@ add_library(${PROJECT_NAME} Helpers.c++)
 target_include_directories(${PROJECT_NAME} PUBLIC ../include)
 
 # Link to libraries
-target_link_libraries(${PROJECT_NAME} pico_stdlib)
-target_link_libraries(${PROJECT_NAME} hardware_pwm)
-target_link_libraries(${PROJECT_NAME} hardware_gpio)
-target_link_libraries(${PROJECT_NAME} hardware_adc)
+target_link_libraries(${PROJECT_NAME} pico_stdlib
+                                      hardware_pwm
+                                      hardware_adc)

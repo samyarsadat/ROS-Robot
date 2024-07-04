@@ -23,7 +23,6 @@
 #pragma once
 #include "motor_control_lib/Motor_Encoder.h"   // Motor encoder interface
 #include "motor_control_lib/Motor.h"           // Motor controller
-#include "pico/stdlib.h"
 
 
 // ---- Main Motor Safety object ----
@@ -31,7 +30,7 @@ class MotorSafety
 {
     public:
         // Constructor
-        MotorSafety(Motor* controller, int safety_object_id);
+        MotorSafety(Motor* controller, uint8_t safety_object_id);
 
         // Safety trigger conditions that will be passed to the trigger callback function.
         enum safety_trigger_conditions
@@ -43,13 +42,13 @@ class MotorSafety
         };
 
         // Safety trigger function callback type definition.
-        typedef void (*safety_trigger_callback)(safety_trigger_conditions condition, int id);
+        typedef void (*safety_trigger_callback)(safety_trigger_conditions condition, uint8_t id);
 
 
         // ---- Functions ----
         
         // Set initial configuration for the module.
-        void configure_safety(int enc_max_deviation, int set_vs_actual_max_deviation, int check_fail_trig_timeout, safety_trigger_callback trig_callback);
+        void configure_safety(uint16_t enc_max_deviation, uint16_t set_vs_actual_max_deviation, uint16_t check_fail_trig_timeout, safety_trigger_callback trig_callback);
         
         // Enable safety monitoring.
         void enable_safety();
@@ -74,18 +73,18 @@ class MotorSafety
         void set_vs_actual_dir_check_enabled(bool is_enabled);
 
         // Set actual vs. set speed monitoring tolerance.
-        void set_set_vs_actual_spd_tolerance(int tolerance);
+        void set_set_vs_actual_spd_tolerance(uint16_t tolerance);
 
         // Set actual vs. set speed monitoring extra timeout tolerance.
-        void set_set_vs_actual_spd_time_tolerance(int milliseconds);
+        void set_set_vs_actual_spd_time_tolerance(uint16_t milliseconds);
 
         // Set encoder difference speed monitoring tolerance.
-        void set_enc_diff_tolerance(int tolerance);
+        void set_enc_diff_tolerance(uint16_t tolerance);
 
         // Set the check fail trigger timeout.
         // (The amount of time for which a check has to keep failing until
         // the trigger function is called)
-        void set_fail_trigger_timeout(int timeout);
+        void set_fail_trigger_timeout(uint16_t timeout);
 
         // Run the safety monitoring checks.
         // The safety monitoring conditions are only checked
@@ -98,8 +97,8 @@ class MotorSafety
         MotorEncoder* encoders[max_number_of_encoders];
         int number_of_encoders_defined;
 
-        int id;   // The ID of this monitoring object. This is passed to the trigger_callback so that the callback can 
-                  // identify which object is triggered if the same callback is used for multiple monitoring objects.
+        uint8_t id;   // The ID of this monitoring object. This is passed to the trigger_callback so that the callback can 
+                      // identify which object is triggered if the same callback is used for multiple monitoring objects.
         bool safety_configured;
         bool safety_enabled;
         bool enc_diff_check_enabled;
@@ -107,15 +106,15 @@ class MotorSafety
         bool set_actual_direction_check_enabled;
         bool enc_dir_diff_check_enabled;
         safety_trigger_callback trigger_callback;
-        int enc_diff_trigger_tolerance;
-        int set_actual_spd_diff_tolerance;
-        int checks_fail_trigger_timout_ms;
+        uint16_t enc_diff_trigger_tolerance;
+        uint16_t set_actual_spd_diff_tolerance;
+        uint16_t checks_fail_trigger_timout_ms;
         uint32_t last_enc_diff_trigger;
         uint32_t last_set_speed_trigger;
         uint32_t last_enc_dir_diff_trigger;
         uint32_t last_set_direction_trigger;
-        int set_vs_actual_spd_check_timeout_extra_ms;   // How many milliseconds should be added to checks_fail_trigger_timout_ms when checking for set vs. actual speed difference. 
-                                                        // Essentially how much extra tolerance should be allowed for this check.
+        uint16_t set_vs_actual_spd_check_timeout_extra_ms;   // How many milliseconds should be added to checks_fail_trigger_timout_ms when checking for set vs. actual speed difference. 
+                                                             // Essentially how much extra tolerance should be allowed for this check.
 
 
         // ---- Internal Functions ----

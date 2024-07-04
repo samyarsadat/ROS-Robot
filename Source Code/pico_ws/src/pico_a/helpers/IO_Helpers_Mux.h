@@ -25,17 +25,19 @@
 #include "helpers_lib/Helpers.h"
 
 
-// ------- Global variables -------
-extern uint mux_a, mux_b, mux_c, mux_d, mux_io;
-
-
 // ------- Functions ------- 
 
 // ---- Sets the mux pins ----
-void set_mux_pins(uint addr_a, uint addr_b, uint addr_c, uint addr_d, uint io);
+void set_mux_pins(uint8_t addr_a, uint8_t addr_b, uint8_t addr_c, uint8_t addr_d, uint8_t io);
 
 // ---- Set mux address pins according to mux IO pin number ----
 void set_mux_addr(uint pin);
 
 // ---- Set mux IO mode ----
 void set_mux_io_mode(PIN_CONFIG_MODE mode);
+
+// ---- Take the multiplexer mutex ----
+bool take_mux_mutex();
+
+// ---- Release the multiplexer mutex ----
+void release_mux_mutex();

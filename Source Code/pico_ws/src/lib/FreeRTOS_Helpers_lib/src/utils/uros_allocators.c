@@ -34,12 +34,10 @@ void *uros_rtos_allocate(size_t size, void *state)
     return (void *)pvPortMalloc(size);
 }
 
-
 void uros_rtos_deallocate(void *pointer, void *state)
 {
     vPortFree(pointer);
 }
-
 
 void *uros_rtos_reallocate(void *pointer, size_t size, void *state)
 {
@@ -54,7 +52,6 @@ void *uros_rtos_reallocate(void *pointer, size_t size, void *state)
         return (void *)pvPortMalloc(size);
     }
 }
-
 
 void *uros_rtos_zero_allocate(size_t number_of_elements, size_t size_of_element, void *state)
 {

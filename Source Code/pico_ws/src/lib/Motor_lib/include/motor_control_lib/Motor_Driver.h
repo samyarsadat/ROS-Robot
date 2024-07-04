@@ -49,13 +49,13 @@ class MotorDriver
         };
 
         // Constructor
-        MotorDriver(uint drv_pins[], int number_of_pins, driver_type drv_type);
+        MotorDriver(uint8_t drv_pins[], uint8_t number_of_pins, driver_type drv_type);
 
 
         // ---- Functions ----
 
         // Set driver output/speed (input must be within input_limits).
-        void set_speed(int speed);
+        void set_speed(uint16_t speed);
 
         // Set driver direction.
         void set_direction(direction dir);
@@ -72,7 +72,7 @@ class MotorDriver
         void disable();
 
         // Returns current set driver output/speed.
-        int get_speed();
+        uint16_t get_speed();
 
         // Returns current driver direction.
         direction get_direction();
@@ -82,18 +82,18 @@ class MotorDriver
         bool is_enabled();
 
         // Returns minimum set speed input limit.
-        int get_input_limit_min();
+        uint16_t get_input_limit_min();
 
         // Returns maximum set speed input limit.
-        int get_input_limit_max();
+        uint16_t get_input_limit_max();
 
 
     private:
-        uint driver_pins[max_number_of_driver_pins];
+        uint8_t driver_pins[max_number_of_driver_pins];
         driver_type drv_type;
         
-        int input_limits[2];
-        int input;                   // Currently set driver output/speed
+        uint16_t input_limits[2];
+        uint16_t input;              // Currently set driver output/speed
         direction input_direction;   // Currently set driver direction
         bool driver_enabled;
 

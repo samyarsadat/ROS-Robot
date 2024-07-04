@@ -23,7 +23,6 @@
 #include "motor_control_lib/Motor_Safety.h"
 #include "motor_control_lib/Motor_Encoder.h"   // Motor encoder interface
 #include "motor_control_lib/Motor.h"           // Motor controller
-#include "pico/stdlib.h"
 #include <cstdlib>
 
 
@@ -34,7 +33,7 @@
  *    int safety_object_id: the ID of this monitoring object. This is passed to the trigger_callback so that the callback can 
  *                          identify which object is triggered if the same callback is used for multiple monitoring objects.
  */
-MotorSafety::MotorSafety(Motor* ctrl, int safety_object_id)
+MotorSafety::MotorSafety(Motor* ctrl, uint8_t safety_object_id)
 {
     controller = ctrl;
     number_of_encoders_defined = ctrl->get_num_defined_encs();
@@ -62,7 +61,7 @@ MotorSafety::MotorSafety(Motor* ctrl, int safety_object_id)
  *  Returns:
  *    void
  */
-void MotorSafety::configure_safety(int enc_max_deviation, int set_vs_actual_max_deviation, int check_fail_trig_timeout, safety_trigger_callback trig_callback)
+void MotorSafety::configure_safety(uint16_t enc_max_deviation, uint16_t set_vs_actual_max_deviation, uint16_t check_fail_trig_timeout, safety_trigger_callback trig_callback)
 {
     safety_configured = true;
     trigger_callback = trig_callback;
@@ -178,7 +177,7 @@ void MotorSafety::set_vs_actual_dir_check_enabled(bool is_enabled)
  *  Returns:
  *    void
  */
-void MotorSafety::set_set_vs_actual_spd_tolerance(int tolerance)
+void MotorSafety::set_set_vs_actual_spd_tolerance(uint16_t tolerance)
 {
     set_actual_spd_diff_tolerance = tolerance;
 }
@@ -201,7 +200,7 @@ void MotorSafety::set_set_vs_actual_spd_tolerance(int tolerance)
  *  Returns:
  *    void
  */
-void MotorSafety::set_set_vs_actual_spd_time_tolerance(int milliseconds)
+void MotorSafety::set_set_vs_actual_spd_time_tolerance(uint16_t milliseconds)
 {
     set_vs_actual_spd_check_timeout_extra_ms = milliseconds;
 }
@@ -216,7 +215,7 @@ void MotorSafety::set_set_vs_actual_spd_time_tolerance(int milliseconds)
  *  Returns:
  *    void
  */
-void MotorSafety::set_enc_diff_tolerance(int tolerance)
+void MotorSafety::set_enc_diff_tolerance(uint16_t tolerance)
 {
     enc_diff_trigger_tolerance = tolerance;
 }
@@ -231,7 +230,7 @@ void MotorSafety::set_enc_diff_tolerance(int tolerance)
  *  Returns:
  *    void
  */
-void MotorSafety::set_fail_trigger_timeout(int timeout)
+void MotorSafety::set_fail_trigger_timeout(uint16_t timeout)
 {
     checks_fail_trigger_timout_ms = timeout;
 }
@@ -325,6 +324,7 @@ bool MotorSafety::check_encoder_difference()
             {
                 if (((time_us_32() - last_enc_diff_trigger) / 1000) > checks_fail_trigger_timout_ms)
                 {
+                    last_enc_diff_trigger = time_us_32();
                     return false;
                 }
             }
@@ -370,6 +370,7 @@ bool MotorSafety::check_set_vs_actual_speed_difference()
             {
                 if (((time_us_32() - last_set_speed_trigger) / 1000) > checks_fail_trigger_timout_ms + set_vs_actual_spd_check_timeout_extra_ms)
                 {
+                    last_set_speed_trigger = time_us_32();
                     return false;
                 }
             }
@@ -417,6 +418,7 @@ bool MotorSafety::check_encoder_dir_difference()
                 {
                     if (((time_us_32() - last_enc_dir_diff_trigger) / 1000) > checks_fail_trigger_timout_ms + set_vs_actual_spd_check_timeout_extra_ms)
                     {
+                        last_enc_dir_diff_trigger = time_us_32();
                         return false;
                     }
                 }
@@ -449,6 +451,8 @@ bool MotorSafety::check_encoder_dir_difference()
  */
 bool MotorSafety::check_set_vs_actual_direction()
 {
+    volatile float avrrpm = controller->get_avg_rpm();
+
     if (number_of_encoders_defined > 1 && controller->get_avg_rpm() > 0 && set_actual_direction_check_enabled)
     {
         if (controller->get_set_motor_direction() != encoders[0]->get_direction())
@@ -462,6 +466,7 @@ bool MotorSafety::check_set_vs_actual_direction()
             {
                 if (((time_us_32() - last_set_direction_trigger) / 1000) > checks_fail_trigger_timout_ms)
                 {
+                    last_set_direction_trigger = time_us_32();
                     return false;
                 }
             }

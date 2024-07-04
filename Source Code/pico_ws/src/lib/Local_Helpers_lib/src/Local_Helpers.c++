@@ -24,15 +24,13 @@
 
 // ------- Libraries & Modules -------
 #include "local_helpers_lib/Local_Helpers.h"
-#include "pico/stdlib.h"
-#include <rcl/rcl.h>
-#include <string>
-#include <vector>
+#include "freertos_helpers_lib/uROS_Publishing_Handler.h"
 #include <rmw_microros/rmw_microros.h>
-#include <diagnostic_msgs/msg/diagnostic_status.h>
 #include "pico/stdio_uart.h"
 #include "pico/stdio/driver.h"
 #include "pico/stdio.h"
+#include "semphr.h"
+#include "hardware/adc.h"
 
 
 
@@ -43,13 +41,14 @@
 // Note: diagnostics_msg (type: diagnostic_msgs__msg__DiagnosticStatus) must be defined eslewhere!
 // Note: diagnostics_pub (type: rcl_publisher_t) must be defined eslewhere!
 
+QueueHandle_t pub_queue;
 extern diagnostic_msgs__msg__DiagnosticStatus diagnostics_msg;
 extern rcl_publisher_t diagnostics_pub;
 extern void clean_shutdown();
 
 
 // ---- RCL return checker ----
-bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode, const char *func)
+bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode, const char *func, uint16_t line)
 {
     if (rctc != RCL_RET_OK)
     {
@@ -59,22 +58,20 @@ bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode, const char *func)
         {
             case RT_HARD_CHECK:
                 sprintf(buffer, "RCL Return check failed: [code: %d, RT_HARD_CHECK]", rctc);
-                write_log(buffer, LOG_LVL_FATAL, FUNCNAME_ONLY, func);
+                write_log(buffer, LOG_LVL_FATAL, FUNCNAME_LINE_ONLY, func, "", line);
                 publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_UROS, DIAG_HWID_UROS, DIAG_ERR_MSG_UROS_RC_CHECK_FAIL, DIAG_KV_EMPTY());
                 clean_shutdown();
                 break;
 
             case RT_SOFT_CHECK:
                 sprintf(buffer, "RCL Return check failed: [code: %d, RT_SOFT_CHECK]", rctc);
-                write_log(buffer, LOG_LVL_ERROR, FUNCNAME_ONLY, func);
+                write_log(buffer, LOG_LVL_ERROR, FUNCNAME_LINE_ONLY, func, "", line);
                 publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UROS, DIAG_HWID_UROS, DIAG_WARN_MSG_UROS_RC_CHECK_FAIL, DIAG_KV_EMPTY());
-                return false;
                 break;
             
             case RT_LOG_ONLY_CHECK:
                 sprintf(buffer, "RCL Return check failed: [code: %d, RT_LOG_ONLY_CHECK]", rctc);
-                write_log(buffer, LOG_LVL_WARN, FUNCNAME_ONLY, func);
-                return false;
+                write_log(buffer, LOG_LVL_WARN, FUNCNAME_LINE_ONLY, func, "", line);
                 break;
 
             default:
@@ -82,30 +79,30 @@ bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode, const char *func)
         }
     }
 
-    return true;
+    return (rctc != RCL_RET_OK);
 }
 
 
 // ---- Return checker, except for functions that return a boolean ----
-bool check_bool(bool function, RT_CHECK_MODE mode, const char *func)
+bool check_bool(bool function, RT_CHECK_MODE mode, const char *func, uint16_t line)
 {
     if (!function)
     {
         switch (mode)
         {
             case RT_HARD_CHECK:
-                write_log("BOOL Return check failed: [RT_HARD_CHECK]", LOG_LVL_FATAL, FUNCNAME_ONLY, func);
+                write_log("BOOL Return check failed: [RT_HARD_CHECK]", LOG_LVL_FATAL, FUNCNAME_LINE_ONLY, func, "", line);
                 publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_ERR_MSG_BOOL_RT_CHECK_FAIL, DIAG_KV_EMPTY());
                 clean_shutdown();
                 break;
 
             case RT_SOFT_CHECK:
-                write_log("BOOL Return check failed: [RT_SOFT_CHECK]", LOG_LVL_ERROR, FUNCNAME_ONLY, func);
+                write_log("BOOL Return check failed: [RT_SOFT_CHECK]", LOG_LVL_ERROR, FUNCNAME_LINE_ONLY, func, "", line);
                 publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_BOOL_RT_CHECK_FAIL, DIAG_KV_EMPTY());
                 break;
             
             case RT_LOG_ONLY_CHECK:
-                write_log("BOOL Return check failed: [RT_LOG_ONLY_CHECK]", LOG_LVL_WARN, FUNCNAME_ONLY, func);
+                write_log("BOOL Return check failed: [RT_LOG_ONLY_CHECK]", LOG_LVL_WARN, FUNCNAME_LINE_ONLY, func, "", line);
                 break;
 
             default:
@@ -117,46 +114,129 @@ bool check_bool(bool function, RT_CHECK_MODE mode, const char *func)
 }
 
 
+// ---- Set diagonstics MicroROS publishing queue ----
+void set_diag_pub_queue(QueueHandle_t queue)
+{
+    pub_queue = queue;
+}
+
+
+// ---- Create a diagnostic status message ----
+diagnostic_msgs__msg__DiagnosticStatus create_diag_msg(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values)
+{
+    diagnostic_msgs__msg__DiagnosticStatus diag_status;
+    
+    diag_status.name.data = hw_name.data();
+    diag_status.name.size = strlen(diag_status.name.data);
+    diag_status.hardware_id.data = hw_id.data();
+    diag_status.hardware_id.size = strlen(diag_status.hardware_id.data);
+    diag_status.message.data = msg.data();
+    diag_status.message.size = strlen(diag_status.message.data);
+    diag_status.values.data = NULL;
+    diag_status.values.size = 0;
+    diag_status.level = level;
+
+    if (!key_values.empty())
+    {
+        diag_status.values.data = key_values.data();
+        diag_status.values.size = key_values.size();
+    }
+
+    return diag_status;
+}
+
+
 // ---- Diagnostics error reporting ----
 // TODO: We can use std::string_view or std::string& here instead. This would require changing diagnostics definitions.
 void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values)
 {
-    diagnostics_msg.name.data = hw_name.data();
-    diagnostics_msg.name.size = strlen(diagnostics_msg.name.data);
-    diagnostics_msg.hardware_id.data = hw_id.data();
-    diagnostics_msg.hardware_id.size = strlen(diagnostics_msg.hardware_id.data);
-    diagnostics_msg.message.data = msg.data();
-    diagnostics_msg.message.size = strlen(diagnostics_msg.message.data);
-    diagnostics_msg.values.data = NULL;
-    diagnostics_msg.values.size = 0;
-    diagnostics_msg.level = level;
-
-    // TODO: LOGGING
-    /*char buffer[60];
-    sprintf(buffer, "Publishing diagnostics report: [hwname: %d, hwid: %s, lvl: %u]", hw_name);
-    write_log("publish_diag_report", buffer, LOG_LVL_FATAL);*/
-    
-    if (!key_values.empty())
-    {
-        diagnostics_msg.values.data = key_values.data();
-        diagnostics_msg.values.size = key_values.size();
-    }
+    diagnostics_msg = create_diag_msg(level, hw_name, hw_id, msg, key_values);
+    write_log("Diagnostic report! [hwname: " + hw_name + ", hwid: " + hw_id + ", lvl: " + std::to_string(level) + "]", LOG_LVL_WARN, FUNCNAME_ONLY);
 
     /* 
-        The return value of rcl_publish() is intentionally not checked here to prevent infinite recursion of publish_diag_report().
+        rt_check_mode is intentionally set to log-only to prevent infinite recursion of publish_diag_report().
         This edge case may occur if MicroROS is not initialized properly when check_rc() is called 
         (this could happen if check_rc() fails for rclc_node_init_default(), for example).
         In this case, this publish function would also not return RCL_RET_OK, resulting in its
         check_rc() calling publish_diag_report() and then the same thing happening over and over again.
     */
-    rcl_publish(&diagnostics_pub, &diagnostics_msg, NULL);
+    uRosPublishingHandler::PublishItem_t pub_item;
+    pub_item.publisher = &diagnostics_pub;
+    pub_item.message = &diagnostics_msg;
+    pub_item.rt_check_mode = RT_LOG_ONLY_CHECK;
+    xQueueSendToBack(pub_queue, (void *) &pub_item, 0);
+}
+
+
+// ---- Initialize ADC mutex ----
+SemaphoreHandle_t adc_mutex = NULL;
+void adc_init_mutex()
+{
+    if (adc_mutex == NULL)
+    {
+        adc_mutex = xSemaphoreCreateMutex();
+    }
+}
+
+
+// ---- Take the ADC mutex ----
+bool adc_take_mutex()
+{
+    return (xSemaphoreTake(adc_mutex, portMAX_DELAY) == pdTRUE);
+}
+
+
+// ---- Release the ADC mutex ----
+void adc_release_mutex()
+{
+    xSemaphoreGive(adc_mutex);
+}
+
+
+// ---- Change ADC mux channel with mutex ----
+bool adc_select_input_with_mutex(uint8_t channel)
+{
+    TaskHandle_t current_task = xTaskGetCurrentTaskHandle();
+
+    if (xSemaphoreGetMutexHolder(adc_mutex) == current_task)
+    {
+        adc_select_input(channel);
+        return true;
+    }
+
+    return false;
+}
+
+
+// ---- Initialize print_uart mutex ----
+SemaphoreHandle_t print_uart_mutex = NULL;
+void init_print_uart_mutex()
+{
+    if (print_uart_mutex == NULL)
+    {
+        print_uart_mutex = xSemaphoreCreateMutex();
+    }
 }
 
 
 // ---- Print to STDIO UART function ----
-void print_uart(std::string msg)
+bool print_uart(std::string msg)
 {
-    stdio_uart.out_chars(msg.c_str(), msg.length());
+    // We don't care about the mutex if we're not in a task.
+    if (xTaskGetCurrentTaskHandle() == NULL)
+    {
+        stdio_uart.out_chars(msg.c_str(), msg.length());
+        return true;
+    }
+
+    if (xSemaphoreTake(print_uart_mutex, portMAX_DELAY) == pdTRUE)
+    {
+        stdio_uart.out_chars(msg.c_str(), msg.length());
+        xSemaphoreGive(print_uart_mutex);
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -184,14 +264,13 @@ void write_log(std::string msg, LOG_LEVEL lvl, LOG_SOURCE_VERBOSITY src_verb, co
 
     // This is quite ugly, but it works.
     msg = "[" + std::to_string(timestamp_sec) + "." + std::to_string(timestamp_millisec) + "] [" + level + "] [" + src + "]: " + msg + "\r\n";
-    //print_uart(msg);
+    print_uart(msg);
 }
 
 
 // ---- Pings the MicroROS agent ----
 bool ping_agent()
 {
-    write_log("Pinging agent...", LOG_LVL_INFO, FUNCNAME_ONLY);
     bool success = (rmw_uros_ping_agent(uros_agent_find_timeout_ms, uros_agent_find_attempts) == RMW_RET_OK);
     return success;
 }
@@ -202,6 +281,12 @@ bool ping_agent()
 // ---- Returns false if the execution time has exceeded the specified limit ----
 bool check_exec_interval(uint32_t &last_call_time_ms, uint16_t max_exec_time_ms, std::string log_msg, const char *func)
 {
+    // Initialize last_call_time_ms if it's 0 (first call).
+    if (last_call_time_ms == 0) 
+    { 
+        last_call_time_ms = time_us_32() / 1000; 
+    }
+
     uint32_t time_ms = time_us_32() / 1000;
     uint32_t exec_time_ms = time_ms - last_call_time_ms;
     last_call_time_ms = time_ms;

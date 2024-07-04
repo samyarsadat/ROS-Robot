@@ -25,13 +25,12 @@
 
 
 // ------- Libraries & Modules -------
-#include "pico/stdlib.h"
-#include "local_helpers_lib/Diagnostics_Definitons.h"
 #include "local_helpers_lib/Common_Definitions.h"
-#include <diagnostic_msgs/msg/diagnostic_status.h>
+#include "pico/stdlib.h"
 #include <rcl/rcl.h>
 #include <string>
-#include <vector>
+#include "FreeRTOS.h"
+#include "queue.h"
 
 
 
@@ -41,24 +40,45 @@ enum LOG_LEVEL {LOG_LVL_INFO, LOG_LVL_WARN, LOG_LVL_ERROR, LOG_LVL_FATAL};
 enum LOG_SOURCE_VERBOSITY {FUNCNAME_ONLY, FILENAME_LINE_ONLY, FUNCNAME_LINE_ONLY, FILENAME_LINE_FUNCNAME};
 
 
-
 // ------- Functions ------- 
 
 // ----- RETURN CHECKERS -----
 // Note: clean_shutdown() must be defined elsewhere!
 // Note: diagnostics_msg (type: diagnostic_msgs__msg__DiagnosticStatus) must be defined eslewhere!
+// Note: diagnostics_pub (type: rcl_publisher_t) must be defined eslewhere!
 
 // --- RCL return checker ---
-bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode, const char *func=__builtin_FUNCTION());
+bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode, const char *func=__builtin_FUNCTION(), uint16_t line=__builtin_LINE());
 
 // --- Return checker, except for functions that return a boolean ---
-bool check_bool(bool function, RT_CHECK_MODE mode, const char *func=__builtin_FUNCTION());
+bool check_bool(bool function, RT_CHECK_MODE mode, const char *func=__builtin_FUNCTION(), uint16_t line=__builtin_LINE());
+
+// ---- Set MicroROS publishing queue ----
+void set_diag_pub_queue(QueueHandle_t queue);
+
+// ---- Create a diagnostic status message ----
+diagnostic_msgs__msg__DiagnosticStatus create_diag_msg(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values);
 
 // ---- Diagnostics error reporting ----
 void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values);
 
+// ---- Initialize ADC mutex ----
+void adc_init_mutex();
+
+// ---- Take the ADC mutex ----
+bool adc_take_mutex();
+
+// ---- Release the ADC mutex ----
+void adc_release_mutex();
+
+// ---- Change ADC mux channel with mutex ----
+bool adc_select_input_with_mutex(uint8_t channel);
+
+// ---- Initialize print_uart mutex ----
+void init_print_uart_mutex();
+
 // ---- Print to STDIO UART function ----
-void print_uart(std::string msg);
+bool print_uart(std::string msg);
 
 // ---- Logging functions ----
 void write_log(std::string msg, LOG_LEVEL lvl, LOG_SOURCE_VERBOSITY src_verb, const char *func=__builtin_FUNCTION(), const char *file=__builtin_FILE(), uint16_t line=__builtin_LINE());

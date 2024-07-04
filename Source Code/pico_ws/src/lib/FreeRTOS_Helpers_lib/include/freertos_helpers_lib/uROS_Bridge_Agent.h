@@ -24,28 +24,22 @@
 
 
 #pragma once
-#include "pico/stdlib.h"
 #include "freertos_helpers_lib/RTOS_Agent.h"
 #include <rcl/rcl.h>
-#include <rcl/error_handling.h>
-#include <rclc/types.h>
 #include <rclc/executor.h>
-#include <rclc/subscription.h>
-#include <std_msgs/msg/int32.h>
-#include <rmw_microros/rmw_microros.h>
 #include <vector>
 
 
 // Absolute maximums
 #define MAX_PUBLISHERS   8
 #define MAX_SUBSCRIBERS  2
-#define MAX_SERVICES     5
+#define MAX_SERVICES     7
 #define MAX_TIMERS       10
-#define MAX_EXEC_TIME    200
+#define MAX_EXEC_TIME    60
 
 // Misc.
-#define EXECUTE_DELAY_MS           75
-#define EXECUTOR_TIMEOUT_MS        80
+#define EXECUTE_DELAY_MS           80
+#define EXECUTOR_TIMEOUT_MS        25
 #define BRIDGE_AGENT_MEMORY_WORDS  2048
 #define BRIDGE_AGENT_NAME          "uROS_Bridge_Agent"
 
@@ -54,17 +48,21 @@
 class uRosBridgeAgent : public Agent
 {
     public:
-        // MicroROS init (pubs, subs, services, timers, executor, node, etc.) function typedef
+        // MicroROS init & fini (pubs, subs, services, timers, executor, node, etc.) function typedefs
         typedef bool (*uros_init_function)(void);
+        typedef void (*uros_fini_function)(void);
 
         // MicroROS agent state enum
         enum UROS_STATE {WAITING_FOR_AGENT, AGENT_AVAILABLE, AGENT_CONNECTED, AGENT_DISCONNECTED};
 
+        // MicroROS object QoS mode
+        enum QOS_MODE {QOS_BEST_EFFORT, QOS_RELIABLE};
+
         // Get the singleton instance
-        static uRosBridgeAgent *get_instance();
+        static uRosBridgeAgent* get_instance();
 
         // Pre-init configuration
-        void pre_init(uros_init_function init_function, uros_init_function fini_function);
+        void pre_init(uros_init_function init_function, uros_fini_function fini_function);
 
         // Initialize MicroROS node.
         // This function should be called before any other uROS-related functions.
@@ -83,19 +81,19 @@ class uRosBridgeAgent : public Agent
 
         // Initialize a publisher.
         // This function is NOT thread-safe.
-        bool init_publisher(rcl_publisher_t *publisher, const rosidl_message_type_support_t *type_support, const char *topic_name);
+        bool init_publisher(rcl_publisher_t *publisher, const rosidl_message_type_support_t *type_support, const char *topic_name, QOS_MODE qos_mode = QOS_BEST_EFFORT);
 
         // Initialize a subscriber.
         // This function is NOT thread-safe.
-        bool init_subscriber(rcl_subscription_t *subscriber, const rosidl_message_type_support_t *type_support, const char *topic_name);
+        bool init_subscriber(rcl_subscription_t *subscriber, const rosidl_message_type_support_t *type_support, const char *topic_name, QOS_MODE qos_mode = QOS_RELIABLE);
 
         // Initialize a service.
         // This function is NOT thread-safe.
-        bool init_service(rcl_service_t *service, const rosidl_service_type_support_t *type_support, const char *service_name);
+        bool init_service(rcl_service_t *service, const rosidl_service_type_support_t *type_support, const char *service_name, QOS_MODE qos_mode = QOS_RELIABLE);
 
         // Add a subscriber to the executor.
         // This function is NOT thread-safe.
-        bool add_subscriber(rcl_subscription_t *subscriber, void *msg, rclc_subscription_callback_t callback);
+        bool add_subscriber(rcl_subscription_t *subscriber, void *msg, rclc_subscription_callback_t callback, rclc_executor_handle_invocation_t invocation = ON_NEW_DATA);
 
         // Add a service to the executor.
         // This function is NOT thread-safe.
@@ -131,7 +129,7 @@ class uRosBridgeAgent : public Agent
 
         // Initialize function
         uros_init_function init_func;
-        uros_init_function fini_func;
+        uros_fini_function fini_func;
 
         // MicroROS agent state
         UROS_STATE current_uros_state;

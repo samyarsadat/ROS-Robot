@@ -20,15 +20,11 @@
 */
 
 
+#include "motor_control_lib/Motor.h"
 #include "motor_control_lib/Motor_Driver.h"    // Motor driver interface
 #include "motor_control_lib/Motor_Encoder.h"   // Motor encoder interface
-#include "pico/stdlib.h"
-#include <memory>
-#include "pid_v1_lib/PID_v1.h"
 #include "helpers_lib/Helpers.h"
-#include "motor_control_lib/Motor.h"
 #include <cmath>
-#include <vector>
 
 
 /*  Constructor
@@ -38,7 +34,7 @@
  *    MotorEncoder* encs[]: an array containing pointers to all of the MotorEncoder objects that are to be used by this controller.
  *    int number_of_encoders: the number of MotorEncoder object pointers that have been passed in the encs array.
  */
-Motor::Motor(MotorDriver* drv, MotorEncoder* encs[], int number_of_encoders)
+Motor::Motor(MotorDriver* drv, MotorEncoder* encs[], uint8_t number_of_encoders)
 {
     Motor::set_control_mode(control_mode::BLIND);
     Motor::set_motor_direction(motor_direction::FORWARD);
@@ -188,14 +184,18 @@ void Motor::disable_controller()
  */
 float Motor::get_avg_rpm()
 {
-    std::vector<float> measured_speeds;
+    // This function used to use C++ vectors, but I had to make it so it doesn't use them
+    // to prevent memory allocation as this function is used by functions that are called from ISRs,
+    // and we can't dynamically allocate memory from ISRs.
+
+    float measured_speeds_total = 0.0f;
 
     for (int i = 0; i < number_of_encoders_defined; i++)
     {
-        measured_speeds.push_back(encoders[i]->get_rpm());
+        measured_speeds_total += encoders[i]->get_rpm();
     }
 
-    return calculate_mean(measured_speeds);
+    return (measured_speeds_total / number_of_encoders_defined);
 }
 
 
@@ -209,14 +209,14 @@ float Motor::get_avg_rpm()
  */
 int32_t Motor::get_avg_enc_pulse_count()
 {
-    int64_t pulse_counters_total;
+    int64_t pulse_counters_total = 0;
 
     for (int i = 0; i < number_of_encoders_defined; i++)
     {
         pulse_counters_total += encoders[i]->get_pulse_counter();
     }
 
-    return pulse_counters_total / number_of_encoders_defined;
+    return (pulse_counters_total / number_of_encoders_defined);
 }
 
 
@@ -334,6 +334,7 @@ void Motor::compute_outputs()
             else
             {
                 driver->set_speed(0);
+                pid->Compute();   // So that PID output also falls to 0.
             }
         }
 
@@ -388,4 +389,18 @@ int Motor::get_num_defined_encs()
 float Motor::get_pid_output()
 {
     return pid_output;
+}
+
+
+/*  Returns whether the controller is enabled or not.
+ *  
+ *  Arguments:
+ *    None
+ * 
+ *  Returns:
+ *    bool: true for enabled, false for disabled
+ */
+bool Motor::is_enabled()
+{
+    return controller_enabled;
 }

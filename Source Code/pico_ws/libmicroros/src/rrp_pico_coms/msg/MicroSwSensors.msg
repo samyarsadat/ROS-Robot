@@ -1,7 +1,7 @@
 #  The ROS robot project - Raspberry Pi Pico Communication Messages Package
 #  Microswitch States Message (Pico B)
 #  Copyright 2024 Samyar Sadat Akhavi
-#  Written by Samyar Sadat Akhavi, 2022-2024.
+#  Written by Samyar Sadat Akhavi, 2024.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by

@@ -1,5 +1,5 @@
 #  The ROS robot project - Raspberry Pi Pico Communication Messages Package
-#  Miscellaneous Sensor(s) State Message (Pico A)
+#  Odometry message similar to the one from Nav Messages, but without covariance matricies.
 #  Copyright 2024 Samyar Sadat Akhavi
 #  Written by Samyar Sadat Akhavi, 2024.
 #
@@ -16,14 +16,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-builtin_interfaces/Time time
+std_msgs/Header header
 
 
-# ---- Inertial Measurement Unit ----
-geometry_msgs/Vector3 imu_accel  # Linear Acceleration
-geometry_msgs/Vector3 imu_gyro   # Angular Velocity
-float32 imu_temp                 # Temperature From MPU6050
-bool imu_freefall_int            # MPU6050 Freefall Detection Interrupt
-
-# ---- Misc. ----
-float32 cpu_temp     # RP2040 temperature, Celsius
+# ---- Odometry ----
+string child_frame_id
+geometry_msgs/Pose pose
+geometry_msgs/Twist twist

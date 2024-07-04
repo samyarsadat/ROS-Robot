@@ -22,9 +22,7 @@
 
 
 #pragma once
-
 #include "pico/stdlib.h"
-#include <memory>
 #include <vector>
 using namespace std;
 
@@ -36,8 +34,8 @@ enum PIN_CONFIG_MODE {OUTPUT, OUTPUT_PWM, INPUT, INPUT_PULLUP, INPUT_PULLDOWN, I
 enum PIN_STATE {LOW, HIGH};
 
 // ---- Misc. ----
-#define temp_sens_vref         3.22f   // Volts
-#define adc_conversion_factor  temp_sens_vref / (1 << 12)
+#define temp_sens_vref         3.25f   // Volts
+#define adc_conversion_factor  (temp_sens_vref / (1 << 12))
 
 
 // ------- Functions -------
@@ -70,3 +68,7 @@ float get_rp2040_temp();
 
 // ---- Returns the ADC channel of a given GPIO pin ----
 int get_gpio_adc_channel(uint gpio);
+
+// ---- Converts Euler angles to a quaternion ----
+// ---- Output: [x, y, z, w] ----
+vector<float> euler_to_quaternion(float roll, float pitch, float yaw);

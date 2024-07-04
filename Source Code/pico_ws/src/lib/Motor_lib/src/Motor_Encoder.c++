@@ -21,9 +21,8 @@
 */
 
 
-#include "pico/stdlib.h"
-#include "helpers_lib/Helpers.h"
 #include "motor_control_lib/Motor_Encoder.h"
+#include "helpers_lib/Helpers.h"
 
 
 /*  Constructor (dual-channel encoders)
@@ -35,7 +34,7 @@
  *    uint enc_pulses_per_rotation: number of pulses sent by the encoder per pre-gearbox shaft rotation
  *    gpio_irq_callback_t gpio_irq_callback_func: GPIO irq callback function
  */
-MotorEncoder::MotorEncoder(uint encoder_chan_a_pin, uint encoder_chan_b_pin, float mtr_gear_ratio, uint enc_pulses_per_rotation, gpio_irq_callback_t gpio_irq_callback_func)
+MotorEncoder::MotorEncoder(uint8_t encoder_chan_a_pin, uint8_t encoder_chan_b_pin, float mtr_gear_ratio, uint16_t enc_pulses_per_rotation, gpio_irq_callback_t gpio_irq_callback_func)
 {
     is_dual_channel_encoder = true;
     channel_a_pin = encoder_chan_a_pin; 
@@ -61,7 +60,7 @@ MotorEncoder::MotorEncoder(uint encoder_chan_a_pin, uint encoder_chan_b_pin, flo
  *    uint enc_pulses_per_rotation: number of pulses sent by the encoder per pre-gearbox shaft rotation
  *    gpio_irq_callback_t gpio_irq_callback_func: GPIO irq callback function
  */
-MotorEncoder::MotorEncoder(uint encoder_pin, float mtr_gear_ratio, uint enc_pulses_per_rotation, gpio_irq_callback_t gpio_irq_callback_func)
+MotorEncoder::MotorEncoder(uint8_t encoder_pin, float mtr_gear_ratio, uint16_t enc_pulses_per_rotation, gpio_irq_callback_t gpio_irq_callback_func)
 {
     is_dual_channel_encoder = false;
     channel_a_pin = encoder_pin; 
@@ -100,7 +99,7 @@ void MotorEncoder::set_gear_ratio(float gear_ratio)
  *  Returns:
  *    void
  */
-void MotorEncoder::set_method_1_cutoff(int rpm)
+void MotorEncoder::set_method_1_cutoff(uint16_t rpm)
 {
     method_1_cutoff_rpm = rpm;
 }
@@ -114,7 +113,7 @@ void MotorEncoder::set_method_1_cutoff(int rpm)
  *  Returns:
  *    void
  */
-void MotorEncoder::set_enc_pulses_per_rotation(int pulses)
+void MotorEncoder::set_enc_pulses_per_rotation(uint16_t pulses)
 {
     encoder_pulses_per_rotation = pulses;
 }
@@ -143,7 +142,7 @@ void MotorEncoder::set_enc_direction_reversed(bool is_reversed)
  *  Returns:
  *    void
  */
-void MotorEncoder::enc_hardware_irq_trigger(uint pin)
+void MotorEncoder::enc_hardware_irq_trigger(uint8_t pin)
 {
     if (pin == channel_a_pin)
     {

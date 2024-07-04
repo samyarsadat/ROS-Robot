@@ -22,15 +22,10 @@
 
 
 // ------- Libraries & Modules -------
-#include "pico/stdlib.h"
-#include "hardware/gpio.h"
+#include "helpers_lib/Helpers.h"
 #include "hardware/adc.h"
 #include "hardware/pwm.h"
 #include <math.h>
-#include <cmath>
-#include <memory>
-#include <vector>
-#include "helpers_lib/Helpers.h"
 using namespace std;
 
 
@@ -178,9 +173,8 @@ vector<bool> standard_score_check(vector<float> &numbers, float z_score_threshho
 float get_rp2040_temp()
 {
     adc_select_input(4);
-    double reading_volts = adc_read() * adc_conversion_factor;
+    float reading_volts = adc_read() * adc_conversion_factor;
     float reading_celsius = 27 - (reading_volts - 0.706) / 0.001721;  // Formula taken from the RP2040 datasheet.
-
     return reading_celsius;
 }
 
@@ -191,5 +185,32 @@ int get_gpio_adc_channel(uint gpio)
     if (gpio == 26) { return 0; }
     else if (gpio == 27) { return 1; }
     else if (gpio == 28) { return 2; }
+    else if (gpio == 29) { return 3; }
     return 0;   // Just in case there's user error and a non-ADC pin is provided.
+}
+
+
+// ---- Converts Euler angles to a quaternion ----
+// ---- Output: [x, y, z, w] ----
+vector<float> euler_to_quaternion(float roll, float pitch, float yaw)
+{
+    vector<float> quaternion;
+    
+    float yaw_half = yaw * 0.5;
+    float pitch_half = pitch * 0.5;
+    float roll_half = roll * 0.5;
+
+    float cy = cos(yaw_half);
+    float sy = sin(yaw_half);
+    float cp = cos(pitch_half);
+    float sp = sin(pitch_half);
+    float cr = cos(roll_half);
+    float sr = sin(roll_half);
+
+    quaternion.push_back(sr * cp * cy - cr * sp * sy);  // x
+    quaternion.push_back(cr * sp * cy + sr * cp * sy);  // y
+    quaternion.push_back(cr * cp * sy - sr * sp * cy);  // z
+    quaternion.push_back(cr * cp * cy + sr * sp * sy);  // w
+
+    return quaternion;
 }

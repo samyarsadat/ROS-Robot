@@ -23,23 +23,16 @@
 
 
 #pragma once
-#include "pico/stdlib.h"
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
 #include "freertos_helpers_lib/RTOS_Agent.h"
 #include "freertos_helpers_lib/uROS_Bridge_Agent.h"
-#include <rcl/rcl.h>
-#include <rcl/error_handling.h>
-#include <rclc/types.h>
-#include <vector>
+#include "local_helpers_lib/Local_Helpers.h"
 
 
 // Absolute maximums
-#define MAX_QUEUE_ITEMS  10
+#define MAX_PUBLISH_QUEUE_ITEMS  20
 
 // Misc.
-#define PUB_AGENT_MEMORY_WORDS  1024
+#define PUB_AGENT_MEMORY_WORDS  2048
 #define PUB_AGENT_NAME          "uROS_Publishing_Handler"
 
 
@@ -55,7 +48,8 @@ class uRosPublishingHandler : public Agent
         {
             rcl_publisher_t *publisher;
             void *message;
-            publish_failed_callback failed_callback;
+            publish_failed_callback failed_callback = NULL;
+            RT_CHECK_MODE rt_check_mode = RT_SOFT_CHECK;
         };
 
         // Publishing queue item typedef

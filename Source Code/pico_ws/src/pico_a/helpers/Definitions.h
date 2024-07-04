@@ -18,8 +18,8 @@
 */
 
 #pragma once
-#include <string>
 #include "local_helpers_lib/Common_Definitions.h"
+#include "hardware/i2c.h"
 #include "Diag_Msgs.h"
 
 
@@ -50,10 +50,10 @@
 #define analog_mux_io  26
 
 // ---- Motor encoders & motor driver ----
-#define l_motor_1_enc_b  27
-#define l_motor_1_enc_a  12
-#define l_motor_2_enc_b  9
-#define l_motor_2_enc_a  10
+#define l_motor_1_enc_b  12   // Supposed to be 27, temporarily swapped.
+#define l_motor_1_enc_a  27   // Supposed to be 12, temporarily swapped.
+#define l_motor_2_enc_b  10   // Supposed to be 9, temporarily swapped.
+#define l_motor_2_enc_a  9    // Supposed to be 10, temporarily swapped.
 #define r_motor_1_enc_b  8
 #define r_motor_1_enc_a  7
 #define r_motor_2_enc_b  11
@@ -64,9 +64,9 @@
 #define r_motor_drive_2  21
 
 // ---- I2C ----
-#define i2c_inst   i2c1   // I2C instance (14 & 15 are on I2C1)
-#define i2c_sda    14
-#define i2c_scl    15
+#define i2c_inst  i2c1   // I2C instance (14 & 15 are on I2C1)
+#define i2c_sda   14
+#define i2c_scl   15
 
 
 // ------- Other definitions -------
@@ -74,26 +74,25 @@
 // ---- MicroROS node config ----
 #define UROS_NODE_NAME              "pico_a"
 #define UROS_NODE_NAMESPACE         "io"
-#define UROS_EXEC_TIMEOUT_MS        80   // In milliseconds
-#define uros_executor_exec_timeout  50
 
 // ---- Repeating timer intervals ----
-#define motor_odom_rt_interval    50    // In milliseconds
-#define ultra_pub_rt_interval     100   // In milliseconds
-#define edge_ir_pub_rt_interval   80    // In milliseconds
-#define sensors_pub_rt_interval   100   // In milliseconds
+#define motor_odom_rt_interval          100   // In milliseconds
+#define ultra_pub_rt_interval           200   // In milliseconds
+#define edge_ir_pub_rt_interval         100   // In milliseconds
+#define sensors_pub_rt_interval         100   // In milliseconds
+#define motor_enc_method_2_rt_interval  150   // In milliseconds
 
 // ---- Ultrasonic sensor specs ----
 #define ultra_fov                    30
 #define ultra_min_dist               1         // In cm
 #define ultra_max_dist               400       // In cm
-#define ultrasonic_signal_timout_us  32*1000   // 32 milliseconds
+#define ultrasonic_signal_timout_us  14*1000   // 32 milliseconds
 
 // ---- IR edge sensors ----
 #define ir_edge_detection_range          3   // In cm
 #define ir_edge_fov                      20
 #define num_ir_sensors                   8
-#define ir_trigger_limit                 6500
+#define ir_trigger_limit                 2000
 #define ir_self_test_z_score_threshhold  200.0f
 
 // ---- Motor controller & safety ----
@@ -106,13 +105,18 @@
 #define left_motor_controller_id            1
 
 // ---- Motor specs ----
-#define enc_pulses_per_rotation         2
-#define motor_gear_ratio                80/1
+#define enc_pulses_per_rot              2
+#define gear_ratio_motor                80/1
 #define wheel_diameter                  100.0f                  // In millimeters
 #define wheelbase                       140.0f                  // In millimeters
 #define wheel_circumference             (PI * wheel_diameter)   // In millimeters
-#define enc_pulses_per_meter_of_travel  (1000 / wheel_circumference) * (motor_gear_ratio * enc_pulses_per_rotation)
+#define enc_pulses_per_meter_of_travel  (1000 / wheel_circumference) * (gear_ratio_motor * enc_pulses_per_rot)
 
 // ---- Frame IDs ----
 #define odom_frame_id       (char *) "odom"
 #define base_link_frame_id  (char *) "base_link"
+
+// ---- Misc. ----
+#define SETUP_TASK_STACK_DEPTH  1024
+#define TIMER_TASK_STACK_DEPTH  1024
+#define STARTUP_WAIT_TIME_S     3   // In seconds

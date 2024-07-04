@@ -20,10 +20,10 @@
 */
 
 #pragma once
-#include <limits>
 #include "local_helpers_lib/Common_Diag_Msgs.h"
 #include "local_helpers_lib/Diagnostics_Definitons.h"
 #include <diagnostic_msgs/msg/diagnostic_status.h>
+#include <limits>
 #include <vector>
 
 
@@ -36,11 +36,10 @@
 // ------- Other definitions -------
 
 // ---- Misc. ----
-#define PI            3.141f
-#define TAU           2 * PI
-#define CHECK_FLAG    1687
-#define INF           std::numeric_limits<float>::infinity()
-#define N_INF         INF * -1
+#define PI     3.141f
+#define TAU    (2 * PI)
+#define INF    std::numeric_limits<float>::infinity()
+#define N_INF  (INF * -1)
 
 // ---- Diagnostics message levels ----
 #define DIAG_LVL_OK     diagnostic_msgs__msg__DiagnosticStatus__OK
@@ -49,8 +48,8 @@
 #define DIAG_LVL_STALE  diagnostic_msgs__msg__DiagnosticStatus__STALE
 
 // ---- MicroROS agent detection ----
-#define uros_agent_find_timeout_ms  1000
-#define uros_agent_find_attempts    120
+#define uros_agent_find_timeout_ms  100
+#define uros_agent_find_attempts    10
 
 // ---- Misc. typedefs ----
 typedef std::vector<diagnostic_msgs__msg__KeyValue> DIAG_KV_EMPTY;

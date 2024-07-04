@@ -63,7 +63,7 @@ class Agent
 
         // Static internal function used by FreeRTOS to start
         // the agent task.
-        static void vTask(void *pvParameters);
+        static void vTask(void *parameters);
 
         // Main task execute function.
         // Code that is to be executed by the task goes here.

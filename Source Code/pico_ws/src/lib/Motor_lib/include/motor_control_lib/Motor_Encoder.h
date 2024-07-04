@@ -39,10 +39,10 @@ class MotorEncoder
         };
 
         // Single-channel encoder constructor
-        MotorEncoder(uint encoder_pin, float mtr_gear_ratio, uint enc_pulses_per_rotation, gpio_irq_callback_t gpio_irq_callback_func);
+        MotorEncoder(uint8_t encoder_pin, float mtr_gear_ratio, uint16_t enc_pulses_per_rotation, gpio_irq_callback_t gpio_irq_callback_func);
 
         // Dual-channel encoder constructor
-        MotorEncoder(uint encoder_chan_a_pin, uint encoder_chan_b_pin, float mtr_gear_ratio, uint enc_pulses_per_rotation, gpio_irq_callback_t gpio_irq_callback_func);
+        MotorEncoder(uint8_t encoder_chan_a_pin, uint8_t encoder_chan_b_pin, float mtr_gear_ratio, uint16_t enc_pulses_per_rotation, gpio_irq_callback_t gpio_irq_callback_func);
 
 
         // ---- Functions ----
@@ -51,16 +51,16 @@ class MotorEncoder
         void set_gear_ratio(float gear_ratio);
 
         // Sets method 1 RPM cutoff config variable.
-        void set_method_1_cutoff(int rpm);
+        void set_method_1_cutoff(uint16_t rpm);
 
         // Sets encoder pulses per pre-gearbox shaft rotation config variable.
-        void set_enc_pulses_per_rotation(int pulses);
+        void set_enc_pulses_per_rotation(uint16_t pulses);
 
         // Configures whether the motor encoder measured direction should be reversed.
         void set_enc_direction_reversed(bool is_reversed);
 
         // This function should be called in the GPIO irq callback function.
-        void enc_hardware_irq_trigger(uint pin);
+        void enc_hardware_irq_trigger(uint8_t pin);
 
         // This function should be called in a timer interrupt callback function.
         // How often this function is called determines the sample time of method 2 RPM measurements.
@@ -84,15 +84,15 @@ class MotorEncoder
 
 
     private:
-        uint channel_a_pin;
-        uint channel_b_pin;
+        uint8_t channel_a_pin;
+        uint8_t channel_b_pin;
         bool is_dual_channel_encoder;
 
-        uint encoder_pulses_per_rotation;
+        uint16_t encoder_pulses_per_rotation;
+        uint16_t method_1_cutoff_rpm;
         float motor_gear_ratio;
-        int method_1_cutoff_rpm;
 
-        int enc_pulses;
+        uint16_t enc_pulses;
         uint32_t enc_pulse_time;
         uint32_t enc_last_pulse_rst;
         uint32_t enc_time_per_rot;

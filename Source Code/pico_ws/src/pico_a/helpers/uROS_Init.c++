@@ -21,41 +21,16 @@
 
 // ------- Libraries & Modules -------
 #include "uROS_Init.h"
-#include <std_msgs/msg/string.h>
-#include <std_msgs/msg/empty.h>
-#include <geometry_msgs/msg/twist.h>
-#include <geometry_msgs/msg/transform_stamped.h>
-#include <diagnostic_msgs/msg/diagnostic_status.h>
-#include <diagnostic_msgs/srv/self_test.h>
-#include <sensor_msgs/msg/range.h>
-#include <std_srvs/srv/set_bool.h>
-#include <nav_msgs/msg/odometry.h>
-#include <rrp_pico_coms/msg/misc_sensors_a.h>
-#include <rrp_pico_coms/msg/ultrasonic_sensors.h>
-#include <rrp_pico_coms/msg/falloff_sensors.h>
-#include <rrp_pico_coms/msg/motor_ctrl_state.h>
-#include <rrp_pico_coms/srv/set_pid_tunings.h>
-#include <rcl/rcl.h>
-#include <rclc/rclc.h>
-#include <rcl/error_handling.h>
-#include <rclc/executor.h>
 #include "Definitions.h"
 #include "local_helpers_lib/Local_Helpers.h"
+#include "freertos_helpers_lib/uROS_Bridge_Agent.h"
 
 
 
 // ------- Variables -------
 
 // ---- General ----
-rcl_allocator_t rc_alloc, rc_alloc_1;
-rclc_support_t rc_supp, rc_supp_1;
-rcl_node_t rc_node, rc_node_1;
-rclc_executor_t rc_executor, rc_executor_1;
-
-
-// ---- Executor Timers ----
-rcl_timer_t motor_odom_timer, ultrasonic_publish_timer;
-rcl_timer_t edge_ir_publish_timer, other_sensors_publish_timer;
+extern uRosBridgeAgent *bridge;   // From the main file.
 
 
 // ---- Subscribers ----
@@ -87,11 +62,7 @@ rrp_pico_coms__msg__MotorCtrlState mtr_ctrl_r_state_msg, mtr_ctrl_l_state_msg;
 
 // Odometry
 rcl_publisher_t enc_odom_pub;
-nav_msgs__msg__Odometry enc_odom_msg;
-
-// Odometry -> Base Link Transform
-rcl_publisher_t odom_baselink_tf_pub;
-geometry_msgs__msg__TransformStamped odom_baselink_tf_msg;
+rrp_pico_coms__msg__FastOdometry enc_odom_msg;
 
 
 // ---- Services ----
@@ -121,6 +92,16 @@ rcl_service_t run_self_test_srv;
 diagnostic_msgs__srv__SelfTest_Request run_self_test_req;
 diagnostic_msgs__srv__SelfTest_Response run_self_test_res;
 
+// Calibration routines service
+rcl_service_t run_calib_srv;
+rrp_pico_coms__srv__RunCalibrationsA_Request run_calib_req;
+rrp_pico_coms__srv__RunCalibrationsA_Response run_calib_res;
+
+// Get configuration information service
+rcl_service_t get_config_srv;
+rrp_pico_coms__srv__GetConfigA_Request get_config_req;
+rrp_pico_coms__srv__GetConfigA_Response get_config_res;
+
 
 
 // ------- Subscriber & service callback prototypes -------
@@ -130,29 +111,25 @@ extern void en_emitters_callback(const void *req, void *res);
 extern void en_relay_callback(const void *req, void *res);
 extern void set_mtr_pid_tunings_callback(const void *req, void *res);
 extern void run_self_test_callback(const void *req, void *res);
+extern void run_calib_callback(const void *req, void *res);
+extern void get_config_callback(const void *req, void *res);
 extern void clean_shutdown();
+extern void start_timers();
 void clean_shutdown_callback(const void *msgin) { clean_shutdown(); }
-
-// ---- Timer callbacks ----
-/*extern void publish_ultra(rcl_timer_t *timer, int64_t last_call_time);
-extern void publish_edge_ir(rcl_timer_t *timer, int64_t last_call_time);
-extern void publish_misc_sens(rcl_timer_t *timer, int64_t last_call_time);
-extern void motor_ctrl_odom_timer_call(rcl_timer_t *timer, int64_t last_call_time);*/
 
 
 
 // ------- Functions -------
 
-// ---- Setup subscribers, publishers, services, and timers ----
+// ---- Setup subscribers, publishers, and services ----
 void init_subs_pubs()
 {
-    write_log("init_subs_pubs", "Initializing publishers, subscribers, services, and timers...", LOG_LVL_INFO);
+    write_log("Initializing publishers, subscribers, and services...", LOG_LVL_INFO, FUNCNAME_ONLY);
 
     const rosidl_message_type_support_t *twist_type = ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist);
-    const rosidl_message_type_support_t *transform_s_type = ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, TransformStamped);
     const rosidl_message_type_support_t *diag_status_type = ROSIDL_GET_MSG_TYPE_SUPPORT(diagnostic_msgs, msg, DiagnosticStatus);
     const rosidl_message_type_support_t *empty_type = ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Empty);
-    const rosidl_message_type_support_t *odom_type = ROSIDL_GET_MSG_TYPE_SUPPORT(nav_msgs, msg, Odometry);
+    const rosidl_message_type_support_t *odom_type = ROSIDL_GET_MSG_TYPE_SUPPORT(rrp_pico_coms, msg, FastOdometry);
     const rosidl_message_type_support_t *mtr_ctrl_state_type = ROSIDL_GET_MSG_TYPE_SUPPORT(rrp_pico_coms, msg, MotorCtrlState);
     const rosidl_message_type_support_t *misc_sensors_type = ROSIDL_GET_MSG_TYPE_SUPPORT(rrp_pico_coms, msg, MiscSensorsA);
     const rosidl_message_type_support_t *ultrasonics_sensors_type = ROSIDL_GET_MSG_TYPE_SUPPORT(rrp_pico_coms, msg, UltrasonicSensors);
@@ -160,116 +137,93 @@ void init_subs_pubs()
     const rosidl_service_type_support_t *set_bool_type = ROSIDL_GET_SRV_TYPE_SUPPORT(std_srvs, srv, SetBool);
     const rosidl_service_type_support_t *set_pid_tunings_type = ROSIDL_GET_SRV_TYPE_SUPPORT(rrp_pico_coms, srv, SetPidTunings);
     const rosidl_service_type_support_t *run_self_test_type = ROSIDL_GET_SRV_TYPE_SUPPORT(diagnostic_msgs, srv, SelfTest);
-
-
-    // ---- Timers ----
-    write_log("init_subs_pubs", "Initializing timers...", LOG_LVL_INFO);
-    /*check_rc(rclc_timer_init_default(&motor_odom_timer, &rc_supp, RCL_MS_TO_NS(ultra_pub_rt_interval), publish_ultra), RT_HARD_CHECK);
-    check_rc(rclc_timer_init_default(&ultrasonic_publish_timer, &rc_supp_1, RCL_MS_TO_NS(edge_ir_pub_rt_interval), publish_edge_ir), RT_HARD_CHECK);
-    check_rc(rclc_timer_init_default(&edge_ir_publish_timer, &rc_supp_1, RCL_MS_TO_NS(sensors_pub_rt_interval), publish_misc_sens), RT_HARD_CHECK);
-    check_rc(rclc_timer_init_default(&other_sensors_publish_rt, &rc_supp_1, RCL_MS_TO_NS(motor_odom_rt_interval), motor_ctrl_odom_timer_call), RT_HARD_CHECK);*/
+    const rosidl_service_type_support_t *run_calib_type = ROSIDL_GET_SRV_TYPE_SUPPORT(rrp_pico_coms, srv, RunCalibrationsA);
+    const rosidl_service_type_support_t *get_config_type = ROSIDL_GET_SRV_TYPE_SUPPORT(rrp_pico_coms, srv, GetConfigA);
 
 
     // ---- Services ----
-    write_log("init_subs_pubs", "Initializing services...", LOG_LVL_INFO);
-    check_rc(rclc_service_init_default(&en_motor_ctrl_srv, &rc_node, set_bool_type, "/enable_disable/motor_ctrl"), RT_HARD_CHECK);
-    check_rc(rclc_service_init_default(&en_emitters_srv, &rc_node, set_bool_type, "/enable_disable/emitters"), RT_HARD_CHECK);
-    check_rc(rclc_service_init_default(&en_relay_srv, &rc_node, set_bool_type, "/enable_disable/pico_a_relay"), RT_HARD_CHECK);
-    check_rc(rclc_service_init_default(&set_mtr_pid_tunings_srv, &rc_node, set_pid_tunings_type, "/config/set_motor_pid_tunings"), RT_HARD_CHECK);
-    check_rc(rclc_service_init_default(&run_self_test_srv, &rc_node, run_self_test_type, "/self_test/pico_a"), RT_HARD_CHECK);
+    write_log("Initializing services...", LOG_LVL_INFO, FUNCNAME_ONLY);
+    bridge->init_service(&en_motor_ctrl_srv, set_bool_type, "enable_disable/motor_ctrl");
+    bridge->init_service(&en_emitters_srv, set_bool_type, "enable_disable/emitters");
+    bridge->init_service(&en_relay_srv, set_bool_type, "enable_disable/pico_a_relay");
+    bridge->init_service(&set_mtr_pid_tunings_srv, set_pid_tunings_type, "config/set_motor_pid_tunings");
+    bridge->init_service(&run_self_test_srv, run_self_test_type, "self_test/pico_a");
+    bridge->init_service(&run_calib_srv, run_calib_type, "calibrate/pico_a");
+    bridge->init_service(&get_config_srv, get_config_type, "config/get_pico_a");
 
 
     // ---- Subscribers ----
-    write_log("init_subs_pubs", "Initializing subscribers...", LOG_LVL_INFO);
+    write_log("Initializing subscribers...", LOG_LVL_INFO, FUNCNAME_ONLY);
 
     // Command velocity topic
-    check_rc(rclc_subscription_init_default(&cmd_vel_sub, &rc_node, twist_type, "/cmd_vel"), RT_HARD_CHECK);
+    bridge->init_subscriber(&cmd_vel_sub, twist_type, "/cmd_vel");
     geometry_msgs__msg__Twist__init(&cmd_vel_msg);
 
     // E-stop topic
-    check_rc(rclc_subscription_init_default(&e_stop_sub, &rc_node, empty_type, "/e_stop"), RT_HARD_CHECK);
+    bridge->init_subscriber(&e_stop_sub, empty_type, "/e_stop");
     std_msgs__msg__Empty__init(&e_stop_msg);
 
 
     // ---- Publishers ----
-    write_log("init_subs_pubs", "Initializing publishers...", LOG_LVL_INFO);
-
-    // Odometry topic
-    check_rc(rclc_publisher_init_default(&enc_odom_pub, &rc_node, odom_type, "/sensors/enc_odom"), RT_HARD_CHECK);
-    nav_msgs__msg__Odometry__init(&enc_odom_msg);
+    write_log("Initializing publishers...", LOG_LVL_INFO, FUNCNAME_ONLY);
 
     // Diagnostics
-    check_rc(rclc_publisher_init_default(&diagnostics_pub, &rc_node, diag_status_type, "/diagnostics"), RT_HARD_CHECK);
+    bridge->init_publisher(&diagnostics_pub, diag_status_type, "/diagnostics");
     diagnostic_msgs__msg__DiagnosticStatus__init(&diagnostics_msg);
 
     // Sensor state topics
-    check_rc(rclc_publisher_init_default(&misc_sensor_pub, &rc_node, misc_sensors_type, "/sensors_raw/misc_a"), RT_HARD_CHECK);
-    check_rc(rclc_publisher_init_default(&ultrasonic_sensor_pub, &rc_node, ultrasonics_sensors_type, "/sensors_raw/ultrasonics"), RT_HARD_CHECK);
-    check_rc(rclc_publisher_init_default(&falloff_sensor_pub, &rc_node, falloff_sensors_type, "/sensors_raw/falloff"), RT_HARD_CHECK);
+    bridge->init_publisher(&misc_sensor_pub, misc_sensors_type, "sensors_raw/misc_a");
+    bridge->init_publisher(&ultrasonic_sensor_pub, ultrasonics_sensors_type, "sensors_raw/ultrasonics");
+    bridge->init_publisher(&falloff_sensor_pub, falloff_sensors_type, "sensors_raw/falloff");
     rrp_pico_coms__msg__MiscSensorsA__init(&misc_sensor_msg);
     rrp_pico_coms__msg__UltrasonicSensors__init(&ultrasonic_sensor_msg);
     rrp_pico_coms__msg__FalloffSensors__init(&falloff_sensor_msg);
 
     // Motor controller state topics
-    check_rc(rclc_publisher_init_default(&mtr_ctrl_r_state_pub, &rc_node, mtr_ctrl_state_type, "/sensors_raw/mtr_ctrl_right"), RT_HARD_CHECK);
-    check_rc(rclc_publisher_init_default(&mtr_ctrl_l_state_pub, &rc_node, mtr_ctrl_state_type, "/sensors_raw/mtr_ctrl_left"), RT_HARD_CHECK);
+    bridge->init_publisher(&mtr_ctrl_r_state_pub, mtr_ctrl_state_type, "sensors_raw/mtr_ctrl_right");
+    bridge->init_publisher(&mtr_ctrl_l_state_pub, mtr_ctrl_state_type, "sensors_raw/mtr_ctrl_left");
     rrp_pico_coms__msg__MotorCtrlState__init(&mtr_ctrl_r_state_msg);
     rrp_pico_coms__msg__MotorCtrlState__init(&mtr_ctrl_l_state_msg);
 
-    // Odometry -> base link transform topic 
-    // TODO: This should be broadcast.
-    check_rc(rclc_publisher_init_default(&odom_baselink_tf_pub, &rc_node, transform_s_type, "/tf/pico_odom_base"), RT_HARD_CHECK);
-    geometry_msgs__msg__TransformStamped__init(&odom_baselink_tf_msg);
+    // Odometry topic
+    bridge->init_publisher(&enc_odom_pub, odom_type, "sensors/enc_odom");
+    rrp_pico_coms__msg__FastOdometry__init(&enc_odom_msg);
 
 
-    write_log("init_subs_pubs", "Init. completed.", LOG_LVL_INFO);
+    write_log("Init. completed.", LOG_LVL_INFO, FUNCNAME_ONLY);
 }
 
 
 // ---- Executor init ----
 void exec_init()
 {
-    write_log("exec_init", "Initializing MicroROS executors...", LOG_LVL_INFO);
+    write_log("Initializing MicroROS executor...", LOG_LVL_INFO, FUNCNAME_ONLY);
 
-    rc_executor = rclc_executor_get_zero_initialized_executor();
-    rc_executor_1 = rclc_executor_get_zero_initialized_executor();
-    const uint num_handles_core0 = 5;
-    const uint num_handles_core1 = 2;
+    bridge->uros_init_executor();
+    bridge->add_subscriber(&cmd_vel_sub, &cmd_vel_msg, &cmd_vel_call);
+    bridge->add_subscriber(&e_stop_sub, &e_stop_msg, &clean_shutdown_callback);
+    bridge->add_service(&en_motor_ctrl_srv, &en_motor_ctrl_req, &en_motor_ctrl_res, &en_motor_ctrl_callback);
+    bridge->add_service(&set_mtr_pid_tunings_srv, &set_mtr_pid_tunings_req, &set_mtr_pid_tunings_res, &set_mtr_pid_tunings_callback);
+    bridge->add_service(&run_self_test_srv, &run_self_test_req, &run_self_test_res, &run_self_test_callback);
+    bridge->add_service(&en_emitters_srv, &en_emitters_req, &en_emitters_res, &en_emitters_callback);
+    bridge->add_service(&en_relay_srv, &en_relay_req, &en_relay_res, &en_relay_callback);
+    bridge->add_service(&run_calib_srv, &run_calib_req, &run_calib_res, &run_calib_callback);
+    bridge->add_service(&get_config_srv, &get_config_req, &get_config_res, &get_config_callback);
 
-    // Core 0 executor
-    write_log("exec_init", "Core 0 executor...", LOG_LVL_INFO);
-    check_rc(rclc_executor_init(&rc_executor, &rc_supp.context, num_handles_core0, &rc_alloc), RT_HARD_CHECK);
-    check_rc(rclc_executor_add_subscription(&rc_executor, &cmd_vel_sub, &cmd_vel_msg, &cmd_vel_call, ON_NEW_DATA), RT_HARD_CHECK);
-    check_rc(rclc_executor_add_subscription(&rc_executor, &e_stop_sub, &e_stop_msg, &clean_shutdown_callback, ON_NEW_DATA), RT_HARD_CHECK);
-    check_rc(rclc_executor_add_service(&rc_executor, &en_motor_ctrl_srv, &en_motor_ctrl_req, &en_motor_ctrl_res, &en_motor_ctrl_callback), RT_HARD_CHECK);
-    check_rc(rclc_executor_add_service(&rc_executor, &set_mtr_pid_tunings_srv, &set_mtr_pid_tunings_req, &set_mtr_pid_tunings_res, &set_mtr_pid_tunings_callback), RT_HARD_CHECK);
-    check_rc(rclc_executor_add_service(&rc_executor, &run_self_test_srv, &run_self_test_req, &run_self_test_res, &run_self_test_callback), RT_HARD_CHECK);
-
-    // Core 1 executor
-    write_log("exec_init", "Core 1 executor...", LOG_LVL_INFO);
-    check_rc(rclc_executor_init(&rc_executor_1, &rc_supp_1.context, num_handles_core1, &rc_alloc_1), RT_HARD_CHECK);
-    check_rc(rclc_executor_add_service(&rc_executor, &en_emitters_srv, &en_emitters_req, &en_emitters_res, &en_emitters_callback), RT_HARD_CHECK);
-    check_rc(rclc_executor_add_service(&rc_executor, &en_relay_srv, &en_relay_req, &en_relay_res, &en_relay_callback), RT_HARD_CHECK);
-
-    write_log("exec_init", "Init. completed.", LOG_LVL_INFO);
+    write_log("Init. completed.", LOG_LVL_INFO, FUNCNAME_ONLY);
 }
 
 
-// ---- Node init ----
-void uros_init(const char *node_name, const char *name_space)
+// ---- Bridge init function ----
+bool uros_init()
 {
-    std::string core0_node_name = std::string(node_name) + "_core0";
-    std::string core1_node_name = std::string(node_name) + "_core1";
+    write_log("MicroROS init...", LOG_LVL_INFO, FUNCNAME_ONLY);
 
-    write_log("uros_init", "Initializing the MicroROS node (core 0 node)...", LOG_LVL_INFO);
-    rc_alloc = rcl_get_default_allocator();
-    check_rc(rclc_support_init(&rc_supp, 0, NULL, &rc_alloc), RT_HARD_CHECK);
-    check_rc(rclc_node_init_default(&rc_node, core0_node_name.c_str(), name_space, &rc_supp), RT_HARD_CHECK);
+    bridge->uros_init_node(UROS_NODE_NAME, UROS_NODE_NAMESPACE);
+    init_subs_pubs();
+    exec_init();
+    start_timers();
 
-    write_log("uros_init", "Initializing the MicroROS node (core 1 node)...", LOG_LVL_INFO);
-    rc_alloc_1 = rcl_get_default_allocator();
-    check_rc(rclc_support_init(&rc_supp_1, 0, NULL, &rc_alloc_1), RT_HARD_CHECK);
-    check_rc(rclc_node_init_default(&rc_node_1, core1_node_name.c_str(), name_space, &rc_supp_1), RT_HARD_CHECK);
-    
-    write_log("uros_init", "Init. completed.", LOG_LVL_INFO);
+    write_log("Init. completed.", LOG_LVL_INFO, FUNCNAME_ONLY);
+    return true;
 }

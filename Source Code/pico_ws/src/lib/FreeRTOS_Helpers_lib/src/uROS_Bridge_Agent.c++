@@ -24,20 +24,11 @@
 
 
 #include "freertos_helpers_lib/uROS_Bridge_Agent.h"
+#include "local_helpers_lib/Local_Helpers.h"
 #include "pico_uart_transports.h"
 #include "uros_allocators.h"
-#include "pico/stdlib.h"
-#include "freertos_helpers_lib/RTOS_Agent.h"
-#include "local_helpers_lib/Local_Helpers.h"
-#include <rcl/rcl.h>
-#include <rcl/error_handling.h>
-#include <rclc/types.h>
-#include <rclc/executor.h>
-#include <rclc/subscription.h>
 #include <rclc/rclc.h>
-#include <std_msgs/msg/int32.h>
 #include <rmw_microros/rmw_microros.h>
-#include <vector>
 
 
 // Constructor
@@ -71,7 +62,7 @@ uRosBridgeAgent *uRosBridgeAgent::get_instance()
 
 
 // Pre-init configuration
-void uRosBridgeAgent::pre_init(uros_init_function init_function, uros_init_function fini_function)
+void uRosBridgeAgent::pre_init(uros_init_function init_function, uros_fini_function fini_function)
 {
     uRosBridgeAgent::get_instance()->init_func = init_function;
     uRosBridgeAgent::get_instance()->fini_func = fini_function;
@@ -125,7 +116,7 @@ void uRosBridgeAgent::uros_init_executor()
         // Initialize the MicroROS executor
         rc_executor = rclc_executor_get_zero_initialized_executor();
         check_rc(rclc_executor_init(&rc_executor, &rc_support.context, executor_handles, &rcl_allocator), RT_HARD_CHECK);
-
+        
         executor_initialized = true;
     }
 }
@@ -136,38 +127,46 @@ void uRosBridgeAgent::uros_init_executor()
 // This function is NOT thread-safe.
 void uRosBridgeAgent::uros_fini()
 {
+    current_uros_state = AGENT_DISCONNECTED;
+
     for (auto sub : subscribers)
     {
-        check_rc(rcl_subscription_fini(sub, &rc_node), RT_LOG_ONLY_CHECK);
+        rcl_subscription_fini(sub, &rc_node);
     }
 
     for (auto srv : services)
     {
-        check_rc(rcl_service_fini(srv, &rc_node), RT_LOG_ONLY_CHECK);
+        rcl_service_fini(srv, &rc_node);
     }
 
     for (auto pub : publishers)
     {
-        check_rc(rcl_publisher_fini(pub, &rc_node), RT_LOG_ONLY_CHECK);
+        rcl_publisher_fini(pub, &rc_node);
     }
 
-    check_rc(rclc_executor_fini(&rc_executor), RT_LOG_ONLY_CHECK);
-    check_rc(rcl_node_fini(&rc_node), RT_LOG_ONLY_CHECK);
-    check_rc(rclc_support_fini(&rc_support), RT_LOG_ONLY_CHECK);
-
-    // Stop the agent
-    stop();
+    rclc_executor_fini(&rc_executor);
+    rcl_node_fini(&rc_node);
+    rclc_support_fini(&rc_support);
 }
 
 
 // Initialize a publisher.
 // Call this before uros_init_executor().
 // This function is NOT thread-safe.
-bool uRosBridgeAgent::init_publisher(rcl_publisher_t *publisher, const rosidl_message_type_support_t *type_support, const char *topic_name)
+bool uRosBridgeAgent::init_publisher(rcl_publisher_t *publisher, const rosidl_message_type_support_t *type_support, const char *topic_name, QOS_MODE qos_mode)
 {
     if (publishers.size() < MAX_PUBLISHERS)
     {
-        check_rc(rclc_publisher_init_default(publisher, &rc_node, type_support, topic_name), RT_HARD_CHECK);
+        if (qos_mode == QOS_RELIABLE)
+        {
+            check_rc(rclc_publisher_init_default(publisher, &rc_node, type_support, topic_name), RT_HARD_CHECK);
+        }
+        
+        else
+        {
+            check_rc(rclc_publisher_init_best_effort(publisher, &rc_node, type_support, topic_name), RT_HARD_CHECK);
+        }
+
         publishers.push_back(publisher);
         return true;
     }
@@ -179,11 +178,20 @@ bool uRosBridgeAgent::init_publisher(rcl_publisher_t *publisher, const rosidl_me
 // Initialize a subscriber.
 // Call this before uros_init_executor().
 // This function is NOT thread-safe.
-bool uRosBridgeAgent::init_subscriber(rcl_subscription_t *subscriber, const rosidl_message_type_support_t *type_support, const char *topic_name)
+bool uRosBridgeAgent::init_subscriber(rcl_subscription_t *subscriber, const rosidl_message_type_support_t *type_support, const char *topic_name, QOS_MODE qos_mode)
 {
     if (subscribers.size() < MAX_SUBSCRIBERS)
     {
-        check_rc(rclc_subscription_init_default(subscriber, &rc_node, type_support, topic_name), RT_HARD_CHECK);
+        if (qos_mode == QOS_RELIABLE)
+        {
+            check_rc(rclc_subscription_init_default(subscriber, &rc_node, type_support, topic_name), RT_HARD_CHECK);
+        }
+        
+        else
+        {
+            check_rc(rclc_subscription_init_best_effort(subscriber, &rc_node, type_support, topic_name), RT_HARD_CHECK);
+        }
+
         subscribers.push_back(subscriber);
         executor_handles += 1;
         return true;
@@ -196,11 +204,20 @@ bool uRosBridgeAgent::init_subscriber(rcl_subscription_t *subscriber, const rosi
 // Initialize a service.
 // Call this before uros_init_executor().
 // This function is NOT thread-safe.
-bool uRosBridgeAgent::init_service(rcl_service_t *service, const rosidl_service_type_support_t *type_support, const char *service_name)
+bool uRosBridgeAgent::init_service(rcl_service_t *service, const rosidl_service_type_support_t *type_support, const char *service_name, QOS_MODE qos_mode)
 {
     if (services.size() < MAX_SERVICES)
     {
-        check_rc(rclc_service_init_default(service, &rc_node, type_support, service_name), RT_HARD_CHECK);
+        if (qos_mode == QOS_RELIABLE)
+        {
+            check_rc(rclc_service_init_default(service, &rc_node, type_support, service_name), RT_HARD_CHECK);
+        }
+        
+        else
+        {
+            check_rc(rclc_service_init_best_effort(service, &rc_node, type_support, service_name), RT_HARD_CHECK);
+        }
+        
         services.push_back(service);
         executor_handles += 1;
         return true;
@@ -213,13 +230,13 @@ bool uRosBridgeAgent::init_service(rcl_service_t *service, const rosidl_service_
 // Add a subscriber to the executor.
 // Call this after uros_init_executor().
 // This function is NOT thread-safe.
-bool uRosBridgeAgent::add_subscriber(rcl_subscription_t *subscriber, void *msg, rclc_subscription_callback_t callback)
+bool uRosBridgeAgent::add_subscriber(rcl_subscription_t *subscriber, void *msg, rclc_subscription_callback_t callback, rclc_executor_handle_invocation_t invocation)
 {
     for (auto sub : subscribers)
     {
         if (sub == subscriber)
         {
-            check_rc(rclc_executor_add_subscription(&rc_executor, subscriber, msg, callback, ON_NEW_DATA), RT_HARD_CHECK);
+            check_rc(rclc_executor_add_subscription(&rc_executor, subscriber, msg, callback, invocation), RT_HARD_CHECK);
             return true;
         }
     }
@@ -298,13 +315,13 @@ void uRosBridgeAgent::execute()
 {
     uint32_t last_exec_time;
     current_uros_state = WAITING_FOR_AGENT;
+    write_log("Waiting for agent...", LOG_LVL_INFO, FUNCNAME_ONLY);
 
     while (true)
     {
         switch (current_uros_state) 
         {
             case WAITING_FOR_AGENT:
-                write_log("Waiting for agent...", LOG_LVL_INFO, FUNCNAME_ONLY);
                 current_uros_state = ping_agent() ? AGENT_AVAILABLE:WAITING_FOR_AGENT;
                 break;
             
@@ -329,8 +346,8 @@ void uRosBridgeAgent::execute()
             
             case AGENT_DISCONNECTED:
                 write_log("Agent disconnected!", LOG_LVL_INFO, FUNCNAME_ONLY);
-                // TODO: Maybe wait for the agent to connect again?
                 fini_func();
+                stop();
                 break;
         }
     }

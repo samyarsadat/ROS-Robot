@@ -105,9 +105,9 @@ TaskHandle_t Agent::get_rtos_task()
 
 // Static internal function used by FreeRTOS to start
 // the agent task.
-void Agent::vTask(void *pvParameters)
+void Agent::vTask(void *parameters)
 {
-    Agent *agent = (Agent *) pvParameters;
+    Agent *agent = (Agent *) parameters;
 
     if (agent != NULL)
     {

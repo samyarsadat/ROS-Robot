@@ -20,7 +20,7 @@
 add_subdirectory(lib)
 
 # Pico A firmware
-#add_subdirectory(pico_a)
+add_subdirectory(pico_a)
 
 # Pico B firmware
 #add_subdirectory(pico_b)

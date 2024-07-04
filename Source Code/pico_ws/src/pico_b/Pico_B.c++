@@ -23,7 +23,6 @@
 #include "pico/multicore.h"
 #include "hardware/adc.h"
 #include "hardware/pwm.h"
-#include <FreeRTOS_POSIX.h>
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <rcl/error_handling.h>
@@ -35,7 +34,6 @@
 #include "helpers/Definitions.h"
 #include "local_helpers_lib/Local_Helpers.h"
 #include "helpers/IO_Helpers_General.h"
-#include "../uart_transport/pico_uart_transports.h"
 #include <rmw_microros/rmw_microros.h>
 #include <iterator>
 #include <task.h>
@@ -123,7 +121,7 @@ void clean_shutdown()
 }
 
 
-// ---- Irq callback ----
+// ---- IRQ callback ----
 void irq_call(uint pin, uint32_t events)
 {
     if (pin == ms_front_r || pin == ms_front_l || pin == ms_back_r || pin == ms_back_l)

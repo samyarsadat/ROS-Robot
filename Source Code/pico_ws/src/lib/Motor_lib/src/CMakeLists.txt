@@ -26,8 +26,7 @@ add_library(${PROJECT_NAME} Motor.c++ Motor_Driver.c++ Motor_Encoder.c++ Motor_S
 target_include_directories(${PROJECT_NAME} PUBLIC ../include)
 
 # Link to libraries
-target_link_libraries(${PROJECT_NAME} pico_stdlib)
-target_link_libraries(${PROJECT_NAME} hardware_pwm)
-target_link_libraries(${PROJECT_NAME} hardware_gpio)
-target_link_libraries(${PROJECT_NAME} helpers_lib)
-target_link_libraries(${PROJECT_NAME} pid_v1_lib)
+target_link_libraries(${PROJECT_NAME} pico_stdlib
+                                      hardware_pwm
+                                      helpers_lib
+                                      pid_v1_lib)

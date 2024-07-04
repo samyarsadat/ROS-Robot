@@ -23,7 +23,6 @@
 
 
 #include "freertos_helpers_lib/uROS_Publishing_Handler.h"
-#include "local_helpers_lib/Local_Helpers.h"
 
 
 // Constructor
@@ -68,7 +67,7 @@ void uRosPublishingHandler::pre_init(uRosBridgeAgent *bridge_instance)
     bridge = bridge_instance;
 
     // Create the publishing queue
-    publishing_queue = xQueueCreate(MAX_QUEUE_ITEMS, sizeof(PublishItem_t));
+    publishing_queue = xQueueCreate(MAX_PUBLISH_QUEUE_ITEMS, sizeof(PublishItem_t));
 
     if (publishing_queue == NULL)
     {
@@ -96,15 +95,10 @@ void uRosPublishingHandler::execute()
 
         if (avail == pdTRUE && bridge->get_agent_state() == uRosBridgeAgent::AGENT_CONNECTED && queue_item.publisher != NULL && queue_item.message != NULL)
         {
-            write_log("Publishing message from queue...", LOG_LVL_INFO, FUNCNAME_LINE_ONLY);
-
-            if (!check_rc(rcl_publish(queue_item.publisher, queue_item.message, NULL), RT_SOFT_CHECK))
+            if (!check_rc(rcl_publish(queue_item.publisher, queue_item.message, NULL), queue_item.rt_check_mode) && queue_item.failed_callback != NULL)
             {
-                if (queue_item.failed_callback != NULL)
-                {
-                    // Call the failed publish callback, if available.
-                    queue_item.failed_callback(queue_item.publisher, queue_item.message);
-                }
+                // Call the failed publish callback, if available.
+                queue_item.failed_callback(queue_item.publisher, queue_item.message);
             }
         }
     }

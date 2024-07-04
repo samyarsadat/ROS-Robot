@@ -19,15 +19,10 @@
 
 
 // ------- Libraries & Modules -------
-#include "pico/stdlib.h"
-#include "helpers_lib/Helpers.h"
-#include "hardware/pwm.h"
+#include "IO_Helpers_Ultrasonic.h"
 #include "IO_Helpers_Mux.h"
 #include "Definitions.h"
-#include <diagnostic_msgs/msg/diagnostic_status.h>
-#include <diagnostic_msgs/msg/key_value.h>
 #include "local_helpers_lib/Local_Helpers.h"
-#include <string>
 
 
 
@@ -36,15 +31,19 @@
 // ---- (INTERNAL) Checks whether the measured distance is within limits ----
 float check_return_distance(float dist, std::string_view ultra_hwid)
 {
+    std::string log_distance = "[dist: " + std::to_string(dist) + ", " + std::string{ultra_hwid} + "]";
+
     if (dist < ultra_min_dist)
     {
         publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_ULTRASONICS, std::string{ultra_hwid}, DIAG_WARN_MSG_ULTRA_MIN_LIM_EXCEED, DIAG_KV_EMPTY());
+        write_log("Ultrasonic sensor distance below minimum limit! " + log_distance, LOG_LVL_WARN, FUNCNAME_LINE_ONLY);
         return N_INF;
     }
 
     else if (dist > ultra_max_dist)
     {
         publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_ULTRASONICS, std::string{ultra_hwid}, DIAG_WARN_MSG_ULTRA_MAX_LIM_EXCEED, DIAG_KV_EMPTY());
+        write_log("Ultrasonic sensor distance above maximum limit! " + log_distance, LOG_LVL_WARN, FUNCNAME_LINE_ONLY);
         return INF;
     }
 
@@ -58,29 +57,38 @@ float check_return_distance(float dist, std::string_view ultra_hwid)
 // ---- Dual-pin ultrasonic sensor distance measurement using mux ----
 float get_ultra_dist_mux(uint trig_io, uint echo_io, std::string ultra_hwid)
 {
-    set_mux_io_mode(OUTPUT);
-    set_mux_addr(trig_io);
-    
-    gpio_put(mux_io, HIGH);
-    sleep_us(10);
-    gpio_put(mux_io, LOW);
-    sleep_us(5);
+    if (check_bool(take_mux_mutex(), RT_LOG_ONLY_CHECK))
+    {
+        set_mux_io_mode(OUTPUT);
+        set_mux_addr(trig_io);
+        
+        taskENTER_CRITICAL();
 
-    uint32_t start_time = time_us_32();
+        gpio_put(analog_mux_io, HIGH);
+        sleep_us(10);
+        gpio_put(analog_mux_io, LOW);
 
-    set_mux_io_mode(INPUT);
-    set_mux_addr(echo_io);
+        uint32_t start_time = time_us_32();
 
-    while (!gpio_get(mux_io) && ((time_us_32() - start_time) < ultrasonic_signal_timout_us));
-    uint32_t pulse_start = time_us_32();
+        set_mux_io_mode(INPUT);
+        set_mux_addr(echo_io);
 
-    while (gpio_get(mux_io) && ((time_us_32() - start_time) < ultrasonic_signal_timout_us));
-    uint32_t pulse_end = time_us_32();
+        while (!gpio_get(analog_mux_io) && ((time_us_32() - start_time) < ultrasonic_signal_timout_us));
+        uint32_t pulse_start = time_us_32();
 
-    uint16_t time_diff = pulse_end - pulse_start;
-    float dist = (time_diff * 34.3) / 2;
+        while (gpio_get(analog_mux_io) && ((time_us_32() - start_time) < ultrasonic_signal_timout_us));
+        uint32_t pulse_end = time_us_32();
 
-    return check_return_distance(dist, ultra_hwid);
+        release_mux_mutex();
+        taskEXIT_CRITICAL();
+
+        uint16_t time_diff = pulse_end - pulse_start;
+        float dist = (time_diff * 0.0343) / 2;
+
+        return check_return_distance(dist, ultra_hwid);
+    }
+
+    return N_INF;
 }
 
 
@@ -89,11 +97,12 @@ float get_ultra_dist_single(uint ultra_pin, std::string ultra_hwid)
 {
     gpio_deinit(ultra_pin);
     init_pin(ultra_pin, OUTPUT);
-    
+
+    taskENTER_CRITICAL();
+
     gpio_put(ultra_pin, HIGH);
     sleep_us(10);
     gpio_put(ultra_pin, LOW);
-    sleep_us(5);
 
     uint32_t start_time = time_us_32();
 
@@ -106,8 +115,10 @@ float get_ultra_dist_single(uint ultra_pin, std::string ultra_hwid)
     while (gpio_get(ultra_pin) && ((time_us_32() - start_time) < ultrasonic_signal_timout_us));
     uint32_t pulse_end = time_us_32();
 
+    taskEXIT_CRITICAL();
+
     uint16_t time_diff = pulse_end - pulse_start;
-    float dist = (time_diff * 34.3) / 2;
+    float dist = (time_diff * 0.0343) / 2;
 
     return check_return_distance(dist, ultra_hwid);
 }

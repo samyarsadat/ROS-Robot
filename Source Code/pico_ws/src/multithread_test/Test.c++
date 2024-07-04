@@ -122,14 +122,13 @@ bool uros_init()
     return true;
 }
 
-bool uros_fini()
+void uros_fini()
 {
     write_log("MicroROS fini...", LOG_LVL_WARN, FUNCNAME_ONLY);
     rclc_executor_remove_timer(bridge_instance->get_executor(), &rc_timer);
     xTimerStop(rtos_timer, 0);
     bridge_instance->uros_fini();
     write_log("MicroROS fini done.", LOG_LVL_WARN, FUNCNAME_ONLY);
-    return true;
 }
 
 void print_task_info(TimerHandle_t xTimer)

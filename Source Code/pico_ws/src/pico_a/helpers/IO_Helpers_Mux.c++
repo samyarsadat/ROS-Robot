@@ -21,23 +21,22 @@
 
 // ------- Libraries & Modules -------
 #include "IO_Helpers_Mux.h"
-#include "pico/stdlib.h"
-#include "helpers_lib/Helpers.h"
-#include "hardware/pwm.h"
-#include "hardware/adc.h"
-#include "pico/multicore.h"
+#include "local_helpers_lib/Local_Helpers.h"
+#include "FreeRTOS.h"
+#include "semphr.h"
 
 
 
 // ------- Global variables -------
-uint mux_a, mux_b, mux_c, mux_d, mux_io;
+uint8_t mux_a, mux_b, mux_c, mux_d, mux_io;
+SemaphoreHandle_t mux_io_mutex = NULL;
 
 
 
 // ------- Functions ------- 
 
 // ---- Sets the mux pins ----
-void set_mux_pins(uint addr_a, uint addr_b, uint addr_c, uint addr_d, uint io)
+void set_mux_pins(uint8_t addr_a, uint8_t addr_b, uint8_t addr_c, uint8_t addr_d, uint8_t io)
 {
     mux_a = addr_a;
     mux_b = addr_b;
@@ -55,30 +54,58 @@ void set_mux_pins(uint addr_a, uint addr_b, uint addr_c, uint addr_d, uint io)
 // ---- Set mux address pins according to mux IO pin number ----
 void set_mux_addr(uint pin)
 {
-    bool add_0, add_1, add_2, add_3;
+    if (xSemaphoreGetMutexHolder(mux_io_mutex) == xTaskGetCurrentTaskHandle())
+    {
+        bool add_0, add_1, add_2, add_3;
 
-    add_0 = (pin / 1) % 2;
-    add_1 = (pin / 2) % 2;
-    add_2 = (pin / 4) % 2;
-    add_3 = (pin / 8) % 2;
+        add_0 = (pin / 1) % 2;
+        add_1 = (pin / 2) % 2;
+        add_2 = (pin / 4) % 2;
+        add_3 = (pin / 8) % 2;
 
-    gpio_put(mux_a, add_0);
-    gpio_put(mux_b, add_1);
-    gpio_put(mux_c, add_2);
-    gpio_put(mux_d, add_3);
+        gpio_put(mux_a, add_0);
+        gpio_put(mux_b, add_1);
+        gpio_put(mux_c, add_2);
+        gpio_put(mux_d, add_3);
 
-    sleep_us(5);
+        sleep_us(10);
+    }
 }
 
 
 // ---- Set mux IO mode ----
 void set_mux_io_mode(PIN_CONFIG_MODE mode)
 {
-    gpio_deinit(mux_io);
-    init_pin(mux_io, mode);
-
-    if (mode == INPUT_ADC)
+    if (xSemaphoreGetMutexHolder(mux_io_mutex) == xTaskGetCurrentTaskHandle())
     {
-        adc_select_input(get_gpio_adc_channel(mux_io));
+        gpio_deinit(mux_io);
+        init_pin(mux_io, mode);
+
+        if (mode == INPUT_ADC)
+        {
+            check_bool(adc_select_input_with_mutex(get_gpio_adc_channel(mux_io)), RT_HARD_CHECK);
+        }
+    }
+}
+
+
+// ---- Take the multiplexer mutex ----
+bool take_mux_mutex()
+{
+    if (mux_io_mutex == NULL)
+    {
+        mux_io_mutex = xSemaphoreCreateMutex();
+    }
+    
+    return (xSemaphoreTake(mux_io_mutex, portMAX_DELAY) == pdTRUE);
+}
+
+
+// ---- Release the multiplexer mutex ----
+void release_mux_mutex()
+{
+    if (xSemaphoreGetMutexHolder(mux_io_mutex) == xTaskGetCurrentTaskHandle())
+    {
+        xSemaphoreGive(mux_io_mutex);
     }
 }

@@ -24,7 +24,6 @@
 #include "motor_control_lib/Motor_Driver.h"    // Motor driver interface
 #include "motor_control_lib/Motor_Encoder.h"   // Motor encoder interface
 #include "pid_v1_lib/PID_v1.h"
-#include "pico/stdlib.h"
 #include <memory>
 
 
@@ -59,7 +58,7 @@ class Motor
         std::unique_ptr<PID_v1_h::PID> pid;
 
         // Constructor
-        Motor(MotorDriver* drv, MotorEncoder* encs[], int number_of_encoders);
+        Motor(MotorDriver* drv, MotorEncoder* encs[], uint8_t number_of_encoders);
 
 
         // ---- Functions ----
@@ -131,12 +130,15 @@ class Motor
         // Returns the PID controller's output variable.
         // This is for diagnostic purposes.
         float get_pid_output();
+
+        // Returns whether the controller is enabled or not.
+        bool is_enabled();
         
 
     private:
         MotorDriver* driver;
         MotorEncoder* encoders[max_number_of_encoders];
-        int number_of_encoders_defined;
+        uint8_t number_of_encoders_defined;
         bool controller_enabled;
 
         float average_rpm;

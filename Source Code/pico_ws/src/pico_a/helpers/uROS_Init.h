@@ -21,39 +21,26 @@
 
 
 // ------- Libraries & Modules -------
+#include <rcl/rcl.h>
 #include <std_msgs/msg/string.h>
 #include <std_msgs/msg/empty.h>
 #include <geometry_msgs/msg/twist.h>
-#include <geometry_msgs/msg/transform_stamped.h>
 #include <diagnostic_msgs/msg/diagnostic_status.h>
 #include <sensor_msgs/msg/range.h>
 #include <std_srvs/srv/set_bool.h>
-#include <nav_msgs/msg/odometry.h>
 #include <rrp_pico_coms/msg/misc_sensors_a.h>
 #include <rrp_pico_coms/msg/ultrasonic_sensors.h>
 #include <rrp_pico_coms/msg/falloff_sensors.h>
 #include <rrp_pico_coms/msg/motor_ctrl_state.h>
+#include <rrp_pico_coms/msg/fast_odometry.h>
 #include <rrp_pico_coms/srv/set_pid_tunings.h>
+#include <rrp_pico_coms/srv/run_calibrations_a.h>
+#include <rrp_pico_coms/srv/get_config_a.h>
 #include <diagnostic_msgs/srv/self_test.h>
-#include <rcl/rcl.h>
-#include <rclc/rclc.h>
-#include <rclc/executor.h>
 
 
 
 // ------- Variables -------
-
-// ---- General ----
-extern rcl_allocator_t rc_alloc;
-extern rclc_support_t rc_supp;
-extern rcl_node_t rc_node;
-extern rclc_executor_t rc_executor;
-
-
-// ---- Executor Timers ----
-extern rcl_timer_t motor_odom_timer, ultrasonic_publish_timer;
-extern rcl_timer_t edge_ir_publish_timer, other_sensors_publish_timer;
-
 
 // ---- Subscribers ----
 
@@ -84,11 +71,7 @@ extern rrp_pico_coms__msg__MotorCtrlState mtr_ctrl_r_state_msg, mtr_ctrl_l_state
 
 // Odometry
 extern rcl_publisher_t enc_odom_pub;
-extern nav_msgs__msg__Odometry enc_odom_msg;
-
-// Odometry -> Base Link Transform
-extern rcl_publisher_t odom_baselink_tf_pub;
-extern geometry_msgs__msg__TransformStamped odom_baselink_tf_msg;
+extern rrp_pico_coms__msg__FastOdometry enc_odom_msg;
 
 
 // ---- Services ----
@@ -118,6 +101,16 @@ extern rcl_service_t run_self_test_srv;
 extern diagnostic_msgs__srv__SelfTest_Request run_self_test_req;
 extern diagnostic_msgs__srv__SelfTest_Response run_self_test_res;
 
+// Calibration routines service
+extern rcl_service_t run_calib_srv;
+extern rrp_pico_coms__srv__RunCalibrationsA_Request run_calib_req;
+extern rrp_pico_coms__srv__RunCalibrationsA_Response run_calib_res;
+
+// Get configuration information service
+extern rcl_service_t get_config_srv;
+extern rrp_pico_coms__srv__GetConfigA_Request get_config_req;
+extern rrp_pico_coms__srv__GetConfigA_Response get_config_res;
+
 
 
 // ------- Functions -------
@@ -128,5 +121,5 @@ void init_subs_pubs();
 // ---- Executor init ----
 void exec_init();
 
-// ---- Node init ----
-void uros_init(const char *node_name, const char *name_space);
+// ---- Bridge init function ----
+bool uros_init();
