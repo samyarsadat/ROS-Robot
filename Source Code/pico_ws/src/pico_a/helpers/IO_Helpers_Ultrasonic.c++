@@ -35,14 +35,15 @@ float check_return_distance(float dist, std::string_view ultra_hwid)
 
     if (dist < ultra_min_dist)
     {
-        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_ULTRASONICS, std::string{ultra_hwid}, DIAG_WARN_MSG_ULTRA_MIN_LIM_EXCEED, DIAG_KV_EMPTY());
+        publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_ULTRASONICS, std::string{ultra_hwid}, DIAG_WARN_MSG_ULTRA_MIN_LIM_EXCEED, DIAG_KV_PAIR_VEC());
         write_log("Ultrasonic sensor distance below minimum limit! " + log_distance, LOG_LVL_WARN, FUNCNAME_LINE_ONLY);
         return N_INF;
     }
 
     else if (dist > ultra_max_dist)
     {
-        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_ULTRASONICS, std::string{ultra_hwid}, DIAG_WARN_MSG_ULTRA_MAX_LIM_EXCEED, DIAG_KV_EMPTY());
+        // NOTE: This could become a problem if the robot is placed in an open space where the sensors might not get their signals back.
+        publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_ULTRASONICS, std::string{ultra_hwid}, DIAG_WARN_MSG_ULTRA_MAX_LIM_EXCEED, DIAG_KV_PAIR_VEC());
         write_log("Ultrasonic sensor distance above maximum limit! " + log_distance, LOG_LVL_WARN, FUNCNAME_LINE_ONLY);
         return INF;
     }
@@ -121,4 +122,45 @@ float get_ultra_dist_single(uint ultra_pin, std::string ultra_hwid)
     float dist = (time_diff * 0.0343) / 2;
 
     return check_return_distance(dist, ultra_hwid);
+}
+
+
+// ---- Ultrasonic sensor self-test ----
+ULTRA_TEST_RESULT_t ultra_self_test(std::function<float()> sensor_get_dist_func)
+{
+    ULTRA_TEST_RESULT_t test_result;
+    float avg_dist;
+
+    for (int i = 0; i < ultra_selftest_measurements; i++)
+    {
+        float current_reading = sensor_get_dist_func();
+        test_result.measured_distance = current_reading;
+
+        if (current_reading == INF || current_reading < ultra_min_dist)
+        {
+            test_result.status = ULTRA_TEST_FAIL_BELOW_ABSOLUTE_MINIMUM;
+            return test_result;
+        }
+
+        else if (current_reading == N_INF || current_reading > ultra_max_dist)
+        {
+            test_result.status = ULTRA_TEST_FAIL_ABOVE_ABSOLUTE_MAXIMUM;
+            return test_result;
+        }
+
+        avg_dist += sensor_get_dist_func();
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+
+    avg_dist /= ultra_selftest_measurements;
+    test_result.measured_distance = avg_dist;
+
+    if (avg_dist < ultra_selftest_range_min_cm || avg_dist > ultra_selftest_range_max_cm)
+    {
+        test_result.status = ULTRA_TEST_FAIL_OUT_OF_TEST_RANGE;
+        return test_result;
+    }
+
+    test_result.status = ULTRA_TEST_PASS;
+    return test_result;
 }

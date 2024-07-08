@@ -56,6 +56,9 @@ bool check_bool(bool function, RT_CHECK_MODE mode, const char *func=__builtin_FU
 // ---- Set MicroROS publishing queue ----
 void set_diag_pub_queue(QueueHandle_t queue);
 
+// ---- Create a diagnostics key-value pair ----
+diagnostic_msgs__msg__KeyValue create_diag_kv_pair(std::string key, std::string value);
+
 // ---- Create a diagnostic status message ----
 diagnostic_msgs__msg__DiagnosticStatus create_diag_msg(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values);
 
@@ -89,4 +92,4 @@ bool ping_agent();
 // ---- Execution interval checker ----
 // ---- Checks the amount of time passed since the last time it was called (with the specific time storage varialble provided) ----
 // ---- Returns false if the execution time has exceeded the specified limit ----
-bool check_exec_interval(uint32_t &last_call_time_ms, uint16_t max_exec_time_ms, std::string log_msg, const char *func=__builtin_FUNCTION());
+bool check_exec_interval(uint32_t &last_call_time_ms, uint16_t max_exec_time_ms, std::string log_msg, bool publish_diag = false, const char *func=__builtin_FUNCTION());

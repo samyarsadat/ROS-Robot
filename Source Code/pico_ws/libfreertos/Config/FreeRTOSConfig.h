@@ -105,7 +105,7 @@
 #define configUSE_TIMERS                        1
 #define configTIMER_TASK_PRIORITY               (configMAX_PRIORITIES - 1)
 #define configTIMER_QUEUE_LENGTH                10
-#define configTIMER_TASK_STACK_DEPTH            2048
+#define configTIMER_TASK_STACK_DEPTH            1024
 //#define configTIMER_SERVICE_TASK_CORE_AFFINITY  (1 << 1)
 
 

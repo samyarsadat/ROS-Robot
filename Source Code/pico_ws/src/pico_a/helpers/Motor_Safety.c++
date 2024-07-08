@@ -39,7 +39,6 @@ typedef struct MotorSafetyQueueItem MotorSafetyQueueItem_t;
 
 // ------- Global variables -------
 QueueHandle_t motor_safety_queue = NULL;
-extern bool self_test_mode;
 extern Motor r_motors, l_motors;
 extern void clean_shutdown();
 
@@ -85,44 +84,37 @@ void motor_safety_handler_task(void *parameters)
         // Blocks indefinitely until an item is available.
         if (xQueueReceive(motor_safety_queue, &queue_item, portMAX_DELAY) == pdTRUE)
         {
-            snprintf(buffer, 60, "Motor Safety triggered: [code: %d, id: %d]", static_cast<int>(queue_item.condition), queue_item.id);
+            snprintf(buffer, sizeof(buffer), "Motor Safety triggered: [code: %d, id: %d]", static_cast<int>(queue_item.condition), queue_item.id);
             write_log(buffer, LOG_LVL_INFO, FUNCNAME_LINE_ONLY);
 
-            if (!self_test_mode)
+            // FIXME: This causes the motors to jitter back and forth, a cooldown period must be added!
+            /*if (queue_item.condition == MotorSafety::safety_trigger_conditions::SET_VS_ACTUAL_DIR_DIFF)
             {
-                // FIXME: This causes the motors to jitter back and forth, a cooldown period must be added!
-                /*if (queue_item.condition == MotorSafety::safety_trigger_conditions::SET_VS_ACTUAL_DIR_DIFF)
+                if (queue_item.id == right_motor_controller_id)
                 {
-                    if (queue_item.id == right_motor_controller_id)
-                    {
-                        write_log("SET_VS_ACTUAL_DIR_DIFF triggered. Reversing control direction. [Right]", LOG_LVL_WARN, FUNCNAME_LINE_ONLY);
-                        r_motors.set_direction_reversed(!r_motors.get_dir_reversed());
-                    }
-
-                    else
-                    {
-                        write_log("SET_VS_ACTUAL_DIR_DIFF triggered. Reversing control direction. [Left]", LOG_LVL_WARN, FUNCNAME_LINE_ONLY);
-                        l_motors.set_direction_reversed(!l_motors.get_dir_reversed());
-                    }
+                    write_log("SET_VS_ACTUAL_DIR_DIFF triggered. Reversing control direction. [Right]", LOG_LVL_WARN, FUNCNAME_LINE_ONLY);
+                    r_motors.set_direction_reversed(!r_motors.get_dir_reversed());
                 }
 
-                else*/
+                else
                 {
-                    if (queue_item.id == right_motor_controller_id)
-                    {
-                        write_log("Critical Motor Safety condition triggered! [Right]", LOG_LVL_FATAL, FUNCNAME_LINE_ONLY);
-                        publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_DRV_R, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_EMPTY());
-                        publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R1, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_EMPTY());
-                        publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_R, DIAG_HWID_MOTOR_ENC_R2, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_EMPTY());
-                    }
-                    
-                    else
-                    {
-                        write_log("Critical Motor Safety condition triggered! [Left]", LOG_LVL_FATAL, FUNCNAME_LINE_ONLY);
-                        publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_DRV_L, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_EMPTY());
-                        publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L1, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_EMPTY());
-                        publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_MOTOR_CTRL_L, DIAG_HWID_MOTOR_ENC_L2, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_EMPTY());
-                    }
+                    write_log("SET_VS_ACTUAL_DIR_DIFF triggered. Reversing control direction. [Left]", LOG_LVL_WARN, FUNCNAME_LINE_ONLY);
+                    l_motors.set_direction_reversed(!l_motors.get_dir_reversed());
+                }
+            }
+
+            else*/
+            {
+                if (queue_item.id == right_motor_controller_id)
+                {
+                    write_log("Critical Motor Safety condition triggered! [Right]", LOG_LVL_FATAL, FUNCNAME_LINE_ONLY);
+                    publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_MOTOR, DIAG_ID_MOTOR_CTRL_R, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_PAIR_VEC());
+                }
+                
+                else
+                {
+                    write_log("Critical Motor Safety condition triggered! [Left]", LOG_LVL_FATAL, FUNCNAME_LINE_ONLY);
+                    publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_MOTOR, DIAG_ID_MOTOR_CTRL_L, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_PAIR_VEC());
                 }
             }
         }

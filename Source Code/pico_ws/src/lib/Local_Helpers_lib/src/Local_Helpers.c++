@@ -52,25 +52,25 @@ bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode, const char *func, uint16_t lin
 {
     if (rctc != RCL_RET_OK)
     {
-        char buffer[60];
+        char buffer[70];
 
         switch (mode)
         {
             case RT_HARD_CHECK:
-                sprintf(buffer, "RCL Return check failed: [code: %d, RT_HARD_CHECK]", rctc);
+                snprintf(buffer, sizeof(buffer), "RCL Return check failed: [code: %d, RT_HARD_CHECK]", rctc);
                 write_log(buffer, LOG_LVL_FATAL, FUNCNAME_LINE_ONLY, func, "", line);
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_UROS, DIAG_HWID_UROS, DIAG_ERR_MSG_UROS_RC_CHECK_FAIL, DIAG_KV_EMPTY());
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_SYSTEM, DIAG_ID_SYS_UROS, DIAG_ERR_MSG_UROS_RC_CHECK_FAIL, DIAG_KV_PAIR_VEC());
                 clean_shutdown();
                 break;
 
             case RT_SOFT_CHECK:
-                sprintf(buffer, "RCL Return check failed: [code: %d, RT_SOFT_CHECK]", rctc);
+                snprintf(buffer, sizeof(buffer), "RCL Return check failed: [code: %d, RT_SOFT_CHECK]", rctc);
                 write_log(buffer, LOG_LVL_ERROR, FUNCNAME_LINE_ONLY, func, "", line);
-                publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UROS, DIAG_HWID_UROS, DIAG_WARN_MSG_UROS_RC_CHECK_FAIL, DIAG_KV_EMPTY());
+                publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_SYSTEM, DIAG_ID_SYS_UROS, DIAG_WARN_MSG_UROS_RC_CHECK_FAIL, DIAG_KV_PAIR_VEC());
                 break;
             
             case RT_LOG_ONLY_CHECK:
-                sprintf(buffer, "RCL Return check failed: [code: %d, RT_LOG_ONLY_CHECK]", rctc);
+                snprintf(buffer, sizeof(buffer), "RCL Return check failed: [code: %d, RT_LOG_ONLY_CHECK]", rctc);
                 write_log(buffer, LOG_LVL_WARN, FUNCNAME_LINE_ONLY, func, "", line);
                 break;
 
@@ -92,13 +92,13 @@ bool check_bool(bool function, RT_CHECK_MODE mode, const char *func, uint16_t li
         {
             case RT_HARD_CHECK:
                 write_log("BOOL Return check failed: [RT_HARD_CHECK]", LOG_LVL_FATAL, FUNCNAME_LINE_ONLY, func, "", line);
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_ERR_MSG_BOOL_RT_CHECK_FAIL, DIAG_KV_EMPTY());
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_SYSTEM, DIAG_ID_SYS_GENERAL, DIAG_ERR_MSG_BOOL_RT_CHECK_FAIL, DIAG_KV_PAIR_VEC());
                 clean_shutdown();
                 break;
 
             case RT_SOFT_CHECK:
                 write_log("BOOL Return check failed: [RT_SOFT_CHECK]", LOG_LVL_ERROR, FUNCNAME_LINE_ONLY, func, "", line);
-                publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_A, DIAG_WARN_MSG_BOOL_RT_CHECK_FAIL, DIAG_KV_EMPTY());
+                publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_SYSTEM, DIAG_ID_SYS_GENERAL, DIAG_WARN_MSG_BOOL_RT_CHECK_FAIL, DIAG_KV_PAIR_VEC());
                 break;
             
             case RT_LOG_ONLY_CHECK:
@@ -118,6 +118,20 @@ bool check_bool(bool function, RT_CHECK_MODE mode, const char *func, uint16_t li
 void set_diag_pub_queue(QueueHandle_t queue)
 {
     pub_queue = queue;
+}
+
+
+// ---- Create a diagnostics key-value pair ----
+diagnostic_msgs__msg__KeyValue create_diag_kv_pair(std::string key, std::string value)
+{
+    diagnostic_msgs__msg__KeyValue kv_pair;
+    
+    kv_pair.key.data = key.data();
+    kv_pair.key.size = strlen(kv_pair.key.data);
+    kv_pair.value.data = value.data();
+    kv_pair.value.size = strlen(kv_pair.value.data);
+
+    return kv_pair;
 }
 
 
@@ -279,7 +293,7 @@ bool ping_agent()
 // ---- Execution interval checker ----
 // ---- Checks the amount of time passed since the last time it was called (with the specific time storage varialble provided) ----
 // ---- Returns false if the execution time has exceeded the specified limit ----
-bool check_exec_interval(uint32_t &last_call_time_ms, uint16_t max_exec_time_ms, std::string log_msg, const char *func)
+bool check_exec_interval(uint32_t &last_call_time_ms, uint16_t max_exec_time_ms, std::string log_msg, bool publish_diag, const char *func)
 {
     // Initialize last_call_time_ms if it's 0 (first call).
     if (last_call_time_ms == 0) 
@@ -296,6 +310,16 @@ bool check_exec_interval(uint32_t &last_call_time_ms, uint16_t max_exec_time_ms,
         // This is also quite ugly, but it also works.
         log_msg = log_msg + " [act: " + std::to_string(exec_time_ms) + "ms, lim: " + std::to_string(max_exec_time_ms) + "ms]";
         write_log(log_msg, LOG_LVL_WARN, FUNCNAME_ONLY, func);
+
+        if (publish_diag)
+        {
+            std::string report_str = log_msg + " [func: " + func + "]";
+            DIAG_KV_PAIR_VEC kv_pairs;
+            kv_pairs.push_back(create_diag_kv_pair("actual_time", std::to_string(exec_time_ms) + "ms"));
+            kv_pairs.push_back(create_diag_kv_pair("time_limit", std::to_string(max_exec_time_ms) + "ms"));
+            publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_SYSTEM, DIAG_ID_SYS_TIMERS, report_str, kv_pairs);
+        }
+
         return false;
     }
 

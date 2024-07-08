@@ -23,6 +23,25 @@
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
 #include <string>
+#include <functional>
+
+
+// ------- Definitions -------
+enum ULTRA_TEST_RESULT_STATUS
+{
+    ULTRA_TEST_PASS,
+    ULTRA_TEST_FAIL_OUT_OF_TEST_RANGE,   // Test range is 18 to 22 centimeters
+    ULTRA_TEST_FAIL_BELOW_ABSOLUTE_MINIMUM,
+    ULTRA_TEST_FAIL_ABOVE_ABSOLUTE_MAXIMUM
+};
+
+struct ULTRA_TEST_RESULT
+{
+    ULTRA_TEST_RESULT_STATUS status;
+    float measured_distance;
+};
+
+typedef struct ULTRA_TEST_RESULT ULTRA_TEST_RESULT_t;
 
 
 // ------- Functions ------- 
@@ -32,3 +51,6 @@ float get_ultra_dist_mux(uint trig_io, uint echo_io, std::string ultra_hwid);
 
 // ---- Single-pin ultrasonic sensor distance measurement using mux ----
 float get_ultra_dist_single(uint ultra_pin, std::string ultra_hwid);
+
+// ---- Ultrasonic sensor self-test ----
+ULTRA_TEST_RESULT_t ultra_self_test(std::function<float()> sensor_get_dist_func);

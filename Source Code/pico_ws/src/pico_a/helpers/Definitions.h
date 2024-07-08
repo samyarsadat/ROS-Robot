@@ -72,8 +72,8 @@
 // ------- Other definitions -------
 
 // ---- MicroROS node config ----
-#define UROS_NODE_NAME              "pico_a"
-#define UROS_NODE_NAMESPACE         "io"
+#define UROS_NODE_NAME       "pico_a"
+#define UROS_NODE_NAMESPACE  "io"
 
 // ---- Repeating timer intervals ----
 #define motor_odom_rt_interval          100   // In milliseconds
@@ -87,6 +87,9 @@
 #define ultra_min_dist               1         // In cm
 #define ultra_max_dist               400       // In cm
 #define ultrasonic_signal_timout_us  14*1000   // 32 milliseconds
+#define ultra_selftest_measurements  5
+#define ultra_selftest_range_min_cm  18        // In cm
+#define ultra_selftest_range_max_cm  22        // In cm
 
 // ---- IR edge sensors ----
 #define ir_edge_detection_range          3   // In cm

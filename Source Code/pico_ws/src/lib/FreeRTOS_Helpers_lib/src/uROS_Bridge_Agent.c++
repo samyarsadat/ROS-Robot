@@ -337,7 +337,7 @@ void uRosBridgeAgent::execute()
                 
                 if (current_uros_state == AGENT_CONNECTED) 
                 {
-                    check_bool(check_exec_interval(last_exec_time, MAX_EXEC_TIME + EXECUTE_DELAY_MS, "Executor execution time exceeded limits!"), RT_SOFT_CHECK);
+                    check_exec_interval(last_exec_time, MAX_EXEC_TIME + EXECUTE_DELAY_MS, "Executor execution time exceeded limits!", true);
                     check_rc(rclc_executor_spin_some(&rc_executor, RCL_MS_TO_NS(EXECUTOR_TIMEOUT_MS)), RT_LOG_ONLY_CHECK);
                     vTaskDelay(EXECUTE_DELAY_MS / portTICK_PERIOD_MS);
                 }

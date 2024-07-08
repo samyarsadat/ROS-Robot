@@ -54,7 +54,7 @@ void publish_ultra(void *parameters)
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);   // Wait for notification indefinitely
 
         // Check execution time
-        check_bool(check_exec_interval(last_ultrasonic_publish_time, (ultra_pub_rt_interval + 50), "Publish interval exceeded limits!"), RT_SOFT_CHECK);
+        check_exec_interval(last_ultrasonic_publish_time, (ultra_pub_rt_interval + 50), "Publish interval exceeded limits!", true);
 
         uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
         uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;
@@ -62,10 +62,10 @@ void publish_ultra(void *parameters)
         ultrasonic_sensor_msg.time.sec = timestamp_sec;
         ultrasonic_sensor_msg.time.nanosec = timestamp_nanosec;
 
-        ultrasonic_sensor_msg.ultrasonic_f_reading = get_ultra_dist_single(front_ultra_io, DIAG_HWID_ULTRASONIC_F);
-        ultrasonic_sensor_msg.ultrasonic_b_reading = get_ultra_dist_mux(back_ultra_trig_mux, back_ultra_echo_mux, DIAG_HWID_ULTRASONIC_B);
-        ultrasonic_sensor_msg.ultrasonic_r_reading = get_ultra_dist_mux(right_ultra_trig_mux, right_ultra_echo_mux, DIAG_HWID_ULTRASONIC_R);
-        //ultrasonic_sensor_msg.ultrasonic_l_reading = get_ultra_dist_mux(left_ultra_trig_mux, left_ultra_echo_mux, DIAG_HWID_ULTRASONIC_L);
+        ultrasonic_sensor_msg.ultrasonic_f_reading = get_ultra_dist_single(front_ultra_io, DIAG_ID_ULTRASONIC_F);
+        ultrasonic_sensor_msg.ultrasonic_b_reading = get_ultra_dist_mux(back_ultra_trig_mux, back_ultra_echo_mux, DIAG_ID_ULTRASONIC_B);
+        ultrasonic_sensor_msg.ultrasonic_r_reading = get_ultra_dist_mux(right_ultra_trig_mux, right_ultra_echo_mux, DIAG_ID_ULTRASONIC_R);
+        //ultrasonic_sensor_msg.ultrasonic_l_reading = get_ultra_dist_mux(left_ultra_trig_mux, left_ultra_echo_mux, DIAG_ID_ULTRASONIC_L);
 
         uRosPublishingHandler::PublishItem_t pub_item;
         pub_item.publisher = &ultrasonic_sensor_pub;
@@ -83,7 +83,7 @@ void publish_edge_ir(void *parameters)
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);   // Wait for notification indefinitely
 
         // Check execution time
-        check_bool(check_exec_interval(last_edge_ir_publish_time, (edge_ir_pub_rt_interval + 15), "Publish interval exceeded limits!"), RT_SOFT_CHECK);
+        check_exec_interval(last_edge_ir_publish_time, (edge_ir_pub_rt_interval + 15), "Publish interval exceeded limits!", true);
 
         uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
         uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;
@@ -126,7 +126,7 @@ void publish_misc_sens(void *parameters)
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);   // Wait for notification indefinitely
 
         // Check execution time
-        check_bool(check_exec_interval(last_other_sensors_publish_time, (sensors_pub_rt_interval + 15), "Publish interval exceeded limits!"), RT_SOFT_CHECK);
+        check_exec_interval(last_other_sensors_publish_time, (sensors_pub_rt_interval + 15), "Publish interval exceeded limits!", true);
         
         uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
         uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;

@@ -52,4 +52,4 @@
 #define uros_agent_find_attempts    10
 
 // ---- Misc. typedefs ----
-typedef std::vector<diagnostic_msgs__msg__KeyValue> DIAG_KV_EMPTY;
+typedef std::vector<diagnostic_msgs__msg__KeyValue> DIAG_KV_PAIR_VEC;

@@ -34,7 +34,6 @@
 // ------- Global variables -------
 
 // ---- Misc. ----
-bool self_test_mode = false;
 alarm_pool_t *core_1_alarm_pool;
 
 // ---- Timer execution times storage (milliseconds) ----
@@ -292,8 +291,8 @@ void set_mtr_pid_tunings_callback(const void *req, void *res)
     rrp_pico_coms__srv__SetPidTunings_Request *req_in = (rrp_pico_coms__srv__SetPidTunings_Request *) req;
     rrp_pico_coms__srv__SetPidTunings_Response *res_in = (rrp_pico_coms__srv__SetPidTunings_Response *) res;
 
-    char buffer[65];
-    sprintf(buffer, "Received set_pid_tunings: [Kp: %.3f, Ki: %.3f, Kd: %.3f]", req_in->pid_kp, req_in->pid_ki, req_in->pid_kd);
+    char buffer[70];
+    snprintf(buffer, sizeof(buffer), "Received set_pid_tunings: [Kp: %.3f, Ki: %.3f, Kd: %.3f]", req_in->pid_kp, req_in->pid_ki, req_in->pid_kd);
     write_log(buffer, LOG_LVL_INFO, FUNCNAME_ONLY);
 
     r_motors.pid->SetTunings(req_in->pid_kp, req_in->pid_ki, req_in->pid_kd);
@@ -335,7 +334,7 @@ void cmd_vel_call(const void *msgin)
     const geometry_msgs__msg__Twist *msg = (const geometry_msgs__msg__Twist *) msgin;
 
     char buffer[60];
-    sprintf(buffer, "Received cmd_vel: [lin: %.2fm/s, ang: %.2frad/s]", msg->linear.x, msg->angular.z);
+    snprintf(buffer, sizeof(buffer), "Received cmd_vel: [lin: %.2fm/s, ang: %.2frad/s]", msg->linear.x, msg->angular.z);
     write_log(buffer, LOG_LVL_INFO, FUNCNAME_ONLY);
     
     float angular = msg->angular.z;     // rad/s
@@ -350,7 +349,7 @@ void cmd_vel_call(const void *msgin)
     r_motors.set_pid_ctrl_speed(abs(motor_r_speed_rpm));
     l_motors.set_pid_ctrl_speed(abs(motor_l_speed_rpm)); 
     r_motors.set_motor_direction((motor_r_speed_rpm > 0) ? Motor::FORWARD : Motor::BACKWARD);
-    l_motors.set_motor_direction((motor_l_speed_rpm > 0) ? Motor::FORWARD : Motor::BACKWARD);         
+    l_motors.set_motor_direction((motor_l_speed_rpm > 0) ? Motor::FORWARD : Motor::BACKWARD);      
 }
 
 
@@ -489,7 +488,7 @@ void motor_ctrl_odom_timer_call(void *parameters)
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);   // Wait for notification indefinitely
         
         // Check execution time
-        check_bool(check_exec_interval(last_motor_odom_time, (motor_odom_rt_interval + 50), "Execution interval exceeded limits!"), RT_SOFT_CHECK);
+        check_exec_interval(last_motor_odom_time, (motor_odom_rt_interval + 50), "Execution interval exceeded limits!", true);
 
         // Calculate and set motor outputs
         r_motors.compute_outputs();
@@ -551,7 +550,7 @@ bool init_mpu6050()
     }
 
     write_log("MPU init failed.", LOG_LVL_WARN, FUNCNAME_ONLY);
-    publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_ENV_SENSORS, DIAG_HWID_ENV_IMU, DIAG_ERR_MSG_INIT_FAILED, DIAG_KV_EMPTY());
+    publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_ENV_SENSORS, DIAG_HWID_ENV_IMU, DIAG_ERR_MSG_INIT_FAILED, DIAG_KV_PAIR_VEC());
     return false;*/
 
     return true;
