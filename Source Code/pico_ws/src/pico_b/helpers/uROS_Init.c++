@@ -21,22 +21,6 @@
 
 // ------- Libraries & Modules -------
 #include "uROS_Init.h"
-#include <std_msgs/msg/string.h>
-#include <std_msgs/msg/empty.h>
-#include <geometry_msgs/msg/twist.h>
-#include <geometry_msgs/msg/transform_stamped.h>
-#include <diagnostic_msgs/msg/diagnostic_status.h>
-#include <sensor_msgs/msg/range.h>
-#include <std_srvs/srv/set_bool.h>
-#include <nav_msgs/msg/odometry.h>
-#include <rrp_pico_coms/msg/misc_sensors_b.h>
-#include <rrp_pico_coms/msg/micro_sw_sensors.h>
-#include <rrp_pico_coms/srv/set_camera_leds.h>
-#include <rcl/rcl.h>
-#include <rclc/rclc.h>
-#include <rcl/error_handling.h>
-#include <diagnostic_msgs/srv/self_test.h>
-#include <rclc/executor.h>
 #include "Definitions.h"
 #include "local_helpers_lib/Local_Helpers.h"
 #include "freertos_helpers_lib/uROS_Bridge_Agent.h"
@@ -47,13 +31,6 @@
 
 // ---- General ----
 extern uRosBridgeAgent *bridge;   // From the main file.
-
-
-// ---- General ----
-rcl_allocator_t rc_alloc;
-rclc_support_t rc_supp;
-rcl_node_t rc_node;
-rclc_executor_t rc_executor;
 
 
 // ---- Subscribers ----

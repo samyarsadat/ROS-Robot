@@ -21,6 +21,7 @@
 
 
 // ------- Libraries & Modules -------
+#include <rcl/rcl.h>
 #include <std_msgs/msg/string.h>
 #include <std_msgs/msg/empty.h>
 #include <geometry_msgs/msg/twist.h>
@@ -33,20 +34,10 @@
 #include <rrp_pico_coms/msg/micro_sw_sensors.h>
 #include <rrp_pico_coms/srv/set_camera_leds.h>
 #include <diagnostic_msgs/srv/self_test.h>
-#include <rcl/rcl.h>
-#include <rclc/rclc.h>
-#include <rclc/executor.h>
 
 
 
 // ------- Variables -------
-
-// ---- General ----
-extern rcl_allocator_t rc_alloc;
-extern rclc_support_t rc_supp;
-extern rcl_node_t rc_node;
-extern rclc_executor_t rc_executor;
-
 
 // ---- Subscribers ----
 

@@ -19,16 +19,10 @@
 
 
 // ------- Libraries & Modules -------
-#include "pico/stdlib.h"
 #include "Definitions.h"
 #include "uROS_Init.h"
 #include "helpers_lib/Helpers.h"
 #include "IO_Helpers_General.h"
-#include <rcl/rcl.h>
-#include <rclc/rclc.h>
-#include <rcl/error_handling.h>
-#include <rclc/executor.h>
-#include <limits>
 #include "local_helpers_lib/Local_Helpers.h"
 #include "freertos_helpers_lib/uROS_Publishing_Handler.h"
 

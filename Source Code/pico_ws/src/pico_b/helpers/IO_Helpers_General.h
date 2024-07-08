@@ -21,9 +21,6 @@
 
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
-#include "Definitions.h"
-#include "helpers_lib/Helpers.h"
-#include "hardware/adc.h"
 
 
 // ------- Functions ------- 

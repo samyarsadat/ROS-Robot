@@ -19,26 +19,10 @@
 
 
 // ------- Libraries & Modules -------
-#include "pico/stdlib.h"
-#include "pico/multicore.h"
 #include "hardware/adc.h"
-#include "hardware/pwm.h"
-#include <rcl/rcl.h>
-#include <rclc/rclc.h>
-#include <rcl/error_handling.h>
-#include <rclc/executor.h>
-#include <rrp_pico_coms/srv/set_camera_leds.h>
 #include "helpers/Self_Test.c++"
 #include "helpers/Sensor_Publishers.c++"
-#include "freertos_helpers_lib/uROS_Bridge_Agent.h"
-#include "freertos_helpers_lib/uROS_Publishing_Handler.h"
 #include "helpers/uROS_Init.h"
-#include "helpers/Definitions.h"
-#include "local_helpers_lib/Local_Helpers.h"
-#include "helpers/IO_Helpers_General.h"
-#include <rmw_microros/rmw_microros.h>
-#include <iterator>
-#include <task.h>
 
 
 
