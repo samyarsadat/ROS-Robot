@@ -89,5 +89,5 @@ void init_subs_pubs();
 // ---- Executor init ----
 void exec_init();
 
-// ---- Node init ----
-void uros_init(const char *node_name, const char *name_space);
+// ---- Bridge init function ----
+bool uros_init();

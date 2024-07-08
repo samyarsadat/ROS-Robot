@@ -24,7 +24,7 @@
 #define DIAG_OK_MSG_IR_EDGE_TEST_PASS  "IR edge sensor self-test passed! [SENSOR: %d]"
 #define DIAG_OK_MSG_ULTRA_TEST_PASS    "Ultrasonic sensor self-test passed! [CODE: %d]"
 
-// ---- STATUS WARM ----
+// ---- STATUS WARN ----
 #define DIAG_WARN_MSG_ULTRA_MIN_LIM_EXCEED  "Ultrasonic sensor distance reading exceeded ultra_min_dist"
 #define DIAG_WARN_MSG_ULTRA_MAX_LIM_EXCEED  "Ultrasonic sensor distance reading exceeded ultra_max_dist"
 

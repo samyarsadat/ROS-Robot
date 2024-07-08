@@ -30,10 +30,14 @@
 #include <rclc/executor.h>
 #include <limits>
 #include "local_helpers_lib/Local_Helpers.h"
+#include "freertos_helpers_lib/uROS_Publishing_Handler.h"
 
 
 
-// ------- Variables ------- 
+// ------- Global variables ------- 
+
+// ---- Publishing handler instance ----
+extern uRosPublishingHandler *pub_handler;
 
 // ---- Timer execution times storage (milliseconds) ----
 extern uint32_t last_microsw_publish_time, last_other_sensors_publish_time;
@@ -43,60 +47,69 @@ extern uint32_t last_microsw_publish_time, last_other_sensors_publish_time;
 // ------- Functions ------- 
 
 // ---- Microswitch data ----
-bool publish_microsw_sens(struct repeating_timer *rt)
+void publish_microsw_sens(void *parameters)
 {
-    // Check execution time
-    uint16_t exec_time_ms = (time_us_32() / 1000) - last_microsw_publish_time;   // TODO: Log this.
-    last_microsw_publish_time = time_us_32() / 1000;
-    
-    if (exec_time_ms > (sensors_pub_rt_interval + 10)) 
-    { 
-        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_B, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, DIAG_KV_EMPTY());
+    while (true)
+    {
+        xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);   // Wait for notification indefinitely
+
+        // Check execution time
+        check_exec_interval(last_microsw_publish_time, (microsw_pub_rt_interval + 50), "Publish interval exceeded limits!", true);
+
+        uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
+        uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;
+
+        microsw_sensor_msg.time.sec = timestamp_sec;
+        microsw_sensor_msg.time.nanosec = timestamp_nanosec;
+
+        microsw_sensor_msg.micro_fr_trig = !gpio_get(ms_front_r);
+        microsw_sensor_msg.micro_fl_trig = !gpio_get(ms_front_l);
+        microsw_sensor_msg.micro_br_trig = !gpio_get(ms_back_r);
+        microsw_sensor_msg.micro_bl_trig = !gpio_get(ms_back_l);
+
+        uRosPublishingHandler::PublishItem_t pub_item;
+        pub_item.publisher = &microsw_sensor_pub;
+        pub_item.message = &microsw_sensor_msg;
+        xQueueSendToBack(pub_handler->get_queue_handle(), (void *) &pub_item, 0);
     }
-
-    uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
-    uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;
-
-    microsw_sensor_msg.time.sec = timestamp_sec;
-    microsw_sensor_msg.time.nanosec = timestamp_nanosec;
-
-    microsw_sensor_msg.micro_fr_trig = gpio_get(ms_front_r);
-    microsw_sensor_msg.micro_fl_trig = gpio_get(ms_front_l);
-    microsw_sensor_msg.micro_br_trig = gpio_get(ms_back_r);
-    microsw_sensor_msg.micro_bl_trig = gpio_get(ms_back_l);
-
-    check_rc(rcl_publish(&microsw_sensor_pub, &microsw_sensor_msg, NULL), RT_SOFT_CHECK);
-    return true;
 }
 
 
 // ---- Other sensor data ----
-bool publish_misc_sens(struct repeating_timer *rt)
+void publish_misc_sens(void *parameters)
 {
-    // Check execution time
-    uint16_t exec_time_ms = (time_us_32() / 1000) - last_other_sensors_publish_time;   // TODO: Log this.
-    last_other_sensors_publish_time = time_us_32() / 1000;
-    
-    if (exec_time_ms > (sensors_pub_rt_interval + 10)) 
-    { 
-        publish_diag_report(DIAG_LVL_WARN, DIAG_HWNAME_UCONTROLLERS, DIAG_HWID_MCU_MABO_B, DIAG_WARN_MSG_TIMER_EXEC_TIME_OVER, DIAG_KV_EMPTY());
+    while (true)
+    {
+        xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);   // Wait for notification indefinitely
+
+        // Check execution time
+        check_exec_interval(last_other_sensors_publish_time, (sensors_pub_rt_interval + 50), "Publish interval exceeded limits!", true);
+
+        uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
+        uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;
+
+        misc_sensor_msg.time.sec = timestamp_sec;
+        misc_sensor_msg.time.nanosec = timestamp_nanosec;
+
+        misc_sensor_msg.speed_sel_switch = get_speed_sel_sw_pos();
+        misc_sensor_msg.control_mode_switch = gpio_get(mode_sw);
+        misc_sensor_msg.battery_voltage = get_battery_voltage();
+        misc_sensor_msg.cpu_temp = -1.0f;
+        
+        // The get_rp2040_temp function uses the ADC, so we must take the mutex.
+        if (check_bool(adc_take_mutex(), RT_SOFT_CHECK))
+        {
+            misc_sensor_msg.cpu_temp = get_rp2040_temp();
+            adc_release_mutex();
+        }
+        
+        misc_sensor_msg.battery_current = 0;   // TODO: SENSOR TO BE ADDED
+        misc_sensor_msg.env_temp = 0;          // TODO: SENSOR TO BE ADDED
+        misc_sensor_msg.env_humidity = 0;      // TODO: SENSOR TO BE ADDED
+
+        uRosPublishingHandler::PublishItem_t pub_item;
+        pub_item.publisher = &misc_sensor_pub;
+        pub_item.message = &misc_sensor_msg;
+        xQueueSendToBack(pub_handler->get_queue_handle(), (void *) &pub_item, 0);
     }
-
-    uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
-    uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;
-
-    misc_sensor_msg.time.sec = timestamp_sec;
-    misc_sensor_msg.time.nanosec = timestamp_nanosec;
-
-    misc_sensor_msg.speed_sel_switch = get_speed_sel_sw_pos();
-    misc_sensor_msg.control_mode_switch = gpio_get(mode_sw);
-    misc_sensor_msg.cpu_temp = get_rp2040_temp();
-    misc_sensor_msg.battery_voltage = get_battery_voltage();
-    
-    misc_sensor_msg.battery_current = 0;   // TODO: SENSOR TO BE ADDED
-    misc_sensor_msg.env_temp = 0;          // TODO: SENSOR TO BE ADDED
-    misc_sensor_msg.env_humidity = 0;      // TODO: SENSOR TO BE ADDED
-
-    check_rc(rcl_publish(&misc_sensor_pub, &misc_sensor_msg, NULL), RT_SOFT_CHECK);
-    return true;
 }

@@ -22,7 +22,7 @@ builtin_interfaces/Time time
 # ---- Encoder Measurements ----
 float32[2] measured_rpms
 bool[2] measured_dirs       # true:forwards, false:backwards
-int32[2] total_enc_counts   # Total number of counted encoder pulses; TODO: Better explanation.
+int32[2] total_enc_counts   # Total number of counted encoder pulses.
 
 # ---- Set Targets ----
 float32 target_rpm

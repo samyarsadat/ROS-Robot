@@ -227,6 +227,23 @@ bool uRosBridgeAgent::init_service(rcl_service_t *service, const rosidl_service_
 }
 
 
+// Initialize a timer.
+// Call this before uros_init_executor().
+// This function is NOT thread-safe.
+bool uRosBridgeAgent::init_timer(rcl_timer_t *timer, uint64_t period, rcl_timer_callback_t callback)
+{
+    if (timers.size() < MAX_TIMERS)
+    {
+        check_rc(rclc_timer_init_default(timer, &rc_support, RCL_MS_TO_NS(period), callback), RT_HARD_CHECK);
+        timers.push_back(timer);
+        executor_handles += 1;
+        return true;
+    }
+
+    return false;
+}
+
+
 // Add a subscriber to the executor.
 // Call this after uros_init_executor().
 // This function is NOT thread-safe.
@@ -255,6 +272,24 @@ bool uRosBridgeAgent::add_service(rcl_service_t *service, void *request, void *r
         if (srv == service)
         {
             check_rc(rclc_executor_add_service(&rc_executor, service, request, response, callback), RT_HARD_CHECK);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+// Add a timer to the executor.
+// Call this after uros_init_executor().
+// This function is NOT thread-safe.
+bool uRosBridgeAgent::add_timer(rcl_timer_t *timer)
+{
+    for (auto tmr : timers)
+    {
+        if (tmr == timer)
+        {
+            check_rc(rclc_executor_add_timer(&rc_executor, timer), RT_HARD_CHECK);
             return true;
         }
     }

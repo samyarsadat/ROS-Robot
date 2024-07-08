@@ -95,6 +95,7 @@ bool take_mux_mutex()
     if (mux_io_mutex == NULL)
     {
         mux_io_mutex = xSemaphoreCreateMutex();
+        if (mux_io_mutex == NULL) { return false; }
     }
     
     return (xSemaphoreTake(mux_io_mutex, portMAX_DELAY) == pdTRUE);

@@ -23,7 +23,7 @@ add_subdirectory(lib)
 add_subdirectory(pico_a)
 
 # Pico B firmware
-#add_subdirectory(pico_b)
+add_subdirectory(pico_b)
 
 # Multithread MicroROS test firmware
 add_subdirectory(multithread_test)

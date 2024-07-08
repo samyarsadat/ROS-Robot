@@ -141,27 +141,26 @@ diagnostic_msgs__msg__DiagnosticStatus create_diag_msg(uint8_t level, std::strin
     diagnostic_msgs__msg__DiagnosticStatus diag_status;
     
     diag_status.name.data = hw_name.data();
-    diag_status.name.size = strlen(diag_status.name.data);
+    diag_status.name.size = hw_name.size();
     diag_status.hardware_id.data = hw_id.data();
-    diag_status.hardware_id.size = strlen(diag_status.hardware_id.data);
+    diag_status.hardware_id.size = hw_id.size();
     diag_status.message.data = msg.data();
-    diag_status.message.size = strlen(diag_status.message.data);
+    diag_status.message.size = msg.size();
     diag_status.values.data = NULL;
     diag_status.values.size = 0;
     diag_status.level = level;
 
-    if (!key_values.empty())
+    /*if (!key_values.empty())
     {
         diag_status.values.data = key_values.data();
         diag_status.values.size = key_values.size();
-    }
+    }*/
 
     return diag_status;
 }
 
 
 // ---- Diagnostics error reporting ----
-// TODO: We can use std::string_view or std::string& here instead. This would require changing diagnostics definitions.
 void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values)
 {
     diagnostics_msg = create_diag_msg(level, hw_name, hw_id, msg, key_values);
@@ -189,6 +188,12 @@ void adc_init_mutex()
     if (adc_mutex == NULL)
     {
         adc_mutex = xSemaphoreCreateMutex();
+        
+        if (adc_mutex == NULL)
+        {
+            write_log("ADC mutex creation failed!", LOG_LVL_FATAL, FUNCNAME_ONLY);
+            clean_shutdown();
+        }
     }
 }
 
@@ -203,7 +208,10 @@ bool adc_take_mutex()
 // ---- Release the ADC mutex ----
 void adc_release_mutex()
 {
-    xSemaphoreGive(adc_mutex);
+    if (xSemaphoreGetMutexHolder(adc_mutex) == xTaskGetCurrentTaskHandle())
+    {
+        xSemaphoreGive(adc_mutex);
+    }
 }
 
 
@@ -229,6 +237,12 @@ void init_print_uart_mutex()
     if (print_uart_mutex == NULL)
     {
         print_uart_mutex = xSemaphoreCreateMutex();
+
+        if (print_uart_mutex == NULL)
+        {
+            // We shouldn't call write_log() here because the mutex isn't initialized.
+            clean_shutdown();
+        }
     }
 }
 

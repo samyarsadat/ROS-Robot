@@ -24,7 +24,15 @@
 #include "Definitions.h"
 #include "IO_Helpers_General.h"
 #include "helpers_lib/Helpers.h"
+#include "local_helpers_lib/Local_Helpers.h"
 #include "hardware/adc.h"
+#include "FreeRTOS.h"
+#include "semphr.h"
+
+
+
+// ------- Global variables -------
+extern void clean_shutdown();
 
 
 

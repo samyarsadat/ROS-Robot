@@ -17,7 +17,7 @@
     along with this program.  If not, see <https: www.gnu.org/licenses/>.
 */
 
-// TODO: THIS MODULE IS TODO AND NOT HIGH-PRIORITY!
+
 
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
@@ -49,11 +49,13 @@ void run_self_test_callback(const void *req, void *res)
     uint8_t loop_index = 0;
 
     write_log("Received self-test request.", LOG_LVL_INFO, FUNCNAME_ONLY);
+    res_in->passed = true;
 
-
+    
     // Perform IR edge sensor self-test
     write_log("Performing IR edge sensor self-test...", LOG_LVL_INFO, FUNCNAME_ONLY);
     std::vector<bool> ir_test_results = ir_self_test();
+    loop_index = 0;
 
     for (auto result : ir_test_results)
     {
@@ -70,6 +72,7 @@ void run_self_test_callback(const void *req, void *res)
         {
             snprintf(buffer, sizeof(buffer), DIAG_ERR_MSG_IR_EDGE_TEST_FAIL, loop_index);
             diag_status_reports.push_back(create_diag_msg(DIAG_LVL_ERROR, DIAG_NAME_IR_EDGE, HW_ID, buffer, kv_pairs));
+            res_in->passed = false;
         }
 
         else
@@ -85,6 +88,7 @@ void run_self_test_callback(const void *req, void *res)
     // Perform ultrasonic sensor self-test
     write_log("Performing ultrasonic sensor self-test...", LOG_LVL_INFO, FUNCNAME_ONLY);
     ULTRA_TEST_RESULT_t ultra_test_results[4];   // [front, back, right, left]
+    loop_index = 0;
 
     ultra_test_results[0] = ultra_self_test([=]() -> float { return get_ultra_dist_single(front_ultra_io, DIAG_ID_ULTRASONIC_F); });
     ultra_test_results[1] = ultra_self_test([=]() -> float { return get_ultra_dist_mux(back_ultra_trig_mux, back_ultra_echo_mux, DIAG_ID_ULTRASONIC_B); });
@@ -93,7 +97,7 @@ void run_self_test_callback(const void *req, void *res)
     // TODO: Uncomment this when the left ultrasonic is fixed.
     //ultra_test_results[3] = ultra_self_test([=]() -> float { return get_ultra_dist_mux(left_ultra_trig_mux, left_ultra_echo_mux, DIAG_ID_ULTRASONIC_L); });
 
-    for (int i = 0; i < (sizeof(ultra_test_results) / sizeof(ULTRA_TEST_RESULT_t)); i++)
+    for (int i = 0; i < 4; i++)
     {
         char buffer[60];
         char HW_ID[30];
@@ -105,7 +109,7 @@ void run_self_test_callback(const void *req, void *res)
 
         DIAG_KV_PAIR_VEC kv_pairs;
         kv_pairs.push_back(create_diag_kv_pair("measured_distance", std::to_string(ultra_test_results[i].measured_distance)));
-        kv_pairs.push_back(create_diag_kv_pair("status_code", (char *) ultra_test_results[i].status));
+        kv_pairs.push_back(create_diag_kv_pair("status_code", std::to_string(ultra_test_results[i].status)));
         
         if (ultra_test_results[i].status == ULTRA_TEST_PASS)
         {
@@ -117,10 +121,19 @@ void run_self_test_callback(const void *req, void *res)
         {
             snprintf(buffer, sizeof(buffer), DIAG_ERR_MSG_ULTRA_TEST_FAIL, (int) ultra_test_results[i].status);
             diag_status_reports.push_back(create_diag_msg(DIAG_LVL_ERROR, DIAG_NAME_ULTRASONICS, HW_ID, buffer, kv_pairs));
+            res_in->passed = false;
         }
+
+        loop_index ++;
     }
 
 
+    res_in->status.data = diag_status_reports.data();
+    res_in->status.size = diag_status_reports.size();
+
     // TODO: IMU self-test
     // Omitting motor test as the Motor Safety module practically acts as a constantly running "self-test" for the motors.
+
+    write_log("Self-test completed.", LOG_LVL_INFO, FUNCNAME_ONLY);
+    write_log("Size of payload: " + std::to_string(sizeof(*res_in) + (res_in->status.size * sizeof(diagnostic_msgs__msg__DiagnosticStatus))) + " bytes.", LOG_LVL_INFO, FUNCNAME_ONLY);
 }

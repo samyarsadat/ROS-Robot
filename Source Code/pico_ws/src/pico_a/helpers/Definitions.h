@@ -96,7 +96,7 @@
 #define ir_edge_fov                      20
 #define num_ir_sensors                   8
 #define ir_trigger_limit                 2000
-#define ir_self_test_z_score_threshhold  200.0f
+#define ir_self_test_z_score_threshhold  2.5f
 
 // ---- Motor controller & safety ----
 #define motor_safety_trigger_timeout        3500   // In milliseconds

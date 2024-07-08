@@ -1,7 +1,6 @@
 /*
     The ROS robot project
     uROS Publishing Handler for managing MicroROS message publication.
-    TODO: Explain why this is needed.
     
     Copyright 2024 Samyar Sadat Akhavi
     Written by Samyar Sadat Akhavi, 2024.

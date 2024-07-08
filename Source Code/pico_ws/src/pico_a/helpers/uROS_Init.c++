@@ -147,7 +147,7 @@ void init_subs_pubs()
     bridge->init_service(&en_emitters_srv, set_bool_type, "enable_disable/emitters");
     bridge->init_service(&en_relay_srv, set_bool_type, "enable_disable/pico_a_relay");
     bridge->init_service(&set_mtr_pid_tunings_srv, set_pid_tunings_type, "config/set_motor_pid_tunings");
-    bridge->init_service(&run_self_test_srv, run_self_test_type, "self_test/pico_a");
+    bridge->init_service(&run_self_test_srv, run_self_test_type, "self_test/pico_a", uRosBridgeAgent::QOS_RELIABLE);
     bridge->init_service(&run_calib_srv, run_calib_type, "calibrate/pico_a");
     bridge->init_service(&get_config_srv, get_config_type, "config/get_pico_a");
 

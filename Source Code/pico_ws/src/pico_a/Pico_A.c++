@@ -481,7 +481,7 @@ void publish_odom_tf()
 
 
 // ----- Compute motor PID outputs and publish odometry data (timer callback) -----
-void motor_ctrl_odom_timer_call(void *parameters)
+void motor_ctrl_odom_task(void *parameters)
 {
     while (true)
     {
@@ -580,7 +580,7 @@ void setup(void *parameters)
     init_print_uart_mutex();
     write_log("Core 0 setup task started!", LOG_LVL_INFO, FUNCNAME_ONLY);
 
-    // ---- Pin init ----
+    // Pin init
     init_pin(ready_sig, INPUT);
     init_pin(pi_power_relay, OUTPUT);
     init_pin(edge_sens_en, OUTPUT);
@@ -612,7 +612,7 @@ void setup(void *parameters)
     // Create timer tasks
     write_log("Creating timer tasks...", LOG_LVL_INFO, FUNCNAME_ONLY);
     xTaskCreate(motor_safety_handler_task, "motor_safety_handler", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 3, NULL);
-    xTaskCreate(motor_ctrl_odom_timer_call, "motor_odom", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 4, &motor_odom_th);
+    xTaskCreate(motor_ctrl_odom_task, "motor_odom", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 4, &motor_odom_th);
     xTaskCreate(publish_edge_ir, "publish_edge_ir", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 5, &edge_ir_publish_th);
     xTaskCreate(publish_ultra, "publish_ultra", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 5, &ultrasonic_publish_th);
     xTaskCreate(publish_misc_sens, "publish_misc_sens", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 5, &other_sensors_publish_th);
@@ -641,7 +641,7 @@ void setup1(void *parameters)
 
     // Create alarm pool for core 1 timers
     write_log("Creating core 1 alarm pool...", LOG_LVL_INFO, FUNCNAME_ONLY);
-    core_1_alarm_pool = alarm_pool_create(2, 16);
+    core_1_alarm_pool = alarm_pool_create(2, 8);
 
     // MPU6050 init
     check_bool(init_mpu6050(), RT_HARD_CHECK);

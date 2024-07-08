@@ -39,10 +39,15 @@
 #include <rclc/executor.h>
 #include "Definitions.h"
 #include "local_helpers_lib/Local_Helpers.h"
+#include "freertos_helpers_lib/uROS_Bridge_Agent.h"
 
 
 
 // ------- Variables -------
+
+// ---- General ----
+extern uRosBridgeAgent *bridge;   // From the main file.
+
 
 // ---- General ----
 rcl_allocator_t rc_alloc;
@@ -88,6 +93,7 @@ diagnostic_msgs__srv__SelfTest_Response run_self_test_res;
 extern void en_camera_leds_callback(const void *req, void *res);
 extern void run_self_test_callback(const void *req, void *res);
 extern void clean_shutdown();
+extern void start_timers();
 void clean_shutdown_callback(const void *msgin) { clean_shutdown(); }
 
 
@@ -97,6 +103,8 @@ void clean_shutdown_callback(const void *msgin) { clean_shutdown(); }
 // ---- Setup subscribers and publishers ----
 void init_subs_pubs()
 {
+    write_log("Initializing publishers, subscribers, and services...", LOG_LVL_INFO, FUNCNAME_ONLY);
+
     const rosidl_message_type_support_t *diag_status_type = ROSIDL_GET_MSG_TYPE_SUPPORT(diagnostic_msgs, msg, DiagnosticStatus);
     const rosidl_message_type_support_t *empty_type = ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Empty);
     const rosidl_message_type_support_t *misc_sensors_type = ROSIDL_GET_MSG_TYPE_SUPPORT(rrp_pico_coms, msg, MiscSensorsB);
@@ -105,42 +113,61 @@ void init_subs_pubs()
     const rosidl_service_type_support_t *run_self_test_type = ROSIDL_GET_SRV_TYPE_SUPPORT(diagnostic_msgs, srv, SelfTest);
 
     // ---- Services ----
-    check_rc(rclc_service_init_default(&en_camera_leds_srv, &rc_node, set_camera_leds_type, "/enable_disable/camera_leds"), RT_HARD_CHECK);
-    check_rc(rclc_service_init_default(&run_self_test_srv, &rc_node, run_self_test_type, "/self_test/pico_b"), RT_HARD_CHECK);
+    write_log("Initializing services...", LOG_LVL_INFO, FUNCNAME_ONLY);
+    bridge->init_service(&en_camera_leds_srv, set_camera_leds_type, "enable_disable/camera_leds");
+    bridge->init_service(&run_self_test_srv, run_self_test_type, "self_test/pico_b");
 
-    // ---- E-stop topic ----
-    check_rc(rclc_subscription_init_default(&e_stop_sub, &rc_node, empty_type, "/e_stop"), RT_HARD_CHECK);
+
+    // ---- Subscribers ----
+    write_log("Initializing subscribers...", LOG_LVL_INFO, FUNCNAME_ONLY);
+
+    // E-stop topic
+    bridge->init_subscriber(&e_stop_sub, empty_type, "/e_stop");
     std_msgs__msg__Empty__init(&e_stop_msg);
 
-    // ---- Diagnostics ----
-    check_rc(rclc_publisher_init_default(&diagnostics_pub, &rc_node, diag_status_type, "/diagnostics"), RT_HARD_CHECK);
+
+    // ---- Publishers ----
+    write_log("Initializing publishers...", LOG_LVL_INFO, FUNCNAME_ONLY);
+    
+    // Diagnostics
+    bridge->init_publisher(&diagnostics_pub, diag_status_type, "/diagnostics");
     diagnostic_msgs__msg__DiagnosticStatus__init(&diagnostics_msg);
 
-    // ---- Sensor state topics ----
-    check_rc(rclc_publisher_init_default(&misc_sensor_pub, &rc_node, misc_sensors_type, "/sensors_raw/misc_b"), RT_HARD_CHECK);
-    check_rc(rclc_publisher_init_default(&microsw_sensor_pub, &rc_node, microsw_sensors_type, "/sensors_raw/microswitches"), RT_HARD_CHECK);
+    // Sensor state topics
+    bridge->init_publisher(&misc_sensor_pub, misc_sensors_type, "sensors_raw/misc_b");
+    bridge->init_publisher(&microsw_sensor_pub, microsw_sensors_type, "sensors_raw/microswitches");
     rrp_pico_coms__msg__MiscSensorsB__init(&misc_sensor_msg);
     rrp_pico_coms__msg__MicroSwSensors__init(&microsw_sensor_msg);
+
+
+    write_log("Init. completed.", LOG_LVL_INFO, FUNCNAME_ONLY);
 }
 
 
 // ---- Executor init ----
 void exec_init()
 {
-    rc_executor = rclc_executor_get_zero_initialized_executor();
-    const uint num_handles = 3;
+    write_log("Initializing MicroROS executor...", LOG_LVL_INFO, FUNCNAME_ONLY);
 
-    check_rc(rclc_executor_init(&rc_executor, &rc_supp.context, num_handles, &rc_alloc), RT_HARD_CHECK);
-    check_rc(rclc_executor_add_subscription(&rc_executor, &e_stop_sub, &e_stop_msg, &clean_shutdown_callback, ON_NEW_DATA), RT_HARD_CHECK);
-    check_rc(rclc_executor_add_service(&rc_executor, &en_camera_leds_srv, &en_camera_leds_req, &en_camera_leds_res, en_camera_leds_callback), RT_HARD_CHECK);
-    check_rc(rclc_executor_add_service(&rc_executor, &run_self_test_srv, &run_self_test_req, &run_self_test_res, &run_self_test_callback), RT_HARD_CHECK);
+    bridge->uros_init_executor();
+    bridge->add_service(&en_camera_leds_srv, &en_camera_leds_req, &en_camera_leds_res, en_camera_leds_callback);
+    bridge->add_service(&run_self_test_srv, &run_self_test_req, &run_self_test_res, run_self_test_callback);
+    bridge->add_subscriber(&e_stop_sub, &e_stop_msg, clean_shutdown_callback);
+
+    write_log("Init. completed.", LOG_LVL_INFO, FUNCNAME_ONLY);
 }
 
 
 // ---- Node init ----
-void uros_init(const char *node_name, const char *name_space)
+bool uros_init()
 {
-    rc_alloc = rcl_get_default_allocator();
-    check_rc(rclc_support_init(&rc_supp, 0, NULL, &rc_alloc), RT_HARD_CHECK);
-    check_rc(rclc_node_init_default(&rc_node, node_name, name_space, &rc_supp), RT_HARD_CHECK);
+    write_log("MicroROS init...", LOG_LVL_INFO, FUNCNAME_ONLY);
+
+    bridge->uros_init_node(UROS_NODE_NAME, UROS_NODE_NAMESPACE);
+    init_subs_pubs();
+    exec_init();
+    start_timers();
+ 
+    write_log("Init. completed.", LOG_LVL_INFO, FUNCNAME_ONLY);
+    return true;   
 }

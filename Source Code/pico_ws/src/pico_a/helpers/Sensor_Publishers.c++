@@ -133,11 +133,14 @@ void publish_misc_sens(void *parameters)
 
         misc_sensor_msg.time.sec = timestamp_sec;
         misc_sensor_msg.time.nanosec = timestamp_nanosec;
+        misc_sensor_msg.cpu_temp = -1.0f;
         
         // The get_rp2040_temp function uses the ADC, so we must take the mutex.
-        check_bool(adc_take_mutex(), RT_HARD_CHECK);
-        misc_sensor_msg.cpu_temp = get_rp2040_temp();
-        adc_release_mutex();
+        if (check_bool(adc_take_mutex(), RT_SOFT_CHECK))
+        {
+            misc_sensor_msg.cpu_temp = get_rp2040_temp();
+            adc_release_mutex();
+        }
 
         // MPU6050 IMU
         // FIXME: IMU is currently broken.

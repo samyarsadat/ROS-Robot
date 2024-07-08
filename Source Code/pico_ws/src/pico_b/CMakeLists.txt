@@ -23,7 +23,8 @@ message("Configuring Pico B firmware build... (${PICO_B_NAME})")
 # Add source files
 add_executable(${PICO_B_NAME} Pico_B.c++ 
                               helpers/uROS_Init.c++
-                              helpers/IO_Helpers_General.c++)
+                              helpers/IO_Helpers_General.c++
+                              ../posix/functions.c)
 
 # Create map/bin/hex/uf2 files
 pico_add_extra_outputs(${PICO_B_NAME})
@@ -31,10 +32,9 @@ pico_add_extra_outputs(${PICO_B_NAME})
 # Link to libraries
 target_link_libraries(${PICO_B_NAME} micro_ros
                                      pico_stdlib
-                                     pico_multicore
                                      hardware_pwm
                                      hardware_adc
-                                     hardware_gpio
+                                     hardware_i2c
                                      helpers_lib
                                      local_helpers_lib
                                      freertos_helpers_lib
@@ -47,7 +47,6 @@ target_include_directories(${PICO_B_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 # UART Config
 target_compile_definitions(${PICO_B_NAME} PRIVATE
-    PICO_DEOPTIMIZED_DEBUG=1
     PICO_RP2040_B0_SUPPORTED=0
     PICO_RP2040_B1_SUPPORTED=0
     PICO_STACK_SIZE=0x1000

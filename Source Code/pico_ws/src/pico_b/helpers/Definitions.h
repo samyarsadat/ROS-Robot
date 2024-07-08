@@ -19,6 +19,7 @@
 
 #pragma once
 #include "local_helpers_lib/Common_Definitions.h"
+#include "hardware/i2c.h"
 #include "Diag_Msgs.h"
 
 
@@ -47,16 +48,16 @@
 #define ms_back_r   13
 
 // ---- I2C ----
-#define i2c_inst   i2c0   // I2C instance (0 & 1 are on I2C0)
-#define i2c_sda    0
-#define i2c_scl    1
+#define i2c_inst  i2c0   // I2C instance (0 & 1 are on I2C0)
+#define i2c_sda   0
+#define i2c_scl   1
 
 
 // ------- Other definitions -------
 
 // ---- Battery ----
 #define batt_voltage_divider_r1  10 * 1000    // In ohms (10k ohms)
-#define batt_voltage_divider_r2  2.7 * 1000   // In ohms (2.7k ohms)
+#define batt_voltage_divider_r2  2.67 * 1000   // In ohms (2.7k ohms)
 
 // ---- MicroROS node config ----
 #define UROS_NODE_NAME        "pico_b"
@@ -66,3 +67,9 @@
 // ---- Repeating timer intervals ----
 #define microsw_pub_rt_interval   200   // In milliseconds
 #define sensors_pub_rt_interval   80    // In milliseconds
+
+// ---- Misc. ----
+#define SETUP_TASK_STACK_DEPTH       1024
+#define TIMER_TASK_STACK_DEPTH       1024
+#define STARTUP_WAIT_TIME_S          3          // In seconds
+#define microsw_led_test_timeout_ms  60 * 1000  // 60 seconds

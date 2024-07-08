@@ -30,6 +30,8 @@
 #include <rrp_pico_coms/srv/set_camera_leds.h>
 #include "helpers/Self_Test.c++"
 #include "helpers/Sensor_Publishers.c++"
+#include "freertos_helpers_lib/uROS_Bridge_Agent.h"
+#include "freertos_helpers_lib/uROS_Publishing_Handler.h"
 #include "helpers/uROS_Init.h"
 #include "helpers/Definitions.h"
 #include "local_helpers_lib/Local_Helpers.h"
@@ -39,35 +41,26 @@
 #include <task.h>
 
 
-void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
-{
-    panic("Stack overflow. Task: %s\n", pcTaskName);
-}
-
-void vApplicationMallocFailedHook()
-{
-    panic("malloc failed");
-}
-
-
-
 
 // ------- Global variables -------
 
 // ---- Misc. ----
-bool halt_core_0 = false;
-bool self_test_mode = false;
 alarm_pool_t *core_1_alarm_pool;
-
-// ---- MicroROS state ----
-enum UROS_STATE {WAITING_FOR_AGENT, AGENT_AVAILABLE, AGENT_CONNECTED, AGENT_DISCONNECTED};
-UROS_STATE current_uros_state = WAITING_FOR_AGENT;
 
 // ---- Timer execution times storage (milliseconds) ----
 uint32_t last_microsw_publish_time, last_other_sensors_publish_time;
 
 // ---- Timers ----
 struct repeating_timer microsw_publish_rt, other_sensors_publish_rt;
+TaskHandle_t microsw_publish_th, other_sensors_publish_th;
+
+
+
+// ------- Library object inits -------
+
+// ---- MicroROS ----
+uRosBridgeAgent *bridge;
+uRosPublishingHandler *pub_handler;
 
 
 
@@ -76,48 +69,66 @@ struct repeating_timer microsw_publish_rt, other_sensors_publish_rt;
 // ---- Graceful shutdown ----
 void clean_shutdown()
 {
-    write_log("clean_shutdown", "A clean shutdown has been triggered. The program will now shut down.", LOG_LVL_FATAL);
+    write_log("A clean shutdown has been triggered. The program will now shut down.", LOG_LVL_FATAL, FUNCNAME_ONLY);
 
     // Stop all repeating timers
     cancel_repeating_timer(&microsw_publish_rt);
     cancel_repeating_timer(&other_sensors_publish_rt);
 
-
     // IO cleanup
     set_camera_leds(0, 0, 0, 0);
+    init_pin(onboard_led, OUTPUT);
+    gpio_put(onboard_led, LOW);
 
     // MicroROS cleanup
-    rcl_service_fini(&en_camera_leds_srv, &rc_node);
-    rcl_service_fini(&run_self_test_srv, &rc_node);
-    rcl_subscription_fini(&e_stop_sub, &rc_node);
-    rcl_publisher_fini(&diagnostics_pub, &rc_node);
-    rcl_publisher_fini(&misc_sensor_pub, &rc_node);
-    rcl_publisher_fini(&microsw_sensor_pub, &rc_node);
-    rclc_executor_fini(&rc_executor);
-    rcl_node_fini(&rc_node);
-    rclc_support_fini(&rc_supp);
+    bridge->uros_fini();
 
-
-    // Stop core 0 (only effective when this function is called from core 1)
-    halt_core_0 = true;
-
-    // Stop core 1 if this function is being called from core 0.
-    if (get_core_num() == 0)
-    {
-        multicore_reset_core1();
-    }
+    // Suspend the FreeRTOS scheduler
+    // No FreeRTOS API calls beyond this point!
+    vTaskSuspendAll();
 
     while (true)
     {
-        write_log("clean_shutdown", "Program shutdown hang loop.", LOG_LVL_INFO);
-
-        gpio_put_pwm(cam_led_1, 0);
         gpio_put(onboard_led, LOW);
         sleep_ms(100);
-        gpio_put_pwm(cam_led_1, 65535);
         gpio_put(onboard_led, HIGH);
         sleep_ms(100);
     }
+}
+
+
+// ---- FreeRTOS task stack overflow hook ----
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
+{
+    write_log("Stack overflow! Task: " + std::string(pcTaskName, strlen(pcTaskName)), LOG_LVL_FATAL, FUNCNAME_ONLY);
+    clean_shutdown();
+}
+
+
+// ---- FreeRTOS memory allocation failure hook ----
+void vApplicationMallocFailedHook()
+{
+    // Not calling clean_shutdown() because it calls write_log() which uses malloc.
+    // This shouldn't ever happen anyway, so it doesn't matter.
+    panic("Memory allocation failed!");
+}
+
+
+// ---- Timer callbacks for task notification ----
+bool publish_microsw_notify(struct repeating_timer *rt)
+{
+    BaseType_t higher_prio_woken;
+    vTaskNotifyGiveFromISR(microsw_publish_th, &higher_prio_woken);
+    portYIELD_FROM_ISR(higher_prio_woken);
+    return true;
+}
+
+bool publish_misc_sens_notify(struct repeating_timer *rt)
+{
+    BaseType_t higher_prio_woken;
+    vTaskNotifyGiveFromISR(other_sensors_publish_th, &higher_prio_woken);
+    portYIELD_FROM_ISR(higher_prio_woken);
+    return true;
 }
 
 
@@ -127,7 +138,7 @@ void irq_call(uint pin, uint32_t events)
     if (pin == ms_front_r || pin == ms_front_l || pin == ms_back_r || pin == ms_back_l)
     {
         // Publish microswitch states if they are triggered, regardless of the timer.
-        publish_microsw_sens(NULL);   
+        publish_microsw_notify(NULL);   
     }
 }
 
@@ -142,18 +153,11 @@ void en_camera_leds_callback(const void *req, void *res)
     rrp_pico_coms__srv__SetCameraLeds_Response *res_in = (rrp_pico_coms__srv__SetCameraLeds_Response *) res;
 
     char buffer[75];
-    sprintf(buffer, "Received set_camera_leds: [c1: %u, c2: %u, c3: %u, c4: %u]", req_in->led_outputs[0], req_in->led_outputs[1], req_in->led_outputs[2], req_in->led_outputs[3]);
-    write_log("en_camera_leds_callback", buffer, LOG_LVL_INFO);
+    snprintf(buffer, sizeof(buffer), "Received set_camera_leds: [c1: %u, c2: %u, c3: %u, c4: %u]", req_in->led_outputs[0], req_in->led_outputs[1], req_in->led_outputs[2], req_in->led_outputs[3]);
+    write_log(buffer, LOG_LVL_INFO, FUNCNAME_ONLY);
 
     set_camera_leds(req_in->led_outputs[0], req_in->led_outputs[1], req_in->led_outputs[2], req_in->led_outputs[3]);
     res_in->success = true;
-}
-
-
-// ---- Run self-test functions service ----
-void run_self_test_callback(const void *req, void *res)
-{
-
 }
 
 
@@ -161,17 +165,20 @@ void run_self_test_callback(const void *req, void *res)
 // ------- Main program -------
 
 // ---- Setup repeating timers ----
-void start_repeating_timers()
+void start_timers()
 {
-    add_repeating_timer_ms(microsw_pub_rt_interval, publish_microsw_sens, NULL, &microsw_publish_rt);
-    alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, sensors_pub_rt_interval, publish_misc_sens, NULL, &other_sensors_publish_rt);
+    alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, microsw_pub_rt_interval, publish_microsw_notify, NULL, &microsw_publish_rt);
+    alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, sensors_pub_rt_interval, publish_misc_sens_notify, NULL, &other_sensors_publish_rt);
 }
 
 
 // ---- Setup function (Runs once on core 0) ----
-void setup()
+void setup(void *parameters)
 {
-    // ---- Pin init ----
+    init_print_uart_mutex();
+    write_log("Core 0 setup task started!", LOG_LVL_INFO, FUNCNAME_ONLY);
+
+    // Pin init
     init_pin(ready_sig, INPUT);
     init_pin(batt_adc, INPUT_ADC);
     init_pin(ms_front_r, INPUT_PULLUP);
@@ -195,31 +202,40 @@ void setup()
 
     // Misc. init
     adc_init();
+    adc_init_mutex();
     adc_set_temp_sensor_enabled(true);
 
-    //stdio_init_all();
-    //stdio_filter_driver(&stdio_usb);   // Filter the output of STDIO to USB.
-    //write_log("main", "STDIO init!", LOG_LVL_INFO);
+    // Create timer tasks
+    write_log("Creating timer tasks...", LOG_LVL_INFO, FUNCNAME_ONLY);
+    xTaskCreate(publish_microsw_sens, "microsw_publish", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 3, &microsw_publish_th);
+    xTaskCreate(publish_misc_sens, "other_sensors_publish", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 4, &other_sensors_publish_th);
+    vTaskCoreAffinitySet(microsw_publish_th, (1 << 1));
+    vTaskCoreAffinitySet(other_sensors_publish_th, (1 << 1));
 
-    // MicroROS transport init
-    rmw_uros_set_custom_transport(
-		true,
-		NULL,
-		pico_serial_transport_open,
-		pico_serial_transport_close,
-		pico_serial_transport_write,
-		pico_serial_transport_read
-	);
+    // Start MicroROS tasks
+    write_log("Starting MicroROS tasks...", LOG_LVL_INFO, FUNCNAME_ONLY);
+    check_bool(bridge->start(configMAX_PRIORITIES - 1, (1 << 0), true), RT_HARD_CHECK);
+    check_bool(pub_handler->start(configMAX_PRIORITIES - 2, (1 << 0), true), RT_HARD_CHECK);
 
-    // MicroROS and timer inits are performed in the core 0 loop.
+    // Indicate successful startup
+    gpio_put(onboard_led, HIGH);
+
+    // Delete setup task
+    vTaskDelete(NULL);
 }
 
 
 // ---- Setup function (Runs once on core 1) ----
-void setup1()
+void setup1(void *parameters)
 {
+    write_log("Core 1 setup task started!", LOG_LVL_INFO, FUNCNAME_ONLY);
+
     // Create alarm pool for core 1 timers
-    core_1_alarm_pool = alarm_pool_create(2, 4);
+    write_log("Creating core 1 alarm pool...", LOG_LVL_INFO, FUNCNAME_ONLY);
+    core_1_alarm_pool = alarm_pool_create(2, 8);
+
+    // Delete setup task
+    vTaskDelete(NULL);
 }
 
 
@@ -227,81 +243,45 @@ void setup1()
 // ******** END OF MAIN PROGRAM *********
 // *********** STARTUP & INIT ***********
 
-// ---- Core 1 main function ----
-void main_core_1()
-{
-    setup1();
-
-    // Core 1 loop
-    while (true);   // All core 1 functions run on timers. Nothing needs to be run in a loop.
-}
-
-
 // ---- Main function (Runs setup, loop, and loop1) ----
 int main() 
 {
-    multicore_reset_core1();
-
-    // UART output
+    // UART & USB STDIO outputs
     stdio_init_all();
     stdio_filter_driver(&stdio_usb);   // Filter the output of STDIO to USB.
-    write_log("main", "STDIO init, program starting...", LOG_LVL_INFO);
+    write_log("STDIO init, program starting...", LOG_LVL_INFO, FUNCNAME_LINE_ONLY);
 
-    // Wait for 5 seconds
+    // Wait for 3 seconds
     init_pin(onboard_led, OUTPUT);
-    init_pin(cam_led_1, OUTPUT_PWM);
-    
-    for (int i = 0; i < 5; i++)
+
+    for (int i = 0; i < STARTUP_WAIT_TIME_S; i++)
     {
-        write_log("main", "Waiting...", LOG_LVL_INFO);
-        gpio_put_pwm(cam_led_1, 65535);
+        write_log("Startup wait " + std::to_string(i + 1) + "...", LOG_LVL_INFO, FUNCNAME_ONLY);
         gpio_put(onboard_led, HIGH);
         sleep_ms(500);
-        gpio_put_pwm(cam_led_1, 0);
         gpio_put(onboard_led, LOW);
         sleep_ms(500);
     }
 
-    setup();
-    multicore_launch_core1(main_core_1);
+    // MicroROS pre-init
+    write_log("MicroROS pre-init...", LOG_LVL_INFO, FUNCNAME_LINE_ONLY);
+    bridge = uRosBridgeAgent::get_instance();
+    pub_handler = uRosPublishingHandler::get_instance();
+    bridge->pre_init(uros_init, clean_shutdown);
+    pub_handler->pre_init(bridge);
+    set_diag_pub_queue(pub_handler->get_queue_handle());
 
-    gpio_put(onboard_led, HIGH);
+    // Stetup function tasks
+    write_log("Creating setup tasks...", LOG_LVL_INFO, FUNCNAME_LINE_ONLY);
+    xTaskCreateAffinitySet(setup, "setup_core_0", SETUP_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 1, (1 << 0), NULL);
+    xTaskCreateAffinitySet(setup1, "setup_core_1", SETUP_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 1, (1 << 1), NULL);
 
-    // Core 0 loop
-    while (!halt_core_0)
-    {
-        switch (current_uros_state) 
-        {
-    	    case WAITING_FOR_AGENT:
-    	        current_uros_state = ping_agent() ? AGENT_AVAILABLE:WAITING_FOR_AGENT;
-    	        break;
-    	    
-            case AGENT_AVAILABLE:
-    	        uros_init(UROS_NODE_NAME, UROS_NODE_NAMESPACE);
-                init_subs_pubs();
-                exec_init();
-                start_repeating_timers();
+    // Start FreeRTOS scheduler
+    write_log("Starting FreeRTOS scheduler...", LOG_LVL_INFO, FUNCNAME_LINE_ONLY);
+    vTaskStartScheduler();
 
-    	        current_uros_state = AGENT_CONNECTED;
-    	        break;
-    	    
-            case AGENT_CONNECTED:
-    	        current_uros_state = ping_agent() ? AGENT_CONNECTED:AGENT_DISCONNECTED;
-    	        
-                if (current_uros_state == AGENT_CONNECTED) 
-                {
-    	            rclc_executor_spin_some(&rc_executor, UROS_EXEC_TIMEOUT_MS * 1000000);
-    	        }
-    	        
-                break;
-    	    
-            case AGENT_DISCONNECTED:
-                // TODO: Maybe wait for the agent to connect again?
-    	        clean_shutdown();
-    	        break;
-    	}
-    }
-
-    write_log("main", "Program exit.", LOG_LVL_INFO);
+    // We should never get to this point!
+    write_log("Program exit. Scheduler start failed!", LOG_LVL_INFO, FUNCNAME_LINE_ONLY);
+    
     return 0;
 }
