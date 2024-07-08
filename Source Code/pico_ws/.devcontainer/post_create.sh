@@ -18,6 +18,10 @@ sudo apt-get update \
 && sudo apt-get autoremove && sudo apt-get autoclean \
 && echo "-> Tools installed!"
 
+echo "-> Installing ELF size analyzer..."
+export PATH="$PATH:$HOME/.local/bin"
+pip install elf-size-analyze
+
 # These were moved here because they only need to be run once!
 echo "source '/opt/ros/$ROS_DISTRO/setup.bash'" >> $HOME/.bashrc
 echo "source '$HOME/pico_ws/libmicroros/src/install/local_setup.bash'" >> $HOME/.bashrc

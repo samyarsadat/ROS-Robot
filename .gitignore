@@ -5,9 +5,6 @@ CAD Files/~$*.sldasm
 CAD Files/**/~$*.sldprt
 CAD Files/**/~$*.sldasm
 Source Code/pico_ws/build
-Source Code/pico_ws/libmicroros/build
-Source Code/pico_ws/libmicroros/install
-Source Code/pico_ws/libmicroros/log
 Source Code/pico_ws/libmicroros/firmware
 Source Code/pico_ws/libmicroros/src/build
 Source Code/pico_ws/libmicroros/src/install

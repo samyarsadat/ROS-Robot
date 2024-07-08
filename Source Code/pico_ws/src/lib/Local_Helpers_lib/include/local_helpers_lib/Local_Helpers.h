@@ -60,7 +60,7 @@ void set_diag_pub_queue(QueueHandle_t queue);
 diagnostic_msgs__msg__KeyValue create_diag_kv_pair(std::string key, std::string value);
 
 // ---- Create a diagnostic status message ----
-diagnostic_msgs__msg__DiagnosticStatus create_diag_msg(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values);
+diagnostic_msgs__msg__DiagnosticStatus create_diag_msg(uint8_t level, std::string *hw_name, std::string *hw_id, std::string *msg, std::vector<diagnostic_msgs__msg__KeyValue> *key_values);
 
 // ---- Diagnostics error reporting ----
 void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values);

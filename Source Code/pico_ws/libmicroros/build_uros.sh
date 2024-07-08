@@ -25,10 +25,13 @@ if [ "$FULL_REBUILD" == "true" ]; then
 
     case $confirm in 
         [yY]) 
-            cd ~/pico_ws/libmicroros \
-            && echo "Removing directories..." && rm -rf ./build && rm -rf ./firmware && rm -rf ./install && rm -rf ./log \
-            && echo "Building..." && colcon build --packages-select rrp_pico_coms \
-            && source install/local_setup.bash \
+            cd ~/pico_ws/libmicroros/src \
+            && echo "Removing directories..." && rm -rf ./build && rm -rf ./install && rm -rf ./log \
+            && echo "Building..." && colcon build \
+            && cd .. \
+            && echo "Removing firmware directory..." && rm -rf ./firmware \
+            && source ./src/install/local_setup.bash \
+            && echo "Generating firmware..." \
             && sudo apt update \
             && ros2 run micro_ros_setup create_firmware_ws.sh generate_lib \
             && ros2 run rrp_pico_coms create_firmware_ws.sh \
@@ -55,8 +58,9 @@ fi
 
 if [ "$REINSTALL_PACKAGES" == "true" ]; then
     echo "Re-building and re-installing packages..."
-    echo "Removing directories..." && rm -rf ./build && rm -rf ./install && rm -rf ./log
-    cd ~/pico_ws/libmicroros/src && colcon build
+    cd ~/pico_ws/libmicroros/src \
+    && echo "Removing directories..." && rm -rf ./build && rm -rf ./install && rm -rf ./log \
+    && colcon build
     source ~/pico_ws/libmicroros/src/install/local_setup.bash
     source ~/.bashrc
     echo "Packages re-installed successfully!"

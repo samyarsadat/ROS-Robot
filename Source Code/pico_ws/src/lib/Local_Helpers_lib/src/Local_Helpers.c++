@@ -136,25 +136,25 @@ diagnostic_msgs__msg__KeyValue create_diag_kv_pair(std::string key, std::string 
 
 
 // ---- Create a diagnostic status message ----
-diagnostic_msgs__msg__DiagnosticStatus create_diag_msg(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values)
+diagnostic_msgs__msg__DiagnosticStatus create_diag_msg(uint8_t level, std::string *hw_name, std::string *hw_id, std::string *msg, std::vector<diagnostic_msgs__msg__KeyValue> *key_values)
 {
     diagnostic_msgs__msg__DiagnosticStatus diag_status;
     
-    diag_status.name.data = hw_name.data();
-    diag_status.name.size = hw_name.size();
-    diag_status.hardware_id.data = hw_id.data();
-    diag_status.hardware_id.size = hw_id.size();
-    diag_status.message.data = msg.data();
-    diag_status.message.size = msg.size();
+    diag_status.name.data = hw_name->data();
+    diag_status.name.size = hw_name->size();
+    diag_status.hardware_id.data = hw_id->data();
+    diag_status.hardware_id.size = hw_id->size();
+    diag_status.message.data = msg->data();
+    diag_status.message.size = msg->size();
     diag_status.values.data = NULL;
     diag_status.values.size = 0;
     diag_status.level = level;
 
-    /*if (!key_values.empty())
+    if (!key_values->empty())
     {
-        diag_status.values.data = key_values.data();
-        diag_status.values.size = key_values.size();
-    }*/
+        diag_status.values.data = key_values->data();
+        diag_status.values.size = key_values->size();
+    }
 
     return diag_status;
 }
@@ -163,7 +163,7 @@ diagnostic_msgs__msg__DiagnosticStatus create_diag_msg(uint8_t level, std::strin
 // ---- Diagnostics error reporting ----
 void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values)
 {
-    diagnostics_msg = create_diag_msg(level, hw_name, hw_id, msg, key_values);
+    diagnostics_msg = create_diag_msg(level, &hw_name, &hw_id, &msg, &key_values);
     write_log("Diagnostic report! [hwname: " + hw_name + ", hwid: " + hw_id + ", lvl: " + std::to_string(level) + "]", LOG_LVL_WARN, FUNCNAME_ONLY);
 
     /* 

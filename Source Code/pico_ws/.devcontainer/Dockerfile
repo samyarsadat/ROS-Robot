@@ -43,8 +43,6 @@ COPY uros_agent/* /home/$USERNAME/pico_ws/uros_agent/
 # Copy configuration files
 USER ${USERNAME}
 COPY vscode_config/* /home/$USERNAME/pico_ws/.vscode/
-RUN echo "source /opt/ros/"$ROS_DISTRO"/setup.bash" >> /home/$USERNAME/.bashrc \
-    && echo "source /home/"$USERNAME"/pico_ws/libmicroros/src/micro_ros_setup/install/local_setup.bash" >> /home/$USERNAME/.bashrc
 
 # OpenOCD Debug Probe permission fix
 USER root
