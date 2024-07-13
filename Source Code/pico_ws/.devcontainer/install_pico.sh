@@ -30,7 +30,7 @@ GITHUB_PREFIX="https://github.com/raspberrypi/"
 GITHUB_SUFFIX=".git"
 SDK_BRANCH="master"
 
-echo ""  >> ~/.bashrc
+echo "" >> ~/.bashrc
 echo "" >> /home/$NONROOT_USERNAME/.bashrc
 
 for REPO in sdk examples extras playground

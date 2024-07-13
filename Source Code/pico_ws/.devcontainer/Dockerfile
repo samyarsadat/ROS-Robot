@@ -21,27 +21,13 @@
 #  https://circuitdigest.com/microcontroller-projects/how-to-program-raspberry-pi-pico-using-c
 #  https://github.com/BrunoB81HK/ros2-workspace-devcontainer-template
 
-FROM ros:humble
+FROM samyarsadat/custom_base_images:base-ros-humble
+ENV USERNAME=nonroot
 
 
-# Install git, pip, and curl
+# Install pip
 RUN apt-get update \
-    && apt-get install -y git python3-pip curl nano \
-    && rm -rf /var/lib/apt/lists/* && apt-get autoremove && apt-get autoclean
-
-# Create non-root user
-ARG USERNAME=urosdev
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    && mkdir /home/$USERNAME/.config && chown $USER_UID:$USER_GID /home/$USERNAME/.config
-
-# Install and configure SUDO
-RUN apt-get update \
-    && apt-get install -y sudo \
-    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    && apt-get install -y python3-pip \
     && rm -rf /var/lib/apt/lists/* && apt-get autoremove && apt-get autoclean
 
 # Pico setup
@@ -50,17 +36,13 @@ RUN export NONROOT_USERNAME=${USERNAME} \
     && bash /pico_setup.sh \
     && rm -rf /var/lib/apt/lists/* && apt-get autoremove && apt-get autoclean
 
-# Download MicroROS tools (this is done here to save some time when running uros_init.sh)
+# MicroROS agent helpers
 USER ${USERNAME}
-RUN cd /home/$USERNAME && mkdir uros_tools_temp \
-    && git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git uros_tools_temp
 COPY uros_agent/* /home/$USERNAME/pico_ws/uros_agent/
 
 # Copy configuration files
 USER ${USERNAME}
 COPY vscode_config/* /home/$USERNAME/pico_ws/.vscode/
-RUN echo "source /opt/ros/"$ROS_DISTRO"/setup.bash" >> /home/$USERNAME/.bashrc \
-    && echo "source /home/"$USERNAME"/pico_ws/uros_ws/src/micro_ros_setup/install/local_setup.bash" >> /home/$USERNAME/.bashrc
 
 # OpenOCD Debug Probe permission fix
 USER root
@@ -70,11 +52,9 @@ RUN usermod -aG plugdev ${USERNAME}
 USER root
 RUN usermod -aG dialout ${USERNAME}
     
-# Environment setup
-COPY entrypoint.sh /entrypoint.sh
-COPY uros_init.sh /uros_init.sh
+# Post create and start scripts
+COPY post_create.sh /devcon_post_create.sh
+COPY post_start.sh /devcon_post_start.sh
 USER root
-RUN chmod +x /entrypoint.sh && chmod +x /uros_init.sh
-ENTRYPOINT ["/entrypoint.sh"]
+RUN chmod +x /devcon_post_start.sh && chmod +x /devcon_post_create.sh
 USER ${USERNAME}
-CMD ["/uros_init.sh"]

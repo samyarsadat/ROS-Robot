@@ -1,7 +1,7 @@
 #  The ROS robot project - Raspberry Pi Pico Communication Messages Package
 #  Falloff (Edge IR) Sensor States Message (Pico A)
 #  Copyright 2024 Samyar Sadat Akhavi
-#  Written by Samyar Sadat Akhavi, 2022-2024.
+#  Written by Samyar Sadat Akhavi, 2024.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,5 @@ builtin_interfaces/Time time
 
 
 # ---- IR Edge Sensors ----
-uint8 ir_edge_sens_fov                # Field of View
-uint8 ir_edge_sens_range              # IR detection range
 bool[4] ir_edge_sens_front_trig
 bool[4] ir_edge_sens_back_trig

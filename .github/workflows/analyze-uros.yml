@@ -1,0 +1,79 @@
+#  The ROS robot project - MicroROS CodeQL analysis workflow.
+#  Copyright 2024 Samyar Sadat Akhavi
+#  Written by Samyar Sadat Akhavi, 2024.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https: www.gnu.org/licenses/>.
+
+name: MicroROS CodeQL Analysis
+on: workflow_call
+
+jobs:
+    analyze_uros:
+        name: Analyze MicroROS library
+        runs-on: ubuntu-latest
+        container: samyarsadat/service_images:microros-build-action-latest
+
+        permissions:
+            security-events: write
+            contents: read
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Copy FreeRTOS Kernel Import File
+              shell: bash
+              run: |
+                  cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
+                  "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
+
+            - name: Generate Pico SDK Headers
+              uses: samyarsadat/Pico-Build-Action@v1
+              with:
+                  source_dir: "Source Code/pico_ws"
+                  output_dir: "build"
+                  cmake_config_only: "true"
+
+            # This step is required because of a bug in micro_ros_setup's firmware workspace creation script.
+            # This bug causes the script to fail if the path to the script's working directory contains spaces.
+            - name: Rename Source Code Directory
+              run: |
+                  mv "Source Code/" "source_code/"
+
+            - name: Initialize CodeQL
+              uses: github/codeql-action/init@v3
+              with:
+                  languages: c-cpp
+                  build-mode: manual
+                  queries: security-extended
+
+            - name: Build MicroROS Library
+              id: build
+              shell: bash
+              run: |
+                  bash ".github/workflows/codeql-pico-scripts/uros-build.sh" "source_code/pico_ws/libmicroros"
+
+            - name: Perform CodeQL Analysis
+              uses: github/codeql-action/analyze@v3
+              with:
+                  category: "pico-source-microros:c-cpp"
+
+            - name: Upload MicroROS Library Artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: uros_library_artifacts
+                  path: ${{steps.build.outputs.library_build_dir}}
+                  if-no-files-found: error

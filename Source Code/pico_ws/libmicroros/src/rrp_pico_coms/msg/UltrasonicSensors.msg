@@ -1,7 +1,7 @@
 #  The ROS robot project - Raspberry Pi Pico Communication Messages Package
 #  Ultrasonic Distance Sensor States Message (Pico A)
 #  Copyright 2024 Samyar Sadat Akhavi
-#  Written by Samyar Sadat Akhavi, 2022-2024.
+#  Written by Samyar Sadat Akhavi, 2024.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -20,9 +20,6 @@ builtin_interfaces/Time time
 
 
 # ---- Ultrasonics ----
-uint8 ultrasonic_fov          # Field of View
-uint16 ultrasonic_min_dist    # Minimum measurement distance
-uint16 ultrasonic_max_dist    # Maximum measurement distance
 float32 ultrasonic_f_reading
 float32 ultrasonic_b_reading
 float32 ultrasonic_r_reading

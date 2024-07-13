@@ -1,25 +1,22 @@
-/CAD Files/swxJRNL.swj
-/CAD Files/G-Code
-/CAD Files/~$*.sldprt
-/CAD Files/~$*.sldasm
-/CAD Files/**/~$*.sldprt
-/CAD Files/**/~$*.sldasm
-/Source Code/pico_ws/libmicroros/src/micro_ros_setup
-/Source Code/pico_ws/build/*
-!/Source Code/pico_ws/build/src/
-/Source Code/pico_ws/build/src/*
-!/Source Code/pico_ws/build/src/*.uf2
-!/Source Code/pico_ws/build/src/*.elf
-!/Source Code/pico_ws/build/src/*.dis
-/Source Code/pico_ws/libmicroros/build
-/Source Code/pico_ws/libmicroros/install
-/Source Code/pico_ws/libmicroros/log
-/Source Code/pico_ws/libmicroros/firmware
-/Circuit Diagrams & PCB Files/**/__Previews
-/Circuit Diagrams & PCB Files/**/History
-/Circuit Diagrams & PCB Files/**/Project *
-/Circuit Diagrams & PCB Files/**/*.Cam
-/Circuit Diagrams & PCB Files/**/*.OutJob
-/Circuit Diagrams & PCB Files/**/*.PrjPcbStructure
-/Testing Data
+CAD Files/swxJRNL.swj
+CAD Files/G-Code
+CAD Files/~$*.sldprt
+CAD Files/~$*.sldasm
+CAD Files/**/~$*.sldprt
+CAD Files/**/~$*.sldasm
+Source Code/pico_ws/build
+Source Code/pico_ws/libmicroros/firmware
+Source Code/pico_ws/libmicroros/src/build
+Source Code/pico_ws/libmicroros/src/install
+Source Code/pico_ws/libmicroros/src/log
+Source Code/pico_ws/libmicroros/src/rrp_pico_coms/build
+Source Code/pico_ws/libmicroros/src/rrp_pico_coms/install
+Source Code/pico_ws/libmicroros/src/rrp_pico_coms/log
+Circuit Diagrams & PCB Files/**/__Previews
+Circuit Diagrams & PCB Files/**/History
+Circuit Diagrams & PCB Files/**/Project *
+Circuit Diagrams & PCB Files/**/*.Cam
+Circuit Diagrams & PCB Files/**/*.OutJob
+Circuit Diagrams & PCB Files/**/*.PrjPcbStructure
+Testing Data
 **/desktop.ini

@@ -1,7 +1,7 @@
 #  The ROS robot project - Raspberry Pi Pico Communication Messages Package
 #  Miscellaneous Sensor(s) State Message (Pico A)
 #  Copyright 2024 Samyar Sadat Akhavi
-#  Written by Samyar Sadat Akhavi, 2022-2024.
+#  Written by Samyar Sadat Akhavi, 2024.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,5 +26,4 @@ float32 imu_temp                 # Temperature From MPU6050
 bool imu_freefall_int            # MPU6050 Freefall Detection Interrupt
 
 # ---- Misc. ----
-float32 cpu_temp    # RP2040 temperature, Celsius
-int16 wheelbase_mm  # Robot's wheelbase in millimeters.
+float32 cpu_temp     # RP2040 temperature, Celsius

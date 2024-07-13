@@ -1,0 +1,65 @@
+#  The ROS robot project - Raspberry Pi Pico CodeQL analysis workflow.
+#  Copyright 2024 Samyar Sadat Akhavi
+#  Written by Samyar Sadat Akhavi, 2024.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https: www.gnu.org/licenses/>.
+
+name: Pico CodeQL Analysis
+on: workflow_call
+
+jobs:
+    analyze_pico:
+        name: Analyze Pico source code
+        runs-on: ubuntu-latest
+        container: samyarsadat/service_images:pico-build-action-latest
+
+        permissions:
+            security-events: write
+            contents: read
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Download MicroROS Library Artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  name: uros_library_artifacts
+                  path: "Source Code/pico_ws/libmicroros/firmware/build"
+
+            - name: Copy FreeRTOS Kernel Import File
+              shell: bash
+              run: |
+                  cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
+                  "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
+
+            - name: Initialize CodeQL
+              uses: github/codeql-action/init@v3
+              with:
+                  languages: c-cpp
+                  build-mode: manual
+                  queries: security-and-quality
+
+            - name: Build Pico Source Code
+              id: build
+              shell: bash
+              run: |
+                  bash ".github/workflows/codeql-pico-scripts/pico-build.sh" "Source Code/pico_ws"
+
+            - name: Perform CodeQL Analysis
+              uses: github/codeql-action/analyze@v3
+              with:
+                  category: "pico-source-code:c-cpp"
