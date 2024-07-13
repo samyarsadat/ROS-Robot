@@ -14,8 +14,8 @@
 </p>
 
 ----
-### Raspberry Pi Pico FreeRTOS Branch
-This branch is for the development of new firmware for the Raspberry Pi Picos based on the FreeRTOS kernel. The need for FreeRTOS came about as a result of a need for multithreading.
+**Note:**<br>
+This project is still under development.
 <br><br><br>
 <img src="Assets/Renders/GitHub_Render_1_Edited.png">
 This is a 3D render of the CAD designs.
