@@ -37,6 +37,7 @@ MotorSafety::MotorSafety(Motor* ctrl, uint8_t safety_object_id)
 {
     controller = ctrl;
     number_of_encoders_defined = ctrl->get_num_defined_encs();
+    id = safety_object_id;
 
     // Copies all of the items in the returned array from get_encs_array() to encoders.
     for (int i = 0; i < number_of_encoders_defined; i++)

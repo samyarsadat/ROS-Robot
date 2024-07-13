@@ -27,8 +27,18 @@
 #include <diagnostic_msgs/srv/self_test.h>
 #include "FreeRTOS.h"
 #include "IO_Helpers_General.h"
+#include "semphr.h"
 
 
+
+// ------- Global variables -------
+std::vector<int> self_test_diag_data_slot_nums;
+std::vector<diagnostic_msgs__msg__DiagnosticStatus> self_test_diag_status_reports;
+SemaphoreHandle_t run_self_test_mutex = NULL;
+
+
+
+// ------- Functions -------
 
 // ---- Run self-test functions service callback ----
 void run_self_test_callback(const void *req, void *res)
@@ -39,9 +49,10 @@ void run_self_test_callback(const void *req, void *res)
 
     diagnostic_msgs__srv__SelfTest_Request *req_in = (diagnostic_msgs__srv__SelfTest_Request *) req;
     diagnostic_msgs__srv__SelfTest_Response *res_in = (diagnostic_msgs__srv__SelfTest_Response *) res;
-    std::vector<diagnostic_msgs__msg__DiagnosticStatus> diag_status_reports;
 
     write_log("Received self-test request.", LOG_LVL_INFO, FUNCNAME_ONLY);
+    disable_diag_pub();
+    
 
     // Perform camera LED and microswitch self-test
     write_log("Performing camera LED and microswitch self-test...", LOG_LVL_INFO, FUNCNAME_ONLY);
@@ -81,10 +92,14 @@ void run_self_test_callback(const void *req, void *res)
         if (triggered_microsws[0] && triggered_microsws[1] && triggered_microsws[2] && triggered_microsws[3])
         {
             taskEXIT_CRITICAL();
-            vTaskDelay(pdMS_TO_TICKS(1000));
             res_in->passed = true;
             microsws_passed = true;
-            diag_status_reports.push_back(create_diag_msg(DIAG_LVL_OK, DIAG_NAME_SYSTEM, DIAG_ID_SYS_GENERAL, DIAG_OK_MSG_MICROSW_LED_TEST_PASS, DIAG_KV_PAIR_VEC()));
+            
+            diag_publish_item_t pub_item = prepare_diag_publish_item(DIAG_LVL_OK, DIAG_NAME_SYSTEM, DIAG_ID_SYS_GENERAL, DIAG_OK_MSG_MICROSW_LED_TEST_PASS, NULL);
+            self_test_diag_status_reports.push_back(*pub_item.diag_msg);
+            self_test_diag_data_slot_nums.push_back(pub_item.allocated_slot);
+            
+            vTaskDelay(pdMS_TO_TICKS(1000));
             break;
         }
     }
@@ -94,11 +109,19 @@ void run_self_test_callback(const void *req, void *res)
     if (!microsws_passed)
     {
         taskEXIT_CRITICAL();
-        diag_status_reports.push_back(create_diag_msg(DIAG_LVL_ERROR, DIAG_NAME_SYSTEM, DIAG_ID_SYS_GENERAL, DIAG_ERR_MSG_MICROSW_LED_TEST_FAIL, DIAG_KV_PAIR_VEC()));
+
+        std::vector<diag_kv_pair_item_t> kv_pairs;
+        std::string pass_states = bool_array_as_str(triggered_microsws, 4);
+        kv_pairs.push_back(diag_kv_pair_item_t{"sensor_pass_states", pass_states});
+
+        diag_publish_item_t pub_item = prepare_diag_publish_item(DIAG_LVL_ERROR, DIAG_NAME_SYSTEM, DIAG_ID_SYS_GENERAL, DIAG_ERR_MSG_MICROSW_LED_TEST_FAIL, &kv_pairs);
+        self_test_diag_status_reports.push_back(*pub_item.diag_msg);
+        self_test_diag_data_slot_nums.push_back(pub_item.allocated_slot);
     }
 
-    res_in->status.data = diag_status_reports.data();
-    res_in->status.size = diag_status_reports.size();
+
+    res_in->status.data = self_test_diag_status_reports.data();
+    res_in->status.size = self_test_diag_status_reports.size();
 
     write_log("Self-test completed.", LOG_LVL_INFO, FUNCNAME_ONLY);
 }

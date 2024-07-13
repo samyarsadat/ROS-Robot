@@ -101,6 +101,11 @@ void publish_misc_sens(void *parameters)
         misc_sensor_msg.env_temp = 0;          // TODO: SENSOR TO BE ADDED
         misc_sensor_msg.env_humidity = 0;      // TODO: SENSOR TO BE ADDED
 
+        misc_sensor_msg.camera_led_vals[0] = camera_led_states[0];
+        misc_sensor_msg.camera_led_vals[1] = camera_led_states[1];
+        misc_sensor_msg.camera_led_vals[2] = camera_led_states[2];
+        misc_sensor_msg.camera_led_vals[3] = camera_led_states[3];
+
         uRosPublishingHandler::PublishItem_t pub_item;
         pub_item.publisher = &misc_sensor_pub;
         pub_item.message = &misc_sensor_msg;

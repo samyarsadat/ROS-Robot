@@ -55,10 +55,6 @@ extern geometry_msgs__msg__Twist cmd_vel_msg;
 
 // ---- Publishers ----
 
-// Diagnostics
-extern rcl_publisher_t diagnostics_pub;
-extern diagnostic_msgs__msg__DiagnosticStatus diagnostics_msg;
-
 // Sensor States
 extern rcl_publisher_t misc_sensor_pub, ultrasonic_sensor_pub, falloff_sensor_pub;
 extern rrp_pico_coms__msg__MiscSensorsA misc_sensor_msg;

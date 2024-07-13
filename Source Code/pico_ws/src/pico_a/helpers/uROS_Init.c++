@@ -46,10 +46,6 @@ geometry_msgs__msg__Twist cmd_vel_msg;
 
 // ---- Publishers ----
 
-// Diagnostics
-rcl_publisher_t diagnostics_pub;
-diagnostic_msgs__msg__DiagnosticStatus diagnostics_msg;
-
 // Sensor States
 rcl_publisher_t misc_sensor_pub, ultrasonic_sensor_pub, falloff_sensor_pub;
 rrp_pico_coms__msg__MiscSensorsA misc_sensor_msg;
@@ -127,7 +123,6 @@ void init_subs_pubs()
     write_log("Initializing publishers, subscribers, and services...", LOG_LVL_INFO, FUNCNAME_ONLY);
 
     const rosidl_message_type_support_t *twist_type = ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist);
-    const rosidl_message_type_support_t *diag_status_type = ROSIDL_GET_MSG_TYPE_SUPPORT(diagnostic_msgs, msg, DiagnosticStatus);
     const rosidl_message_type_support_t *empty_type = ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Empty);
     const rosidl_message_type_support_t *odom_type = ROSIDL_GET_MSG_TYPE_SUPPORT(rrp_pico_coms, msg, FastOdometry);
     const rosidl_message_type_support_t *mtr_ctrl_state_type = ROSIDL_GET_MSG_TYPE_SUPPORT(rrp_pico_coms, msg, MotorCtrlState);
@@ -168,8 +163,7 @@ void init_subs_pubs()
     write_log("Initializing publishers...", LOG_LVL_INFO, FUNCNAME_ONLY);
 
     // Diagnostics
-    bridge->init_publisher(&diagnostics_pub, diag_status_type, "/diagnostics");
-    diagnostic_msgs__msg__DiagnosticStatus__init(&diagnostics_msg);
+    diag_uros_init();
 
     // Sensor state topics
     bridge->init_publisher(&misc_sensor_pub, misc_sensors_type, "sensors_raw/misc_a");

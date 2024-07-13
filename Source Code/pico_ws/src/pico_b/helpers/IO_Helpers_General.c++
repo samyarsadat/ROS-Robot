@@ -24,11 +24,17 @@
 #include "Definitions.h"
 #include "helpers_lib/Helpers.h"
 #include "hardware/adc.h"
+#include "local_helpers_lib/Local_Helpers.h"
+
+
+
+// ------- External functions -------
+extern void clean_shutdown();
 
 
 
 // ------- Global variables -------
-extern void clean_shutdown();
+uint16_t camera_led_states[4] = {0};
 
 
 
@@ -41,6 +47,11 @@ void set_camera_leds(uint16_t led_1, uint16_t led_2, uint16_t led_3, uint16_t le
     gpio_put_pwm(cam_led_2, led_2);
     gpio_put_pwm(cam_led_3, led_3);
     gpio_put_pwm(cam_led_4, led_4);
+
+    camera_led_states[0] = led_1;
+    camera_led_states[1] = led_2;
+    camera_led_states[2] = led_3;
+    camera_led_states[3] = led_4;
 }
 
 
@@ -54,11 +65,11 @@ float get_battery_voltage()
 
 
 // ---- Get the position of the speed select switch ----
-// ---- (0: first position, 1: second position, 2: third position) ----
+// ---- (0: middle position, 1: first position, 2: second position) ----
 uint8_t get_speed_sel_sw_pos()
 {
-    if (!gpio_get(speed_sw_1) && !gpio_get(speed_sw_2)) { return 0; }
-    else if (gpio_get(speed_sw_1)) { return 1; }
-    else if (gpio_get(speed_sw_2)) { return 2; }
+    if (gpio_get(speed_sw_1) && gpio_get(speed_sw_2)) { return 0; }
+    else if (!gpio_get(speed_sw_1)) { return 1; }
+    else if (!gpio_get(speed_sw_2)) { return 2; }
     return 0;   // This will never be reached, but it's here just to be safe.
 }

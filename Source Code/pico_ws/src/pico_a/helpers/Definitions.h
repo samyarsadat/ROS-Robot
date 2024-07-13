@@ -72,8 +72,10 @@
 // ------- Other definitions -------
 
 // ---- MicroROS node config ----
-#define UROS_NODE_NAME       "pico_a"
-#define UROS_NODE_NAMESPACE  "io"
+#define UROS_NODE_NAME                     "pico_a"
+#define UROS_NODE_NAMESPACE                "io"
+#define AGENT_WAITING_LED_TOGGLE_DELAY_MS  500   // In milliseconds
+#define AGENT_AVAIL_LED_TOGGLE_DELAY_MS    250   // In milliseconds
 
 // ---- Repeating timer intervals ----
 #define motor_odom_rt_interval          100   // In milliseconds
@@ -120,6 +122,7 @@
 #define base_link_frame_id  (char *) "base_link"
 
 // ---- Misc. ----
-#define SETUP_TASK_STACK_DEPTH  1024
-#define TIMER_TASK_STACK_DEPTH  1024
-#define STARTUP_WAIT_TIME_S     3   // In seconds
+#define SETUP_TASK_STACK_DEPTH    1024   // In FreeRTOS words
+#define TIMER_TASK_STACK_DEPTH    1024   // In FreeRTOS words
+#define GENERIC_TASK_STACK_DEPTH  1024   // In FreeRTOS words
+#define STARTUP_WAIT_TIME_S       3      // In seconds

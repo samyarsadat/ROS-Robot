@@ -18,9 +18,15 @@
     along with this program.  If not, see <https: www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
+
+
+// ------- Global variables -------
+extern uint16_t camera_led_states[4];
 
 
 // ------- Functions ------- 
@@ -32,5 +38,5 @@ void set_camera_leds(uint16_t led_1, uint16_t led_2, uint16_t led_3, uint16_t le
 float get_battery_voltage();
 
 // ---- Get the position of the speed select switch ----
-// ---- (0: first position, 1: second position, 2: third position) ----
+// ---- (0: middle position, 1: first position, 2: second position) ----
 uint8_t get_speed_sel_sw_pos();

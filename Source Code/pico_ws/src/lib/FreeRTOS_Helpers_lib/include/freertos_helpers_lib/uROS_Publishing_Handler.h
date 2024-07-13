@@ -40,15 +40,23 @@ class uRosPublishingHandler : public Agent
 {
     public:
         // Publishing failed callback typedef
-        typedef void (*publish_failed_callback)(rcl_publisher_t *publisher, void *message);
+        typedef void (*publish_failed_callback)(rcl_publisher_t *publisher, void *message, void *optional_user_param);
+
+        // Post-publish callback typedef
+        typedef void (*post_publish_callback)(rcl_publisher_t *publisher, void *message, void *optional_user_param);
 
         // Publishing queue item struct
         struct PublishItem 
         {
             rcl_publisher_t *publisher;
             void *message;
-            publish_failed_callback failed_callback = NULL;
             RT_CHECK_MODE rt_check_mode = RT_SOFT_CHECK;
+
+            publish_failed_callback failed_callback = NULL;
+            void *pub_fail_user_param = NULL;
+            
+            post_publish_callback post_pub_callback = NULL;
+            void *post_pub_user_param = NULL;
         };
 
         // Publishing queue item typedef

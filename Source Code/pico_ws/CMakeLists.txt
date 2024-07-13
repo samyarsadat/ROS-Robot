@@ -23,7 +23,6 @@ cmake_minimum_required(VERSION 3.12)
 set(PROJ_NAME ROS_Robot)
 set(PICO_A_NAME ${PROJ_NAME}_Pico_A)
 set(PICO_B_NAME ${PROJ_NAME}_Pico_B)
-set(PICO_A_MT_NAME ${PROJ_NAME}_Multithread_Test)
 
 # Include build functions from the Pico SDK
 include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)

@@ -20,7 +20,8 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Add source files
-add_library(${PROJECT_NAME} Local_Helpers.c++)
+add_library(${PROJECT_NAME} Local_Helpers.c++
+                            Diagnostics_Helper.c++)
 
 # Include header files
 target_include_directories(${PROJECT_NAME} PUBLIC ../include)

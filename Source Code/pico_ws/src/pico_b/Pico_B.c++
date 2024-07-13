@@ -23,6 +23,7 @@
 #include "helpers/Self_Test.c++"
 #include "helpers/Sensor_Publishers.c++"
 #include "helpers/uROS_Init.h"
+#include "timers.h"
 
 
 
@@ -37,6 +38,7 @@ uint32_t last_microsw_publish_time, last_other_sensors_publish_time;
 // ---- Timers ----
 struct repeating_timer microsw_publish_rt, other_sensors_publish_rt;
 TaskHandle_t microsw_publish_th, other_sensors_publish_th;
+TimerHandle_t waiting_for_agent_timer;
 
 
 
@@ -65,19 +67,14 @@ void clean_shutdown()
     gpio_put(onboard_led, LOW);
 
     // MicroROS cleanup
+    pub_handler->stop();
     bridge->uros_fini();
+
+    write_log("MicroROS cleanup completed. Suspending the scheduler...", LOG_LVL_INFO, FUNCNAME_ONLY);
 
     // Suspend the FreeRTOS scheduler
     // No FreeRTOS API calls beyond this point!
     vTaskSuspendAll();
-
-    while (true)
-    {
-        gpio_put(onboard_led, LOW);
-        sleep_ms(100);
-        gpio_put(onboard_led, HIGH);
-        sleep_ms(100);
-    }
 }
 
 
@@ -148,11 +145,71 @@ void en_camera_leds_callback(const void *req, void *res)
 
 // ------- Main program -------
 
+// ---- MicroROS executor post-execution function ----
+void uros_post_exec_call()
+{
+    // Cleanup for self-test diagnostics messages.
+    if (!self_test_diag_data_slot_nums.empty())
+    {
+        for (auto slot_num : self_test_diag_data_slot_nums)
+        {
+            destroy_uros_diag_status_msg(slot_num);
+            destroy_diag_kv_pair(slot_num);
+            destroy_diag_kv_pair_refs(slot_num);
+            destroy_diag_msg_object(slot_num);
+            deallocate_slots(slot_num);
+        }
+
+        self_test_diag_status_reports.clear();
+        self_test_diag_status_reports.shrink_to_fit();
+        self_test_diag_data_slot_nums.clear();
+        self_test_diag_data_slot_nums.shrink_to_fit();
+
+        enable_diag_pub();
+    }
+}
+
+
 // ---- Setup repeating timers ----
 void start_timers()
 {
+    write_log("Starting hardware timers...", LOG_LVL_INFO, FUNCNAME_ONLY);
     alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, microsw_pub_rt_interval, publish_microsw_notify, NULL, &microsw_publish_rt);
     alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, sensors_pub_rt_interval, publish_misc_sens_notify, NULL, &other_sensors_publish_rt);
+}
+
+
+// ---- Waiting for agent LED flash timer callback ----
+void waiting_for_agent_timer_call(TimerHandle_t timer)
+{
+    if (bridge->get_agent_state() == uRosBridgeAgent::WAITING_FOR_AGENT)
+    {
+        gpio_put(onboard_led, !gpio_get_out_level(onboard_led));
+        return;
+    }
+
+    if (bridge->get_agent_state() == uRosBridgeAgent::AGENT_AVAILABLE)
+    {
+        if (xTimerGetPeriod(timer) != pdMS_TO_TICKS(AGENT_AVAIL_LED_TOGGLE_DELAY_MS))
+        {
+            xTimerChangePeriod(timer, AGENT_AVAIL_LED_TOGGLE_DELAY_MS, 0);
+        }
+
+        gpio_put(onboard_led, !gpio_get_out_level(onboard_led));
+        return;
+    }
+
+    if (bridge->get_agent_state() == uRosBridgeAgent::AGENT_CONNECTED)
+    {
+        gpio_put(onboard_led, HIGH);
+    }
+
+    else
+    {
+        gpio_put(onboard_led, LOW);
+    }
+
+    xTimerDelete(timer, 0);
 }
 
 
@@ -161,6 +218,9 @@ void setup(void *parameters)
 {
     init_print_uart_mutex();
     write_log("Core 0 setup task started!", LOG_LVL_INFO, FUNCNAME_ONLY);
+
+    // Initialize some mutexes
+    diag_mutex_init();
 
     // Pin init
     init_pin(ready_sig, INPUT);
@@ -196,13 +256,17 @@ void setup(void *parameters)
     vTaskCoreAffinitySet(microsw_publish_th, (1 << 1));
     vTaskCoreAffinitySet(other_sensors_publish_th, (1 << 1));
 
+    // Create FreeRTOS timers
+    write_log("Creating FreeRTOS software timers...", LOG_LVL_INFO, FUNCNAME_ONLY);
+    waiting_for_agent_timer = xTimerCreate("waiting_for_agent_timer", pdMS_TO_TICKS(AGENT_WAITING_LED_TOGGLE_DELAY_MS), pdTRUE, NULL, waiting_for_agent_timer_call);
+
     // Start MicroROS tasks
     write_log("Starting MicroROS tasks...", LOG_LVL_INFO, FUNCNAME_ONLY);
     check_bool(bridge->start(configMAX_PRIORITIES - 1, (1 << 0), true), RT_HARD_CHECK);
     check_bool(pub_handler->start(configMAX_PRIORITIES - 2, (1 << 0), true), RT_HARD_CHECK);
 
-    // Indicate successful startup
-    gpio_put(onboard_led, HIGH);
+    // Start the waiting for MicroROS agent LED blink timer
+    xTimerStart(waiting_for_agent_timer, 0);
 
     // Delete setup task
     vTaskDelete(NULL);
@@ -251,7 +315,7 @@ int main()
     write_log("MicroROS pre-init...", LOG_LVL_INFO, FUNCNAME_LINE_ONLY);
     bridge = uRosBridgeAgent::get_instance();
     pub_handler = uRosPublishingHandler::get_instance();
-    bridge->pre_init(uros_init, clean_shutdown);
+    bridge->pre_init(uros_init, clean_shutdown, uros_post_exec_call);
     pub_handler->pre_init(bridge);
     set_diag_pub_queue(pub_handler->get_queue_handle());
 

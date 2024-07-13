@@ -62,10 +62,11 @@ uRosBridgeAgent *uRosBridgeAgent::get_instance()
 
 
 // Pre-init configuration
-void uRosBridgeAgent::pre_init(uros_init_function init_function, uros_fini_function fini_function)
+void uRosBridgeAgent::pre_init(uros_init_function init_function, uros_fini_function fini_function, uros_post_exec_function post_exec_function)
 {
-    uRosBridgeAgent::get_instance()->init_func = init_function;
-    uRosBridgeAgent::get_instance()->fini_func = fini_function;
+    init_func = init_function;
+    fini_func = fini_function;
+    post_exec_func = post_exec_function;
 
     // Set MicroROS default allocators
     rcl_allocator_t rtos_allocators = rcutils_get_zero_initialized_allocator();
@@ -129,17 +130,17 @@ void uRosBridgeAgent::uros_fini()
 {
     current_uros_state = AGENT_DISCONNECTED;
 
-    for (auto sub : subscribers)
+    for (auto &sub : subscribers)
     {
         rcl_subscription_fini(sub, &rc_node);
     }
 
-    for (auto srv : services)
+    for (auto &srv : services)
     {
         rcl_service_fini(srv, &rc_node);
     }
 
-    for (auto pub : publishers)
+    for (auto &pub : publishers)
     {
         rcl_publisher_fini(pub, &rc_node);
     }
@@ -193,7 +194,7 @@ bool uRosBridgeAgent::init_subscriber(rcl_subscription_t *subscriber, const rosi
         }
 
         subscribers.push_back(subscriber);
-        executor_handles += 1;
+        executor_handles ++;
         return true;
     }
 
@@ -219,7 +220,7 @@ bool uRosBridgeAgent::init_service(rcl_service_t *service, const rosidl_service_
         }
         
         services.push_back(service);
-        executor_handles += 1;
+        executor_handles ++;
         return true;
     }
 
@@ -236,7 +237,7 @@ bool uRosBridgeAgent::init_timer(rcl_timer_t *timer, uint64_t period, rcl_timer_
     {
         check_rc(rclc_timer_init_default(timer, &rc_support, RCL_MS_TO_NS(period), callback), RT_HARD_CHECK);
         timers.push_back(timer);
-        executor_handles += 1;
+        executor_handles ++;
         return true;
     }
 
@@ -249,7 +250,7 @@ bool uRosBridgeAgent::init_timer(rcl_timer_t *timer, uint64_t period, rcl_timer_
 // This function is NOT thread-safe.
 bool uRosBridgeAgent::add_subscriber(rcl_subscription_t *subscriber, void *msg, rclc_subscription_callback_t callback, rclc_executor_handle_invocation_t invocation)
 {
-    for (auto sub : subscribers)
+    for (auto &sub : subscribers)
     {
         if (sub == subscriber)
         {
@@ -267,7 +268,7 @@ bool uRosBridgeAgent::add_subscriber(rcl_subscription_t *subscriber, void *msg, 
 // This function is NOT thread-safe.
 bool uRosBridgeAgent::add_service(rcl_service_t *service, void *request, void *response, rclc_service_callback_t callback)
 {
-    for (auto srv : services)
+    for (auto &srv : services)
     {
         if (srv == service)
         {
@@ -285,7 +286,7 @@ bool uRosBridgeAgent::add_service(rcl_service_t *service, void *request, void *r
 // This function is NOT thread-safe.
 bool uRosBridgeAgent::add_timer(rcl_timer_t *timer)
 {
-    for (auto tmr : timers)
+    for (auto &tmr : timers)
     {
         if (tmr == timer)
         {
@@ -344,11 +345,10 @@ uRosBridgeAgent::UROS_STATE uRosBridgeAgent::get_agent_state()
 }
 
 
-// Execution function.
-// Call this after you've initialized everything.
+// Main execution function.
 void uRosBridgeAgent::execute()
 {
-    uint32_t last_exec_time;
+    uint32_t last_exec_time = 0;
     current_uros_state = WAITING_FOR_AGENT;
     write_log("Waiting for agent...", LOG_LVL_INFO, FUNCNAME_ONLY);
 
@@ -364,7 +364,6 @@ void uRosBridgeAgent::execute()
                 write_log("Agent available!", LOG_LVL_INFO, FUNCNAME_ONLY);
                 check_bool(init_func(), RT_HARD_CHECK);
                 current_uros_state = AGENT_CONNECTED;
-                last_exec_time = time_us_32() / 1000;
                 break;
             
             case AGENT_CONNECTED:
@@ -372,17 +371,22 @@ void uRosBridgeAgent::execute()
                 
                 if (current_uros_state == AGENT_CONNECTED) 
                 {
-                    check_exec_interval(last_exec_time, MAX_EXEC_TIME + EXECUTE_DELAY_MS, "Executor execution time exceeded limits!", true);
-                    check_rc(rclc_executor_spin_some(&rc_executor, RCL_MS_TO_NS(EXECUTOR_TIMEOUT_MS)), RT_LOG_ONLY_CHECK);
+                    check_exec_interval(last_exec_time, (MAX_EXEC_TIME + EXECUTE_DELAY_MS), "Executor execution time exceeded limits!", true);
+                    bool exec_success = check_rc(rclc_executor_spin_some(&rc_executor, RCL_MS_TO_NS(EXECUTOR_TIMEOUT_MS)), RT_LOG_ONLY_CHECK);
+
+                    if (post_exec_func != NULL && exec_success)
+                    {
+                        post_exec_func();
+                    }
+
                     vTaskDelay(EXECUTE_DELAY_MS / portTICK_PERIOD_MS);
                 }
-                
+
                 break;
             
             case AGENT_DISCONNECTED:
                 write_log("Agent disconnected!", LOG_LVL_INFO, FUNCNAME_ONLY);
                 fini_func();
-                stop();
                 break;
         }
     }

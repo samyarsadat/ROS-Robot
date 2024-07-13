@@ -58,7 +58,7 @@ jobs:
               with:
                   languages: c-cpp
                   build-mode: manual
-                  queries: security-and-quality
+                  queries: security-extended
 
             - name: Build MicroROS Library
               id: build

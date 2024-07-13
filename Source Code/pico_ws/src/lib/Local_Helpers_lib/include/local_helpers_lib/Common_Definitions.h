@@ -50,6 +50,3 @@
 // ---- MicroROS agent detection ----
 #define uros_agent_find_timeout_ms  100
 #define uros_agent_find_attempts    10
-
-// ---- Misc. typedefs ----
-typedef std::vector<diagnostic_msgs__msg__KeyValue> DIAG_KV_PAIR_VEC;

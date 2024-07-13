@@ -49,6 +49,7 @@ float theta;
 bool ultrasonic_ir_edge_rt_active = false;
 struct repeating_timer motor_odom_rt, ultrasonic_publish_rt, edge_ir_publish_rt, other_sensors_publish_rt, motor_enc_rt;
 TaskHandle_t motor_odom_th, ultrasonic_publish_th, edge_ir_publish_th, other_sensors_publish_th;
+TimerHandle_t waiting_for_agent_timer;
 
 
 
@@ -115,21 +116,14 @@ void clean_shutdown()
     gpio_put(edge_sens_en, LOW);
 
     // MicroROS cleanup
+    pub_handler->stop();
     bridge->uros_fini();
+
+    write_log("MicroROS cleanup completed. Suspending the scheduler...", LOG_LVL_INFO, FUNCNAME_ONLY);
 
     // Suspend the FreeRTOS scheduler
     // No FreeRTOS API calls beyond this point!
     vTaskSuspendAll();
-
-    while (true)
-    {
-        gpio_put(power_led, LOW);
-        gpio_put(onboard_led, LOW);
-        sleep_ms(100);
-        gpio_put(power_led, HIGH);
-        gpio_put(onboard_led, HIGH);
-        sleep_ms(100);
-    }
 }
 
 
@@ -414,8 +408,8 @@ void publish_motor_ctrl_data()
 }
 
 
-// ---- Publish odometry and transform ----
-void publish_odom_tf()
+// ---- Publish odometry ----
+void publish_odom()
 {
     uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
     uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;
@@ -495,7 +489,7 @@ void motor_ctrl_odom_task(void *parameters)
         l_motors.compute_outputs();
 
         publish_motor_ctrl_data();   // Publish motor controller data
-        publish_odom_tf();           // Calculate and publish odometry data
+        publish_odom();           // Calculate and publish odometry data
     }
 }
 
@@ -515,6 +509,31 @@ bool motor_enc_timer_call(struct repeating_timer *rt)
     
     portYIELD_FROM_ISR(pdTRUE);
     return true;
+}
+
+
+// ---- MicroROS executor post-execution function ----
+void uros_post_exec_call()
+{
+    // Cleanup for self-test diagnostics messages.
+    if (!self_test_diag_data_slot_nums.empty())
+    {
+        for (auto slot_num : self_test_diag_data_slot_nums)
+        {
+            destroy_uros_diag_status_msg(slot_num);
+            destroy_diag_kv_pair(slot_num);
+            destroy_diag_kv_pair_refs(slot_num);
+            destroy_diag_msg_object(slot_num);
+            deallocate_slots(slot_num);
+        }
+
+        self_test_diag_status_reports.clear();
+        self_test_diag_status_reports.shrink_to_fit();
+        self_test_diag_data_slot_nums.clear();
+        self_test_diag_data_slot_nums.shrink_to_fit();
+
+        enable_diag_pub();
+    }
 }
 
 
@@ -550,7 +569,7 @@ bool init_mpu6050()
     }
 
     write_log("MPU init failed.", LOG_LVL_WARN, FUNCNAME_ONLY);
-    publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_ENV_SENSORS, DIAG_HWID_ENV_IMU, DIAG_ERR_MSG_INIT_FAILED, DIAG_KV_PAIR_VEC());
+    publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_ENV_SENSORS, DIAG_HWID_ENV_IMU, DIAG_ERR_MSG_INIT_FAILED, DIAG_KV_PAIR_EMPTY());
     return false;*/
 
     return true;
@@ -560,6 +579,8 @@ bool init_mpu6050()
 // ---- Setup repeating timers ----
 void start_timers()
 {
+    write_log("Starting hardware timers...", LOG_LVL_INFO, FUNCNAME_ONLY);
+
     alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, motor_odom_rt_interval, motor_odom_notify, NULL, &motor_odom_rt);
     alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, ultra_pub_rt_interval, publish_ultra_notify, NULL, &ultrasonic_publish_rt);
     alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, edge_ir_pub_rt_interval, publish_edge_ir_notify, NULL, &edge_ir_publish_rt);
@@ -574,11 +595,52 @@ void start_timers()
 }
 
 
+// ---- Waiting for agent LED flash timer callback ----
+void waiting_for_agent_timer_call(TimerHandle_t timer)
+{
+    if (bridge->get_agent_state() == uRosBridgeAgent::WAITING_FOR_AGENT)
+    {
+        gpio_put(onboard_led, !gpio_get_out_level(onboard_led));
+        gpio_put(power_led, !gpio_get_out_level(power_led));
+        return;
+    }
+
+    if (bridge->get_agent_state() == uRosBridgeAgent::AGENT_AVAILABLE)
+    {
+        if (xTimerGetPeriod(timer) != pdMS_TO_TICKS(AGENT_AVAIL_LED_TOGGLE_DELAY_MS))
+        {
+            xTimerChangePeriod(timer, AGENT_AVAIL_LED_TOGGLE_DELAY_MS, 0);
+        }
+
+        gpio_put(onboard_led, !gpio_get_out_level(onboard_led));
+        gpio_put(power_led, !gpio_get_out_level(power_led));
+        return;
+    }
+
+    if (bridge->get_agent_state() == uRosBridgeAgent::AGENT_CONNECTED)
+    {
+        gpio_put(onboard_led, HIGH);
+        gpio_put(power_led, HIGH);
+    }
+
+    else
+    {
+        gpio_put(onboard_led, LOW);
+        gpio_put(power_led, LOW);
+    }
+
+    xTimerDelete(timer, 0);
+}
+
+
 // ---- Setup function (Runs once on core 0) ----
 void setup(void *parameters)
 {
     init_print_uart_mutex();
     write_log("Core 0 setup task started!", LOG_LVL_INFO, FUNCNAME_ONLY);
+
+    // Initialize mutexes
+    diag_mutex_init();
 
     // Pin init
     init_pin(ready_sig, INPUT);
@@ -611,23 +673,29 @@ void setup(void *parameters)
 
     // Create timer tasks
     write_log("Creating timer tasks...", LOG_LVL_INFO, FUNCNAME_ONLY);
-    xTaskCreate(motor_safety_handler_task, "motor_safety_handler", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 3, NULL);
     xTaskCreate(motor_ctrl_odom_task, "motor_odom", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 4, &motor_odom_th);
     xTaskCreate(publish_edge_ir, "publish_edge_ir", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 5, &edge_ir_publish_th);
     xTaskCreate(publish_ultra, "publish_ultra", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 5, &ultrasonic_publish_th);
     xTaskCreate(publish_misc_sens, "publish_misc_sens", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 5, &other_sensors_publish_th);
-    vTaskCoreAffinitySet(ultrasonic_publish_th, (1 << 1));      // Lock the ultrasonic publisher to core 1
-    vTaskCoreAffinitySet(edge_ir_publish_th, (1 << 1));         // Lock the edge IR publisher to core 1
-    vTaskCoreAffinitySet(other_sensors_publish_th, (1 << 1));   // Lock the other sensors publisher to core 1
-    
+    vTaskCoreAffinitySet(ultrasonic_publish_th, (1 << 1));      // Lock task to core 1
+    vTaskCoreAffinitySet(edge_ir_publish_th, (1 << 1));         // Lock task to core 1
+    vTaskCoreAffinitySet(other_sensors_publish_th, (1 << 1));   // Lock task to core 1
+
+    // Other tasks
+    write_log("Creating other tasks...", LOG_LVL_INFO, FUNCNAME_ONLY);
+    xTaskCreate(motor_safety_handler_task, "motor_safety_handler", GENERIC_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 3, NULL);
+
+    // Create FreeRTOS timers
+    write_log("Creating FreeRTOS software timers...", LOG_LVL_INFO, FUNCNAME_ONLY);
+    waiting_for_agent_timer = xTimerCreate("waiting_for_agent_timer", pdMS_TO_TICKS(AGENT_WAITING_LED_TOGGLE_DELAY_MS), pdTRUE, NULL, waiting_for_agent_timer_call);
+
     // Start MicroROS tasks
     write_log("Starting MicroROS tasks...", LOG_LVL_INFO, FUNCNAME_ONLY);
     check_bool(bridge->start(configMAX_PRIORITIES - 1, (1 << 0), true), RT_HARD_CHECK);
     check_bool(pub_handler->start(configMAX_PRIORITIES - 2, (1 << 0), true), RT_HARD_CHECK);
 
-    // Indicate successful startup
-    gpio_put(power_led, HIGH);
-    gpio_put(onboard_led, HIGH);
+    // Start the waiting for MicroROS agent LED blink timer
+    xTimerStart(waiting_for_agent_timer, 0);
 
     // Delete setup task
     vTaskDelete(NULL);
@@ -682,7 +750,7 @@ int main()
     write_log("MicroROS pre-init...", LOG_LVL_INFO, FUNCNAME_LINE_ONLY);
     bridge = uRosBridgeAgent::get_instance();
     pub_handler = uRosPublishingHandler::get_instance();
-    bridge->pre_init(uros_init, clean_shutdown);
+    bridge->pre_init(uros_init, clean_shutdown, uros_post_exec_call);
     pub_handler->pre_init(bridge);
     set_diag_pub_queue(pub_handler->get_queue_handle());
 

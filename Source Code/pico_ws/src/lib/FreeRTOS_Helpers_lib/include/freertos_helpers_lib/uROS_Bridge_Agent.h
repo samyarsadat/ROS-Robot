@@ -52,6 +52,9 @@ class uRosBridgeAgent : public Agent
         typedef bool (*uros_init_function)(void);
         typedef void (*uros_fini_function)(void);
 
+        // Post executor execution function typedef
+        typedef void (*uros_post_exec_function)(void);
+
         // MicroROS agent state enum
         enum UROS_STATE {WAITING_FOR_AGENT, AGENT_AVAILABLE, AGENT_CONNECTED, AGENT_DISCONNECTED};
 
@@ -62,7 +65,7 @@ class uRosBridgeAgent : public Agent
         static uRosBridgeAgent* get_instance();
 
         // Pre-init configuration
-        void pre_init(uros_init_function init_function, uros_fini_function fini_function);
+        void pre_init(uros_init_function init_function, uros_fini_function fini_function, uros_post_exec_function post_exec_function);
 
         // Initialize MicroROS node.
         // This function should be called before any other uROS-related functions.
@@ -135,6 +138,9 @@ class uRosBridgeAgent : public Agent
         // Initialize function
         uros_init_function init_func;
         uros_fini_function fini_func;
+
+        // Post executor run function
+        uros_post_exec_function post_exec_func;
 
         // MicroROS agent state
         UROS_STATE current_uros_state;

@@ -24,6 +24,7 @@
 #pragma once
 #include "pico/stdlib.h"
 #include <vector>
+#include <string>
 using namespace std;
 
 
@@ -34,7 +35,7 @@ enum PIN_CONFIG_MODE {OUTPUT, OUTPUT_PWM, INPUT, INPUT_PULLUP, INPUT_PULLDOWN, I
 enum PIN_STATE {LOW, HIGH};
 
 // ---- Misc. ----
-#define temp_sens_vref         3.25f   // Volts
+#define temp_sens_vref         3.26f   // Volts
 #define adc_conversion_factor  (temp_sens_vref / (1 << 12))
 
 
@@ -72,3 +73,6 @@ int get_gpio_adc_channel(uint gpio);
 // ---- Converts Euler angles to a quaternion ----
 // ---- Output: [x, y, z, w] ----
 vector<float> euler_to_quaternion(float roll, float pitch, float yaw);
+
+// ---- Get a string representation of a boolean array ----
+string bool_array_as_str(bool bool_array[], uint16_t array_size);

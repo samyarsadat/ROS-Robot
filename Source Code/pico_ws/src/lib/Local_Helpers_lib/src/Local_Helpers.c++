@@ -24,7 +24,6 @@
 
 // ------- Libraries & Modules -------
 #include "local_helpers_lib/Local_Helpers.h"
-#include "freertos_helpers_lib/uROS_Publishing_Handler.h"
 #include <rmw_microros/rmw_microros.h>
 #include "pico/stdio_uart.h"
 #include "pico/stdio/driver.h"
@@ -36,14 +35,7 @@
 
 // ------- Functions ------- 
 
-// ----- RETURN CHECKERS -----
 // Note: clean_shutdown() must be defined elsewhere!
-// Note: diagnostics_msg (type: diagnostic_msgs__msg__DiagnosticStatus) must be defined eslewhere!
-// Note: diagnostics_pub (type: rcl_publisher_t) must be defined eslewhere!
-
-QueueHandle_t pub_queue;
-extern diagnostic_msgs__msg__DiagnosticStatus diagnostics_msg;
-extern rcl_publisher_t diagnostics_pub;
 extern void clean_shutdown();
 
 
@@ -59,14 +51,14 @@ bool check_rc(rcl_ret_t rctc, RT_CHECK_MODE mode, const char *func, uint16_t lin
             case RT_HARD_CHECK:
                 snprintf(buffer, sizeof(buffer), "RCL Return check failed: [code: %d, RT_HARD_CHECK]", rctc);
                 write_log(buffer, LOG_LVL_FATAL, FUNCNAME_LINE_ONLY, func, "", line);
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_SYSTEM, DIAG_ID_SYS_UROS, DIAG_ERR_MSG_UROS_RC_CHECK_FAIL, DIAG_KV_PAIR_VEC());
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_SYSTEM, DIAG_ID_SYS_UROS, DIAG_ERR_MSG_UROS_RC_CHECK_FAIL, NULL);
                 clean_shutdown();
                 break;
 
             case RT_SOFT_CHECK:
                 snprintf(buffer, sizeof(buffer), "RCL Return check failed: [code: %d, RT_SOFT_CHECK]", rctc);
                 write_log(buffer, LOG_LVL_ERROR, FUNCNAME_LINE_ONLY, func, "", line);
-                publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_SYSTEM, DIAG_ID_SYS_UROS, DIAG_WARN_MSG_UROS_RC_CHECK_FAIL, DIAG_KV_PAIR_VEC());
+                publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_SYSTEM, DIAG_ID_SYS_UROS, DIAG_WARN_MSG_UROS_RC_CHECK_FAIL, NULL);
                 break;
             
             case RT_LOG_ONLY_CHECK:
@@ -92,13 +84,13 @@ bool check_bool(bool function, RT_CHECK_MODE mode, const char *func, uint16_t li
         {
             case RT_HARD_CHECK:
                 write_log("BOOL Return check failed: [RT_HARD_CHECK]", LOG_LVL_FATAL, FUNCNAME_LINE_ONLY, func, "", line);
-                publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_SYSTEM, DIAG_ID_SYS_GENERAL, DIAG_ERR_MSG_BOOL_RT_CHECK_FAIL, DIAG_KV_PAIR_VEC());
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_SYSTEM, DIAG_ID_SYS_GENERAL, DIAG_ERR_MSG_BOOL_RT_CHECK_FAIL, NULL);
                 clean_shutdown();
                 break;
 
             case RT_SOFT_CHECK:
                 write_log("BOOL Return check failed: [RT_SOFT_CHECK]", LOG_LVL_ERROR, FUNCNAME_LINE_ONLY, func, "", line);
-                publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_SYSTEM, DIAG_ID_SYS_GENERAL, DIAG_WARN_MSG_BOOL_RT_CHECK_FAIL, DIAG_KV_PAIR_VEC());
+                publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_SYSTEM, DIAG_ID_SYS_GENERAL, DIAG_WARN_MSG_BOOL_RT_CHECK_FAIL, NULL);
                 break;
             
             case RT_LOG_ONLY_CHECK:
@@ -111,73 +103,6 @@ bool check_bool(bool function, RT_CHECK_MODE mode, const char *func, uint16_t li
     }
 
     return function;
-}
-
-
-// ---- Set diagonstics MicroROS publishing queue ----
-void set_diag_pub_queue(QueueHandle_t queue)
-{
-    pub_queue = queue;
-}
-
-
-// ---- Create a diagnostics key-value pair ----
-diagnostic_msgs__msg__KeyValue create_diag_kv_pair(std::string key, std::string value)
-{
-    diagnostic_msgs__msg__KeyValue kv_pair;
-    
-    kv_pair.key.data = key.data();
-    kv_pair.key.size = strlen(kv_pair.key.data);
-    kv_pair.value.data = value.data();
-    kv_pair.value.size = strlen(kv_pair.value.data);
-
-    return kv_pair;
-}
-
-
-// ---- Create a diagnostic status message ----
-diagnostic_msgs__msg__DiagnosticStatus create_diag_msg(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values)
-{
-    diagnostic_msgs__msg__DiagnosticStatus diag_status;
-    
-    diag_status.name.data = hw_name.data();
-    diag_status.name.size = hw_name.size();
-    diag_status.hardware_id.data = hw_id.data();
-    diag_status.hardware_id.size = hw_id.size();
-    diag_status.message.data = msg.data();
-    diag_status.message.size = msg.size();
-    diag_status.values.data = NULL;
-    diag_status.values.size = 0;
-    diag_status.level = level;
-
-    if (!key_values.empty())
-    {
-        diag_status.values.data = key_values.data();
-        diag_status.values.size = key_values.size();
-    }
-
-    return diag_status;
-}
-
-
-// ---- Diagnostics error reporting ----
-void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values)
-{
-    diagnostics_msg = create_diag_msg(level, hw_name, hw_id, msg, key_values);
-    write_log("Diagnostic report! [hwname: " + hw_name + ", hwid: " + hw_id + ", lvl: " + std::to_string(level) + "]", LOG_LVL_WARN, FUNCNAME_ONLY);
-
-    /* 
-        rt_check_mode is intentionally set to log-only to prevent infinite recursion of publish_diag_report().
-        This edge case may occur if MicroROS is not initialized properly when check_rc() is called 
-        (this could happen if check_rc() fails for rclc_node_init_default(), for example).
-        In this case, this publish function would also not return RCL_RET_OK, resulting in its
-        check_rc() calling publish_diag_report() and then the same thing happening over and over again.
-    */
-    uRosPublishingHandler::PublishItem_t pub_item;
-    pub_item.publisher = &diagnostics_pub;
-    pub_item.message = &diagnostics_msg;
-    pub_item.rt_check_mode = RT_LOG_ONLY_CHECK;
-    xQueueSendToBack(pub_queue, (void *) &pub_item, 0);
 }
 
 
@@ -299,8 +224,7 @@ void write_log(std::string msg, LOG_LEVEL lvl, LOG_SOURCE_VERBOSITY src_verb, co
 // ---- Pings the MicroROS agent ----
 bool ping_agent()
 {
-    bool success = (rmw_uros_ping_agent(uros_agent_find_timeout_ms, uros_agent_find_attempts) == RMW_RET_OK);
-    return success;
+    return (rmw_uros_ping_agent(uros_agent_find_timeout_ms, uros_agent_find_attempts) == RMW_RET_OK);
 }
 
 
@@ -328,10 +252,10 @@ bool check_exec_interval(uint32_t &last_call_time_ms, uint16_t max_exec_time_ms,
         if (publish_diag)
         {
             std::string report_str = log_msg + " [func: " + func + "]";
-            DIAG_KV_PAIR_VEC kv_pairs;
-            kv_pairs.push_back(create_diag_kv_pair("actual_time", std::to_string(exec_time_ms) + "ms"));
-            kv_pairs.push_back(create_diag_kv_pair("time_limit", std::to_string(max_exec_time_ms) + "ms"));
-            publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_SYSTEM, DIAG_ID_SYS_TIMERS, report_str, kv_pairs);
+            std::vector<diag_kv_pair_item_t> kv_pairs;
+            kv_pairs.push_back(diag_kv_pair_item_t{"actual_time", std::to_string(exec_time_ms) + "ms"});
+            kv_pairs.push_back(diag_kv_pair_item_t{"time_limit", std::to_string(max_exec_time_ms) + "ms"});
+            publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_SYSTEM, DIAG_ID_SYS_TIMERS, report_str, &kv_pairs);
         }
 
         return false;

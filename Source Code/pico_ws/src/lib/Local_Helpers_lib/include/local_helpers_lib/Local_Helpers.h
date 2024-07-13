@@ -40,6 +40,29 @@ enum LOG_LEVEL {LOG_LVL_INFO, LOG_LVL_WARN, LOG_LVL_ERROR, LOG_LVL_FATAL};
 enum LOG_SOURCE_VERBOSITY {FUNCNAME_ONLY, FILENAME_LINE_ONLY, FUNCNAME_LINE_ONLY, FILENAME_LINE_FUNCNAME};
 
 
+
+// ------- Structs -------
+
+// Diagnostic key-value pair data item for external use.
+struct diag_kv_pair_item
+{
+    std::string_view key;
+    std::string_view value;
+};
+
+typedef struct diag_kv_pair_item diag_kv_pair_item_t;
+
+// Ready to publish diagnostics message item struct.
+struct diag_publish_item
+{
+    diagnostic_msgs__msg__DiagnosticStatus *diag_msg;
+    int allocated_slot;
+};
+
+typedef struct diag_publish_item diag_publish_item_t;
+
+
+
 // ------- Functions ------- 
 
 // ----- RETURN CHECKERS -----
@@ -56,14 +79,53 @@ bool check_bool(bool function, RT_CHECK_MODE mode, const char *func=__builtin_FU
 // ---- Set MicroROS publishing queue ----
 void set_diag_pub_queue(QueueHandle_t queue);
 
-// ---- Create a diagnostics key-value pair ----
-diagnostic_msgs__msg__KeyValue create_diag_kv_pair(std::string key, std::string value);
+// ---- Initialize diagnostics mutexes ----
+void diag_mutex_init();
 
-// ---- Create a diagnostic status message ----
-diagnostic_msgs__msg__DiagnosticStatus create_diag_msg(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values);
+// ---- Initialize diagnostics publisher & message ----
+void diag_uros_init();
+
+// ---- Allocate array slots for a message ----
+int allocate_slots();
+
+// ---- Deallocate array slots ----
+void deallocate_slots(int allocated_slot);
+
+// ---- Populate a diagnostics key-value pair vector ----
+void populate_diag_kv_pair(std::vector<diag_kv_pair_item_t> *kv_pairs, int allocated_slot);
+
+// ---- Populate a diagnostics key-value pair reference vector ----
+void populate_diag_kv_pair_refs(int allocated_slot);
+
+// ---- Populate the diagnostic status message of the given slot ----
+void populate_diag_msg_object(uint8_t level, std::string_view hw_name, std::string_view hw_id, std::string_view msg, int allocated_slot);
+
+// ---- Destroy a diagnostic status message ----
+void destroy_diag_msg_object(int allocated_slot);
+
+// ---- Destroy MicroROS DiagnosticStatus message ----
+void destroy_uros_diag_status_msg(int allocated_slot);
+
+// ---- Destroy a diagnostics key-value pair vector ----
+void destroy_diag_kv_pair(int allocated_slot);
+
+// ---- Destroy a diagnostics key-value pair reference vector ----
+void destroy_diag_kv_pair_refs(int allocated_slot);
+
+// ---- Prepares a diag_publish_item_t struct for diagnostics message publishing based on inputs ----
+diag_publish_item_t prepare_diag_publish_item(uint8_t level, std::string_view hw_name, std::string_view hw_id, std::string_view msg, std::vector<diag_kv_pair_item_t> *kv_pairs);
+
+// ---- Returns a DiagnosticStatus message from the provided global data array slot ----
+diagnostic_msgs__msg__DiagnosticStatus get_diag_msg(int allocated_slot);
 
 // ---- Diagnostics error reporting ----
-void publish_diag_report(uint8_t level, std::string hw_name, std::string hw_id, std::string msg, std::vector<diagnostic_msgs__msg__KeyValue> key_values);
+void publish_diag_report(uint8_t level, std::string_view hw_name, std::string_view hw_id, std::string_view msg, std::vector<diag_kv_pair_item_t> *kv_pairs);
+
+// ---- Temporarily disable publish_diag_report() ----
+void disable_diag_pub();
+
+// ---- Re-enable publish_diag_report() ----
+void enable_diag_pub();
 
 // ---- Initialize ADC mutex ----
 void adc_init_mutex();

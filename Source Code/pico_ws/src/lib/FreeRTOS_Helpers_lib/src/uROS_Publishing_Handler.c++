@@ -71,7 +71,7 @@ void uRosPublishingHandler::pre_init(uRosBridgeAgent *bridge_instance)
 
     if (publishing_queue == NULL)
     {
-        write_log("Error creating publishing queue.", LOG_LVL_FATAL, FUNCNAME_ONLY);
+        write_log("Error creating publishing queue.", LOG_LVL_ERROR, FUNCNAME_ONLY);
     }
 }
 
@@ -98,7 +98,13 @@ void uRosPublishingHandler::execute()
             if (!check_rc(rcl_publish(queue_item.publisher, queue_item.message, NULL), queue_item.rt_check_mode) && queue_item.failed_callback != NULL)
             {
                 // Call the failed publish callback, if available.
-                queue_item.failed_callback(queue_item.publisher, queue_item.message);
+                queue_item.failed_callback(queue_item.publisher, queue_item.message, queue_item.pub_fail_user_param);
+            }
+
+            if (queue_item.post_pub_callback != NULL)
+            {
+                // Call the post-publish callback, if available.
+                queue_item.post_pub_callback(queue_item.publisher, queue_item.message, queue_item.post_pub_user_param);
             }
         }
     }

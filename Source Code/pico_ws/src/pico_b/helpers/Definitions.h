@@ -36,9 +36,9 @@
 #define mode_sw     22
 
 // ---- Raspberry Pi camera LEDs ----
-#define cam_led_1  18
-#define cam_led_2  19
-#define cam_led_3  20
+#define cam_led_1  20
+#define cam_led_2  18
+#define cam_led_3  19
 #define cam_led_4  21
 
 // ---- Micro switches ----
@@ -56,20 +56,22 @@
 // ------- Other definitions -------
 
 // ---- Battery ----
-#define batt_voltage_divider_r1  10 * 1000    // In ohms (10k ohms)
+#define batt_voltage_divider_r1  10 * 1000     // In ohms (10k ohms)
 #define batt_voltage_divider_r2  2.67 * 1000   // In ohms (2.7k ohms)
 
 // ---- MicroROS node config ----
-#define UROS_NODE_NAME        "pico_b"
-#define UROS_NODE_NAMESPACE   "io"
-#define UROS_EXEC_TIMEOUT_MS  80   // In milliseconds
+#define UROS_NODE_NAME                     "pico_b"
+#define UROS_NODE_NAMESPACE                "io"
+#define AGENT_WAITING_LED_TOGGLE_DELAY_MS  500   // In milliseconds
+#define AGENT_AVAIL_LED_TOGGLE_DELAY_MS    250   // In milliseconds
 
 // ---- Repeating timer intervals ----
-#define microsw_pub_rt_interval   200   // In milliseconds
-#define sensors_pub_rt_interval   80    // In milliseconds
+#define microsw_pub_rt_interval  200   // In milliseconds
+#define sensors_pub_rt_interval  80    // In milliseconds
 
 // ---- Misc. ----
-#define SETUP_TASK_STACK_DEPTH       1024
-#define TIMER_TASK_STACK_DEPTH       1024
+#define SETUP_TASK_STACK_DEPTH       1024       // In FreeRTOS words
+#define TIMER_TASK_STACK_DEPTH       1024       // In FreeRTOS words
+#define GENERIC_TASK_STACK_DEPTH     1024       // In FreeRTOS words
 #define STARTUP_WAIT_TIME_S          3          // In seconds
-#define microsw_led_test_timeout_ms  60 * 1000  // 60 seconds
+#define microsw_led_test_timeout_ms  15 * 1000  // 15 seconds

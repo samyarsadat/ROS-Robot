@@ -108,13 +108,13 @@ void motor_safety_handler_task(void *parameters)
                 if (queue_item.id == right_motor_controller_id)
                 {
                     write_log("Critical Motor Safety condition triggered! [Right]", LOG_LVL_FATAL, FUNCNAME_LINE_ONLY);
-                    publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_MOTOR, DIAG_ID_MOTOR_CTRL_R, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_PAIR_VEC());
+                    publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_MOTOR, DIAG_ID_MOTOR_CTRL_R, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
                 }
                 
                 else
                 {
                     write_log("Critical Motor Safety condition triggered! [Left]", LOG_LVL_FATAL, FUNCNAME_LINE_ONLY);
-                    publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_MOTOR, DIAG_ID_MOTOR_CTRL_L, DIAG_ERR_MSG_MOTOR_SAFETY, DIAG_KV_PAIR_VEC());
+                    publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_MOTOR, DIAG_ID_MOTOR_CTRL_L, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
                 }
             }
         }

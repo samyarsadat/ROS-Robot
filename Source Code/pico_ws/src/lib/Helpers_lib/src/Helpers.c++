@@ -173,7 +173,7 @@ vector<bool> standard_score_check(vector<float> &numbers, float z_score_threshho
 float get_rp2040_temp()
 {
     adc_select_input(4);
-    float reading_volts = adc_read() * adc_conversion_factor;
+    double reading_volts = adc_read() * adc_conversion_factor;
     float reading_celsius = 27 - (reading_volts - 0.706) / 0.001721;  // Formula taken from the RP2040 datasheet.
     return reading_celsius;
 }
@@ -213,4 +213,26 @@ vector<float> euler_to_quaternion(float roll, float pitch, float yaw)
     quaternion.push_back(cr * cp * cy + sr * sp * sy);  // w
 
     return quaternion;
+}
+
+
+// ---- Get a string representation of a boolean array ----
+string bool_array_as_str(bool bool_array[], uint16_t array_size)
+{
+    string ret_str = "[";
+
+    for (uint16_t i = 0; i < array_size; i++)
+    {
+        if (i < array_size - 1)
+        {
+            ret_str += bool_array[i] ? "true, " : "false, ";
+        }
+
+        else
+        {
+            ret_str += bool_array[i] ? "true]" : "false]";
+        }
+    }
+
+    return ret_str;
 }

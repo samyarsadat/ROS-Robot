@@ -22,6 +22,7 @@
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
 #include "helpers_lib/Helpers.h"
+#include "freertos_helpers_lib/uROS_Publishing_Handler.h"
 #include "IO_Helpers_Mux.h"
 #include "IO_Helpers_Edge.h"
 #include "IO_Helpers_Ultrasonic.h"
@@ -32,8 +33,19 @@
 #include "motor_control_lib/Motor.h"
 #include "motor_control_lib/Motor_Safety.h"
 #include <functional>
+#include "FreeRTOS.h"
+#include "semphr.h"
 
 
+
+// ------- Global variables -------
+std::vector<int> self_test_diag_data_slot_nums;
+std::vector<diagnostic_msgs__msg__DiagnosticStatus> self_test_diag_status_reports;
+SemaphoreHandle_t run_self_test_mutex = NULL;
+
+
+
+// ------- Functions -------
 
 // ---- Run self-test functions service callback ----
 void run_self_test_callback(const void *req, void *res)
@@ -45,11 +57,11 @@ void run_self_test_callback(const void *req, void *res)
 
     diagnostic_msgs__srv__SelfTest_Request *req_in = (diagnostic_msgs__srv__SelfTest_Request *) req;
     diagnostic_msgs__srv__SelfTest_Response *res_in = (diagnostic_msgs__srv__SelfTest_Response *) res;
-    std::vector<diagnostic_msgs__msg__DiagnosticStatus> diag_status_reports;
     uint8_t loop_index = 0;
 
     write_log("Received self-test request.", LOG_LVL_INFO, FUNCNAME_ONLY);
     res_in->passed = true;
+    disable_diag_pub();
 
     
     // Perform IR edge sensor self-test
@@ -65,22 +77,25 @@ void run_self_test_callback(const void *req, void *res)
         if (loop_index > 4) { strncpy(HW_ID, DIAG_ID_IR_EDGE_B, sizeof(HW_ID)); }
         else { strncpy(HW_ID, DIAG_ID_IR_EDGE_F, sizeof(HW_ID)); }
 
-        DIAG_KV_PAIR_VEC kv_pairs;
-        kv_pairs.push_back(create_diag_kv_pair("sensor_num", std::to_string(loop_index)));
+        diag_publish_item_t pub_item;
+        std::vector<diag_kv_pair_item_t> kv_pairs;
+        kv_pairs.push_back(diag_kv_pair_item_t{"sensor_num", std::to_string(loop_index)});
 
         if (result)
         {
             snprintf(buffer, sizeof(buffer), DIAG_ERR_MSG_IR_EDGE_TEST_FAIL, loop_index);
-            diag_status_reports.push_back(create_diag_msg(DIAG_LVL_ERROR, DIAG_NAME_IR_EDGE, HW_ID, buffer, kv_pairs));
+            pub_item = prepare_diag_publish_item(DIAG_LVL_ERROR, DIAG_NAME_IR_EDGE, HW_ID, buffer, &kv_pairs);
             res_in->passed = false;
         }
 
         else
         {
             snprintf(buffer, sizeof(buffer), DIAG_OK_MSG_IR_EDGE_TEST_PASS, loop_index);
-            diag_status_reports.push_back(create_diag_msg(DIAG_LVL_OK, DIAG_NAME_IR_EDGE, HW_ID, buffer, kv_pairs));
+            pub_item = prepare_diag_publish_item(DIAG_LVL_OK, DIAG_NAME_IR_EDGE, HW_ID, buffer, &kv_pairs);
         }
 
+        self_test_diag_status_reports.push_back(*pub_item.diag_msg);
+        self_test_diag_data_slot_nums.push_back(pub_item.allocated_slot);
         loop_index ++;
     }
 
@@ -107,33 +122,35 @@ void run_self_test_callback(const void *req, void *res)
         else if (loop_index == 2) { strncpy(HW_ID, DIAG_ID_ULTRASONIC_R, sizeof(HW_ID)); }
         else if (loop_index == 3) { strncpy(HW_ID, DIAG_ID_ULTRASONIC_L, sizeof(HW_ID)); }
 
-        DIAG_KV_PAIR_VEC kv_pairs;
-        kv_pairs.push_back(create_diag_kv_pair("measured_distance", std::to_string(ultra_test_results[i].measured_distance)));
-        kv_pairs.push_back(create_diag_kv_pair("status_code", std::to_string(ultra_test_results[i].status)));
+        diag_publish_item_t pub_item;
+        std::vector<diag_kv_pair_item_t> kv_pairs;
+        kv_pairs.push_back(diag_kv_pair_item_t{"measured_distance", std::to_string(ultra_test_results[i].measured_distance)});
+        kv_pairs.push_back(diag_kv_pair_item_t{"status_code", std::to_string(ultra_test_results[i].status)});
         
         if (ultra_test_results[i].status == ULTRA_TEST_PASS)
         {
             snprintf(buffer, sizeof(buffer), DIAG_OK_MSG_ULTRA_TEST_PASS, (int) ultra_test_results[i].status);
-            diag_status_reports.push_back(create_diag_msg(DIAG_LVL_OK, DIAG_NAME_ULTRASONICS, HW_ID, buffer, kv_pairs));
+            pub_item = prepare_diag_publish_item(DIAG_LVL_OK, DIAG_NAME_ULTRASONICS, HW_ID, buffer, &kv_pairs);
         }
 
         else
         {
             snprintf(buffer, sizeof(buffer), DIAG_ERR_MSG_ULTRA_TEST_FAIL, (int) ultra_test_results[i].status);
-            diag_status_reports.push_back(create_diag_msg(DIAG_LVL_ERROR, DIAG_NAME_ULTRASONICS, HW_ID, buffer, kv_pairs));
+            pub_item = prepare_diag_publish_item(DIAG_LVL_ERROR, DIAG_NAME_ULTRASONICS, HW_ID, buffer, &kv_pairs);
             res_in->passed = false;
         }
 
+        self_test_diag_status_reports.push_back(*pub_item.diag_msg);
+        self_test_diag_data_slot_nums.push_back(pub_item.allocated_slot);
         loop_index ++;
     }
 
 
-    res_in->status.data = diag_status_reports.data();
-    res_in->status.size = diag_status_reports.size();
+    res_in->status.data = self_test_diag_status_reports.data();
+    res_in->status.size = self_test_diag_status_reports.size();
 
     // TODO: IMU self-test
     // Omitting motor test as the Motor Safety module practically acts as a constantly running "self-test" for the motors.
 
     write_log("Self-test completed.", LOG_LVL_INFO, FUNCNAME_ONLY);
-    write_log("Size of payload: " + std::to_string(sizeof(*res_in) + (res_in->status.size * sizeof(diagnostic_msgs__msg__DiagnosticStatus))) + " bytes.", LOG_LVL_INFO, FUNCNAME_ONLY);
 }
