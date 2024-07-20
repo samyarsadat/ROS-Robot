@@ -162,6 +162,15 @@ void publish_misc_sens(void *parameters)
             misc_sensor_msg.imu_temp = mpu6050_get_temperature_c(&mpu6050);
         }
 
+        // HMC5883L Compass
+        // TODO: NOT INSTALLED YET!
+        /*if (...)
+        {
+            misc_sensor_msg.imu_compass.x;
+            misc_sensor_msg.imu_compass.y;
+            misc_sensor_msg.imu_compass.z;
+        }*/
+
         uRosPublishingHandler::PublishItem_t pub_item;
         pub_item.publisher = &misc_sensor_pub;
         pub_item.message = &misc_sensor_msg;

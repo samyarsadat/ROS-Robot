@@ -94,6 +94,9 @@
 #define configGENERATE_RUN_TIME_STATS           0
 #define configUSE_TRACE_FACILITY                1
 #define configUSE_STATS_FORMATTING_FUNCTIONS    0
+//#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()
+//#define portGET_RUN_TIME_COUNTER_VALUE()        (time_us_64() / 1000)
+//#define configRECORD_STACK_HIGH_ADDRESS         1
 
 
 /* Co-routine related definitions. */

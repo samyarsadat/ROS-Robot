@@ -378,6 +378,8 @@ void publish_motor_ctrl_data()
     mtr_ctrl_r_state_msg.total_current = 0;            // TODO: Sensor not installed (for V2)
     mtr_ctrl_r_state_msg.driver_out_voltage = -1.0f;   // TODO: Sensor not installed (for V2)
 
+    mtr_ctrl_r_state_msg.controller_enabled = r_motors.is_enabled();
+
     // LEFT
     mtr_ctrl_l_state_msg.measured_dirs[0] = (l_motor_1_enc.get_direction() == MotorEncoder::FORWARD);
     mtr_ctrl_l_state_msg.measured_dirs[1] = (l_motor_2_enc.get_direction() == MotorEncoder::FORWARD);
@@ -394,6 +396,8 @@ void publish_motor_ctrl_data()
 
     mtr_ctrl_l_state_msg.total_current = 0;            // TODO: Sensor not installed (for V2)
     mtr_ctrl_l_state_msg.driver_out_voltage = -1.0f;   // TODO: Sensor not installed (for V2)
+
+    mtr_ctrl_l_state_msg.controller_enabled = l_motors.is_enabled();
 
     // PUBLISH
     uRosPublishingHandler::PublishItem_t mtr_left, mtr_right;
