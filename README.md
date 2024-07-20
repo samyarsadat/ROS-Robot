@@ -14,9 +14,11 @@
 </p>
 
 ----
-**Note:**<br>
-This project is still under development.
-<br><br><br>
+> [!NOTE]
+> This project is still under development!
+
+<br><br>
+
 <img src="Assets/Renders/GitHub_Render_1_Edited.png">
 This is a 3D render of the CAD designs.
 <br><br>
