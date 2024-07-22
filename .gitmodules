@@ -16,3 +16,6 @@
 [submodule "MPU6050 Library"]
 	path = Source Code/pico_ws/src/lib/MPU_lib
 	url = https://github.com/HumansAreWeak/rpi-pico-mpu6050
+[submodule "Common Helper Libraries"]
+	path = Source Code/pico_ws/src/lib/Common_libs
+	url = https://github.com/samyarsadat/Pico-Libraries
