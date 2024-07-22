@@ -88,7 +88,7 @@
 #define ultra_fov                    30
 #define ultra_min_dist               1         // In cm
 #define ultra_max_dist               400       // In cm
-#define ultrasonic_signal_timout_us  14*1000   // 32 milliseconds
+#define ultrasonic_signal_timout_us  24*1000   // 24 milliseconds
 #define ultra_selftest_measurements  5
 #define ultra_selftest_range_min_cm  18        // In cm
 #define ultra_selftest_range_max_cm  22        // In cm
@@ -101,13 +101,14 @@
 #define ir_self_test_z_score_threshhold  2.5f
 
 // ---- Motor controller & safety ----
-#define motor_safety_trigger_timeout        3500   // In milliseconds
-#define motor_actual_vs_set_extra_timeout   4000   // In milliseconds
-#define motor_single_side_max_difference    10     // In RPM
-#define motor_set_vs_actual_max_difference  60     // In RPM
-#define motor_rpm_method_1_cutoff           18     // In RPM
+#define motor_safety_trigger_timeout        3500     // In milliseconds
+#define motor_actual_vs_set_extra_timeout   4000     // In milliseconds
+#define motor_single_side_max_difference    10       // In RPM
+#define motor_set_vs_actual_max_difference  60       // In RPM
+#define motor_rpm_method_1_cutoff           18       // In RPM
 #define right_motor_controller_id           0
 #define left_motor_controller_id            1
+#define motor_auto_reverse_cooldown_ms      4*1000   // 4 seconds
 
 // ---- Motor specs ----
 #define enc_pulses_per_rot              2

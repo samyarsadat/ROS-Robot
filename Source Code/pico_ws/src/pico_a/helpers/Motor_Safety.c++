@@ -38,6 +38,7 @@ typedef struct MotorSafetyQueueItem MotorSafetyQueueItem_t;
 
 
 // ------- Global variables -------
+uint32_t last_motor_auto_reverse = 0;
 QueueHandle_t motor_safety_queue = NULL;
 extern Motor r_motors, l_motors;
 extern void clean_shutdown();
@@ -87,23 +88,32 @@ void motor_safety_handler_task(void *parameters)
             snprintf(buffer, sizeof(buffer), "Motor Safety triggered: [code: %d, id: %d]", static_cast<int>(queue_item.condition), queue_item.id);
             write_log(buffer, LOG_LVL_INFO, FUNCNAME_LINE_ONLY);
 
-            // FIXME: This causes the motors to jitter back and forth, a cooldown period must be added!
-            /*if (queue_item.condition == MotorSafety::safety_trigger_conditions::SET_VS_ACTUAL_DIR_DIFF)
+            // Motor direction auto reverse.
+            if (queue_item.condition == MotorSafety::safety_trigger_conditions::SET_VS_ACTUAL_DIR_DIFF)
             {
-                if (queue_item.id == right_motor_controller_id)
+                if ((time_us_32() - last_motor_auto_reverse) > (motor_auto_reverse_cooldown_ms * 1000))
                 {
-                    write_log("SET_VS_ACTUAL_DIR_DIFF triggered. Reversing control direction. [Right]", LOG_LVL_WARN, FUNCNAME_LINE_ONLY);
-                    r_motors.set_direction_reversed(!r_motors.get_dir_reversed());
-                }
+                    if (queue_item.id == right_motor_controller_id)
+                    {
+                        if (r_motors.get_pid_ctrl_speed() > 0)
+                        {
+                            write_log("SET_VS_ACTUAL_DIR_DIFF triggered. Reversing control direction. [Right]", LOG_LVL_WARN, FUNCNAME_LINE_ONLY);
+                            r_motors.set_direction_reversed(!r_motors.get_dir_reversed());
+                        }
+                    }
 
-                else
-                {
-                    write_log("SET_VS_ACTUAL_DIR_DIFF triggered. Reversing control direction. [Left]", LOG_LVL_WARN, FUNCNAME_LINE_ONLY);
-                    l_motors.set_direction_reversed(!l_motors.get_dir_reversed());
+                    else if (queue_item.id == left_motor_controller_id)
+                    {
+                        if (l_motors.get_pid_ctrl_speed() > 0)
+                        {
+                            write_log("SET_VS_ACTUAL_DIR_DIFF triggered. Reversing control direction. [Left]", LOG_LVL_WARN, FUNCNAME_LINE_ONLY);
+                            l_motors.set_direction_reversed(!l_motors.get_dir_reversed());
+                        }
+                    }
                 }
             }
 
-            else*/
+            else
             {
                 if (queue_item.id == right_motor_controller_id)
                 {
@@ -111,7 +121,7 @@ void motor_safety_handler_task(void *parameters)
                     publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_MOTOR, DIAG_ID_MOTOR_CTRL_R, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);
                 }
                 
-                else
+                else if (queue_item.id == left_motor_controller_id)
                 {
                     write_log("Critical Motor Safety condition triggered! [Left]", LOG_LVL_FATAL, FUNCNAME_LINE_ONLY);
                     publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_MOTOR, DIAG_ID_MOTOR_CTRL_L, DIAG_ERR_MSG_MOTOR_SAFETY, NULL);

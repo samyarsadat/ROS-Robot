@@ -48,7 +48,7 @@ float check_return_distance(float dist, std::string_view ultra_hwid)
         // NOTE TO SELF: This could become a problem if the robot is placed in an open space where the sensors might not get their signals back.
         std::vector<diag_kv_pair_item_t> kv_pairs;
         kv_pairs.push_back(diag_kv_pair_item_t{"measured_distance", std::to_string(dist)});
-        publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_ULTRASONICS, ultra_hwid, DIAG_WARN_MSG_ULTRA_MAX_LIM_EXCEED, NULL);
+        publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_ULTRASONICS, ultra_hwid, DIAG_WARN_MSG_ULTRA_MAX_LIM_EXCEED, &kv_pairs);
 
         write_log("Ultrasonic sensor distance above maximum limit! " + log_distance, LOG_LVL_WARN, FUNCNAME_LINE_ONLY);
         return INF;
@@ -66,6 +66,8 @@ float get_ultra_dist_mux(uint trig_io, uint echo_io, std::string ultra_hwid)
 {
     if (check_bool(take_mux_mutex(), RT_LOG_ONLY_CHECK))
     {
+        uint32_t start_time;
+
         set_mux_io_mode(OUTPUT);
         set_mux_addr(trig_io);
         
@@ -75,10 +77,10 @@ float get_ultra_dist_mux(uint trig_io, uint echo_io, std::string ultra_hwid)
         sleep_us(10);
         gpio_put(analog_mux_io, LOW);
 
-        uint32_t start_time = time_us_32();
-
         set_mux_io_mode(INPUT);
         set_mux_addr(echo_io);
+
+        start_time = time_us_32();
 
         while (!gpio_get(analog_mux_io) && ((time_us_32() - start_time) < ultrasonic_signal_timout_us));
         uint32_t pulse_start = time_us_32();
@@ -86,8 +88,8 @@ float get_ultra_dist_mux(uint trig_io, uint echo_io, std::string ultra_hwid)
         while (gpio_get(analog_mux_io) && ((time_us_32() - start_time) < ultrasonic_signal_timout_us));
         uint32_t pulse_end = time_us_32();
 
-        release_mux_mutex();
         taskEXIT_CRITICAL();
+        release_mux_mutex();
 
         uint16_t time_diff = pulse_end - pulse_start;
         float dist = (time_diff * 0.0343) / 2;
@@ -102,6 +104,8 @@ float get_ultra_dist_mux(uint trig_io, uint echo_io, std::string ultra_hwid)
 // ---- Single-pin ultrasonic sensor distance measurement using mux ----
 float get_ultra_dist_single(uint ultra_pin, std::string ultra_hwid)
 {
+    uint32_t start_time;
+
     gpio_deinit(ultra_pin);
     init_pin(ultra_pin, OUTPUT);
 
@@ -111,10 +115,10 @@ float get_ultra_dist_single(uint ultra_pin, std::string ultra_hwid)
     sleep_us(10);
     gpio_put(ultra_pin, LOW);
 
-    uint32_t start_time = time_us_32();
-
     gpio_deinit(ultra_pin);
     init_pin(ultra_pin, INPUT);
+
+    start_time = time_us_32();
 
     while (!gpio_get(ultra_pin) && ((time_us_32() - start_time) < ultrasonic_signal_timout_us));
     uint32_t pulse_start = time_us_32();

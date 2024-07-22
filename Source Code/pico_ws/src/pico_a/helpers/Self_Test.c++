@@ -108,9 +108,7 @@ void run_self_test_callback(const void *req, void *res)
     ultra_test_results[0] = ultra_self_test([=]() -> float { return get_ultra_dist_single(front_ultra_io, DIAG_ID_ULTRASONIC_F); });
     ultra_test_results[1] = ultra_self_test([=]() -> float { return get_ultra_dist_mux(back_ultra_trig_mux, back_ultra_echo_mux, DIAG_ID_ULTRASONIC_B); });
     ultra_test_results[2] = ultra_self_test([=]() -> float { return get_ultra_dist_mux(right_ultra_trig_mux, right_ultra_echo_mux, DIAG_ID_ULTRASONIC_R); });
-    ultra_test_results[3] = ULTRA_TEST_RESULT_t{ULTRA_TEST_PASS, 0.0f};
-    // TODO: Uncomment this when the left ultrasonic is fixed.
-    //ultra_test_results[3] = ultra_self_test([=]() -> float { return get_ultra_dist_mux(left_ultra_trig_mux, left_ultra_echo_mux, DIAG_ID_ULTRASONIC_L); });
+    ultra_test_results[3] = ultra_self_test([=]() -> float { return get_ultra_dist_mux(left_ultra_trig_mux, left_ultra_echo_mux, DIAG_ID_ULTRASONIC_L); });
 
     for (int i = 0; i < 4; i++)
     {

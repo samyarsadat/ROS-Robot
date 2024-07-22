@@ -48,7 +48,7 @@ float theta;
 // ---- Timers ----
 bool ultrasonic_ir_edge_rt_active = false;
 struct repeating_timer motor_odom_rt, ultrasonic_publish_rt, edge_ir_publish_rt, other_sensors_publish_rt, motor_enc_rt;
-TaskHandle_t motor_odom_th, ultrasonic_publish_th, edge_ir_publish_th, other_sensors_publish_th;
+TaskHandle_t motor_odom_th, ultrasonic_publish_th, edge_ir_publish_th, other_sensors_publish_th, motor_safety_task_th;
 TimerHandle_t waiting_for_agent_timer;
 
 
@@ -65,8 +65,8 @@ mpu6050_t mpu6050 = mpu6050_init(i2c_inst, MPU6050_ADDRESS_A0_VCC);
 // ---- Motor Controller ----
 uint8_t r_motors_drv_pins[2] = {r_motor_drive_1, r_motor_drive_2};
 uint8_t l_motors_drv_pins[2] = {l_motor_drive_1, l_motor_drive_2};
-MotorDriver r_motors_driver(r_motors_drv_pins, 2, MotorDriver::driver_type::GENERIC_PWM);
-MotorDriver l_motors_driver(l_motors_drv_pins, 2, MotorDriver::driver_type::GENERIC_PWM);
+MotorDriver r_motors_driver(r_motors_drv_pins, (sizeof(r_motors_drv_pins) / sizeof(r_motors_drv_pins[0])), MotorDriver::driver_type::GENERIC_PWM);
+MotorDriver l_motors_driver(l_motors_drv_pins, (sizeof(l_motors_drv_pins) / sizeof(l_motors_drv_pins[0])), MotorDriver::driver_type::GENERIC_PWM);
 
 // IRQ callback prototype
 void irq_call(uint pin, uint32_t events);
@@ -78,8 +78,8 @@ MotorEncoder l_motor_2_enc(l_motor_2_enc_a, l_motor_2_enc_b, gear_ratio_motor, e
 MotorEncoder* r_motor_encs[2] = {&r_motor_1_enc, &r_motor_2_enc};
 MotorEncoder* l_motor_encs[2] = {&l_motor_1_enc, &l_motor_2_enc};
 
-Motor r_motors(&r_motors_driver, r_motor_encs, 2);
-Motor l_motors(&l_motors_driver, l_motor_encs, 2);
+Motor r_motors(&r_motors_driver, r_motor_encs, (sizeof(r_motor_encs) / sizeof(r_motor_encs[0])));
+Motor l_motors(&l_motors_driver, l_motor_encs, (sizeof(l_motor_encs) / sizeof(l_motor_encs[0])));
 MotorSafety r_motors_safety(&r_motors, right_motor_controller_id);
 MotorSafety l_motors_safety(&l_motors, left_motor_controller_id);
 
@@ -244,13 +244,19 @@ void en_emitters_callback(const void *req, void *res)
         alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, edge_ir_pub_rt_interval, publish_edge_ir_notify, NULL, &edge_ir_publish_rt);
     }
 
-    else 
+    else if (!req_in->data && ultrasonic_ir_edge_rt_active)
     {
         write_log("Disabling ultrasonic and IR edge emitters.", LOG_LVL_INFO, FUNCNAME_ONLY);
         ultrasonic_ir_edge_rt_active = false;
         cancel_repeating_timer(&ultrasonic_publish_rt);
         cancel_repeating_timer(&edge_ir_publish_rt);
         gpio_put(edge_sens_en, LOW);
+    }
+
+    else 
+    {
+        res_in->success = false;
+        return;
     }
 
     res_in->success = true;
@@ -687,7 +693,8 @@ void setup(void *parameters)
 
     // Other tasks
     write_log("Creating other tasks...", LOG_LVL_INFO, FUNCNAME_ONLY);
-    xTaskCreate(motor_safety_handler_task, "motor_safety_handler", GENERIC_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 3, NULL);
+    xTaskCreate(motor_safety_handler_task, "motor_safety_handler", GENERIC_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 3, &motor_safety_task_th);
+    vTaskCoreAffinitySet(motor_safety_task_th, (1 << 1));   // Lock task to core 1
 
     // Create FreeRTOS timers
     write_log("Creating FreeRTOS software timers...", LOG_LVL_INFO, FUNCNAME_ONLY);

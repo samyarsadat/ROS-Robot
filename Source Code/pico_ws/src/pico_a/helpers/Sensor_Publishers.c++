@@ -65,7 +65,7 @@ void publish_ultra(void *parameters)
         ultrasonic_sensor_msg.ultrasonic_f_reading = get_ultra_dist_single(front_ultra_io, DIAG_ID_ULTRASONIC_F);
         ultrasonic_sensor_msg.ultrasonic_b_reading = get_ultra_dist_mux(back_ultra_trig_mux, back_ultra_echo_mux, DIAG_ID_ULTRASONIC_B);
         ultrasonic_sensor_msg.ultrasonic_r_reading = get_ultra_dist_mux(right_ultra_trig_mux, right_ultra_echo_mux, DIAG_ID_ULTRASONIC_R);
-        //ultrasonic_sensor_msg.ultrasonic_l_reading = get_ultra_dist_mux(left_ultra_trig_mux, left_ultra_echo_mux, DIAG_ID_ULTRASONIC_L);
+        ultrasonic_sensor_msg.ultrasonic_l_reading = get_ultra_dist_mux(left_ultra_trig_mux, left_ultra_echo_mux, DIAG_ID_ULTRASONIC_L);
 
         uRosPublishingHandler::PublishItem_t pub_item;
         pub_item.publisher = &ultrasonic_sensor_pub;
