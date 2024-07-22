@@ -19,4 +19,4 @@
 
 [submodule "Common Helper Libraries"]
 	path = Source Code/pico_ws/src/lib/Common_libs
-	url = https://github.com/samyarsadat/Pico-Librarie
+	url = https://github.com/samyarsadat/Pico-Libraries
