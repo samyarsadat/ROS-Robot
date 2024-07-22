@@ -25,7 +25,7 @@
 #include "haw/MPU6050.h"
 #include <geometry_msgs/msg/twist.h>
 #include <geometry_msgs/msg/vector3.h>
-#include "freertos_helpers_lib/uROS_Publishing_Handler.h"
+#include "uros_freertos_helpers_lib/uROS_Publishing_Handler.h"
 #include "Definitions.h"
 #include "timers.h"
 

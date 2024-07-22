@@ -23,7 +23,7 @@
 #include "uROS_Init.h"
 #include "Definitions.h"
 #include "local_helpers_lib/Local_Helpers.h"
-#include "freertos_helpers_lib/uROS_Bridge_Agent.h"
+#include "uros_freertos_helpers_lib/uROS_Bridge_Agent.h"
 
 
 

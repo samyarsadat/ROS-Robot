@@ -22,7 +22,7 @@
 // ------- Libraries & Modules -------
 #include "pico/stdlib.h"
 #include "helpers_lib/Helpers.h"
-#include "freertos_helpers_lib/uROS_Publishing_Handler.h"
+#include "uros_freertos_helpers_lib/uROS_Publishing_Handler.h"
 #include "IO_Helpers_Mux.h"
 #include "IO_Helpers_Edge.h"
 #include "IO_Helpers_Ultrasonic.h"
