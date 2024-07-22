@@ -37,7 +37,6 @@ jobs:
                   "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
 
             - name: Generate Pico SDK Headers
-              continue-on-error: true
               uses: samyarsadat/Pico-Build-Action@v1
               with:
                   source_dir: "Source Code/pico_ws"
