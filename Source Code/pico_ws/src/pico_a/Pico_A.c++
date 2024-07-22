@@ -60,7 +60,7 @@ uRosBridgeAgent *bridge;
 uRosPublishingHandler *pub_handler;
 
 // ---- MPU6050 ----
-mpu6050_t mpu6050 = mpu6050_init(i2c_inst, MPU6050_ADDRESS_A0_VCC);
+mpu6050_t mpu6050 = mpu6050_init(i2c_inst, mpu6050_i2c_address);
 
 // ---- Motor Controller ----
 uint8_t r_motors_drv_pins[2] = {r_motor_drive_1, r_motor_drive_2};
@@ -550,8 +550,6 @@ void uros_post_exec_call()
 // ---- MPU6050 init ----
 bool init_mpu6050()
 {
-    write_log("MPU6050 disabled!", LOG_LVL_INFO, FUNCNAME_ONLY);
-
     // Init pins
     init_pin(i2c_sda, PROT_I2C);
     init_pin(i2c_scl, PROT_I2C);
@@ -561,8 +559,7 @@ bool init_mpu6050()
 
     write_log("MPU6050 WHO_AM_I ID: " + std::to_string(mpu6050_who_am_i(&mpu6050)), LOG_LVL_INFO, FUNCNAME_ONLY);
 
-    // Commented out as my MPU6050 is broken, waiting for the replacement.
-    /*if (mpu6050_begin(&mpu6050))
+    if (mpu6050_begin(&mpu6050))
     {
         mpu6050_set_scale(&mpu6050, MPU6050_SCALE_2000DPS);
         mpu6050_set_range(&mpu6050, MPU6050_RANGE_16G);
@@ -579,10 +576,8 @@ bool init_mpu6050()
     }
 
     write_log("MPU init failed.", LOG_LVL_WARN, FUNCNAME_ONLY);
-    publish_diag_report(DIAG_LVL_ERROR, DIAG_HWNAME_ENV_SENSORS, DIAG_HWID_ENV_IMU, DIAG_ERR_MSG_INIT_FAILED, DIAG_KV_PAIR_EMPTY());
-    return false;*/
-
-    return true;
+    publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_ENV_SENSORS, DIAG_ID_ENV_IMU, DIAG_ERR_MSG_INIT_FAILED, NULL);
+    return false;
 }
 
 

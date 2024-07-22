@@ -122,6 +122,9 @@
 #define odom_frame_id       (char *) "odom"
 #define base_link_frame_id  (char *) "base_link"
 
+// ---- MPU6050 IMU ----
+#define mpu6050_i2c_address  0x68
+
 // ---- Misc. ----
 #define SETUP_TASK_STACK_DEPTH    1024   // In FreeRTOS words
 #define TIMER_TASK_STACK_DEPTH    1024   // In FreeRTOS words

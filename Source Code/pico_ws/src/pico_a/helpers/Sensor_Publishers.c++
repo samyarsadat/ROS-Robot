@@ -143,9 +143,7 @@ void publish_misc_sens(void *parameters)
         }
 
         // MPU6050 IMU
-        // FIXME: IMU is currently broken.
-        //if (check_bool(mpu6050_event(&mpu6050) == 1, RT_SOFT_CHECK))
-        if (false)
+        if (check_bool(mpu6050_event(&mpu6050) == 1, RT_SOFT_CHECK))
         {
             mpu6050_vectorf_t *mpu_accel = mpu6050_get_accelerometer(&mpu6050);
             mpu6050_vectorf_t *mpu_gyro = mpu6050_get_gyroscope(&mpu6050);
