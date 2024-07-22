@@ -4,9 +4,6 @@ The firmware is written in C++ and uses the micro-ROS library to handle communic
 Pre-built binaries can be found in the `build` directory.<br>
 <br>
 
-### Warning: I am currently in the process of moving over to FreeRTOS for the Pico firmware. The code here is W.I.P.
-<br>
-
 
 ## Important Note #1:
 _The motor encoder implementation may look unconventional compared to other robots.<br>
