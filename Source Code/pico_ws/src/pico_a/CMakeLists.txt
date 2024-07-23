@@ -1,4 +1,5 @@
-#  The ROS robot project - Firmware CMake config, Pico A (NOTE: THIS IS NOT THE TOP-LEVEL CMAKE FILE!)
+#  The ROS robot project - Firmware CMake config, Pico A
+#  (NOTE: THIS IS NOT THE TOP-LEVEL CMAKE FILE!)
 #  Copyright 2022-2024 Samyar Sadat Akhavi
 #  Written by Samyar Sadat Akhavi, 2022-2024.
 #
@@ -41,13 +42,14 @@ target_link_libraries(${PICO_A_NAME} micro_ros
                                      pid_v1_lib
                                      motor_control_lib
                                      freertos_helpers_lib
+                                     uros_freertos_helpers_lib
                                      FreeRTOS-Kernel
                                      FreeRTOS-Kernel-Heap4)
 
 # Link to include directories
 target_include_directories(${PICO_A_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-# UART Config
+# Target-specific compile definitions
 target_compile_definitions(${PICO_A_NAME} PRIVATE
     PICO_RP2040_B0_SUPPORTED=0
     PICO_RP2040_B1_SUPPORTED=0

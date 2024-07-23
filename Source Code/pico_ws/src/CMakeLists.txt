@@ -1,4 +1,5 @@
-#  The ROS robot project - Firmware CMake config (NOTE: THIS IS NOT THE TOP-LEVEL CMAKE FILE!)
+#  The ROS robot project - Firmware CMake config
+#  (NOTE: THIS IS NOT THE TOP-LEVEL CMAKE FILE!)
 #  Copyright 2022-2024 Samyar Sadat Akhavi
 #  Written by Samyar Sadat Akhavi, 2022-2024.
 #
