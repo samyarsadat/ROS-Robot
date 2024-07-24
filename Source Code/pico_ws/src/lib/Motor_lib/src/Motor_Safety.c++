@@ -452,8 +452,6 @@ bool MotorSafety::check_encoder_dir_difference()
  */
 bool MotorSafety::check_set_vs_actual_direction()
 {
-    volatile float avrrpm = controller->get_avg_rpm();
-
     if (number_of_encoders_defined > 1 && controller->get_avg_rpm() > 0 && set_actual_direction_check_enabled)
     {
         if (controller->get_set_motor_direction() != encoders[0]->get_direction())
