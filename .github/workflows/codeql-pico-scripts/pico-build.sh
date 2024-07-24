@@ -25,7 +25,7 @@ set -e
 SOURCE_DIR=$1
 OUTPUT_DIR="build"
 BOARD_NAME="pico"
-CMAKE_ARGS=""
+CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release"
 MAKEFILES_GENERATOR="Unix Makefiles"
 
 # Validate arguments
