@@ -333,9 +333,10 @@ void cmd_vel_call(const void *msgin)
 {
     const geometry_msgs__msg__Twist *msg = (const geometry_msgs__msg__Twist *) msgin;
 
-    char buffer[60];
+    // This topic is published to very frequently. There should not be any logging.
+    /*char buffer[60];
     snprintf(buffer, sizeof(buffer), "Received cmd_vel: [lin: %.2fm/s, ang: %.2frad/s]", msg->linear.x, msg->angular.z);
-    write_log(buffer, LOG_LVL_INFO, FUNCNAME_ONLY);
+    write_log(buffer, LOG_LVL_INFO, FUNCNAME_ONLY);*/
     
     float angular = msg->angular.z;     // rad/s
     float linear = msg->linear.x;       // m/s
