@@ -82,6 +82,7 @@ mkdir /pico && cd /pico \
 && git submodule update --init
 
 export PICO_SDK_PATH="/pico/pico-sdk"
+export PICO_COMPILER="pico_arm_gcc"
 cd "$GITHUB_WORKSPACE"
 
 # Echo arguments
