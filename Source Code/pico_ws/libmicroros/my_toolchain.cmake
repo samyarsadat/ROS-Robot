@@ -58,6 +58,7 @@ include_directories("${FREERTOS_CONFIG_DIR}")
 
 # Raspberry Pi Pico SDK headers
 set(PICO_SDK_PATH $ENV{PICO_SDK_PATH})
+include_directories("${PICO_SDK_PATH}/src/rp2_common/hardware_sync_spin_lock/include")
 include_directories("${PICO_SDK_PATH}/src/rp2_common/pico_platform_panic/include")
 include_directories("${PICO_SDK_PATH}/src/rp2_common/pico_platform_compiler/include")
 include_directories("${PICO_SDK_PATH}/src/rp2_common/pico_platform_sections/include")
