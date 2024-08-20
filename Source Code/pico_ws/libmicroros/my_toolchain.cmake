@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
 
-include($ENV{PICO_SDK_PATH}/cmake/preload/toolchains/find_compiler.cmake)
+include($ENV{PICO_SDK_PATH}/cmake/preload/toolchains/util/find_compiler.cmake)
 
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_CROSSCOMPILING 1)
