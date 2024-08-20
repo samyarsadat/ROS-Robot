@@ -65,7 +65,7 @@ include_directories("${PICO_SDK_PATH}/src/rp2_common/hardware_sync/include")
 include_directories("${PICO_SDK_PATH}/src/rp2_common/hardware_base/include")
 include_directories("${PICO_SDK_PATH}/src/rp2040/hardware_regs/include")
 include_directories("${PICO_SDK_PATH}/src/rp2040/pico_platform/include")
-include_directories("${PICO_SDK_PATH}/src/rp2350/hardware_structs/include")     # Some other Pico SDK headers include headers from here.
+include_directories("${PICO_SDK_PATH}/src/rp2350/hardware_regs/include")        # Some other Pico SDK headers include headers from here.
 include_directories("${PICO_SDK_PATH}/src/common/pico_base_headers/include")
 include_directories("${CMAKE_CURRENT_LIST_DIR}/../build/generated/pico_base")   # Auto-generated headers
 
