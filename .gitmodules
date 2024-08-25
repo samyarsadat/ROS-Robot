@@ -20,3 +20,6 @@
 [submodule "Common Helper Libraries"]
 	path = Source Code/pico_ws/src/lib/Common_libs
 	url = https://github.com/samyarsadat/Pico-Libraries
+[submodule "DHT11 Library"]
+	path = Source Code/pico_ws/src/lib/DHT11_lib
+	url = https://github.com/vmilea/pico_dht
