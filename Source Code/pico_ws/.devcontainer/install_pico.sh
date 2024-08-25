@@ -28,7 +28,7 @@ cd $OUTDIR
 # Clone sw repos
 GITHUB_PREFIX="https://github.com/raspberrypi/"
 GITHUB_SUFFIX=".git"
-SDK_BRANCH="master"
+SDK_BRANCH="1.5.1"
 
 echo "" >> ~/.bashrc
 echo "" >> /home/$NONROOT_USERNAME/.bashrc
