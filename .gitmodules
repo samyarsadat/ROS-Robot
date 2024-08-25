@@ -18,7 +18,9 @@
 [submodule "DHT11 Library"]
 	path = Source Code/pico_ws/src/lib/DHT11_lib
 	url = https://github.com/vmilea/pico_dht
+
 [submodule "MicroROS Tools"]
 	path = Source Code/pico_ws/libmicroros/src/micro_ros_setup
 	url = https://github.com/micro-ROS/micro_ros_setup
 	branch = humble
+	ignore = all
