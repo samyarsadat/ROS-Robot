@@ -3,12 +3,6 @@
 	url = https://github.com/FreeRTOS/FreeRTOS-Kernel
 	ignore = all
 
-[submodule "MicroROS Tools"]
-	path = Source Code/pico_ws/libmicroros/src/micro_ros_setup
-	url = https://github.com/micro-ROS/micro_ros_setup
-	branch = humble
-	ignore = all
-
 [submodule "Pico PID Library"]
 	path = Source Code/pico_ws/src/lib/PID_lib
 	url = https://github.com/samyarsadat/Pico-PID-Library
@@ -24,3 +18,7 @@
 [submodule "DHT11 Library"]
 	path = Source Code/pico_ws/src/lib/DHT11_lib
 	url = https://github.com/vmilea/pico_dht
+[submodule "MicroROS Tools"]
+	path = Source Code/pico_ws/libmicroros/src/micro_ros_setup
+	url = https://github.com/micro-ROS/micro_ros_setup
+	branch = humble
