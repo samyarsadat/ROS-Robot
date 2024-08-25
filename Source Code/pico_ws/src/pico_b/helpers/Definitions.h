@@ -18,6 +18,7 @@
 */
 
 #pragma once
+#include "../../Diagnostics_Names.h"
 #include "local_helpers_lib/Common_Definitions.h"
 #include "hardware/i2c.h"
 #include "Diag_Msgs.h"
@@ -62,12 +63,14 @@
 // ---- MicroROS node config ----
 #define UROS_NODE_NAME                     "pico_b"
 #define UROS_NODE_NAMESPACE                "io"
+#define UROS_NODE_DOMAIN_ID                95
 #define AGENT_WAITING_LED_TOGGLE_DELAY_MS  500   // In milliseconds
 #define AGENT_AVAIL_LED_TOGGLE_DELAY_MS    250   // In milliseconds
 
 // ---- Repeating timer intervals ----
-#define microsw_pub_rt_interval  200   // In milliseconds
-#define sensors_pub_rt_interval  80    // In milliseconds
+#define microsw_pub_rt_interval      200   // In milliseconds
+#define sensors_pub_rt_interval      80    // In milliseconds
+#define dht_measurement_rt_interval  1500  // In milliseconds
 
 // ---- Misc. ----
 #define SETUP_TASK_STACK_DEPTH       1024       // In FreeRTOS words

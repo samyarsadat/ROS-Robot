@@ -35,6 +35,7 @@
 #include <functional>
 #include "FreeRTOS.h"
 #include "semphr.h"
+#include "haw/MPU6050.h"
 
 
 
@@ -42,6 +43,7 @@
 std::vector<int> self_test_diag_data_slot_nums;
 std::vector<diagnostic_msgs__msg__DiagnosticStatus> self_test_diag_status_reports;
 SemaphoreHandle_t run_self_test_mutex = NULL;
+extern mpu6050_t mpu6050;
 
 
 
@@ -79,7 +81,8 @@ void run_self_test_callback(const void *req, void *res)
 
         diag_publish_item_t pub_item;
         std::vector<diag_kv_pair_item_t> kv_pairs;
-        kv_pairs.push_back(diag_kv_pair_item_t{"sensor_num", std::to_string(loop_index)});
+        std::string loop_index_str = std::to_string(loop_index);
+        kv_pairs.push_back(diag_kv_pair_item_t{"sensor_num", loop_index_str});
 
         if (result)
         {
@@ -122,8 +125,10 @@ void run_self_test_callback(const void *req, void *res)
 
         diag_publish_item_t pub_item;
         std::vector<diag_kv_pair_item_t> kv_pairs;
-        kv_pairs.push_back(diag_kv_pair_item_t{"measured_distance", std::to_string(ultra_test_results[i].measured_distance)});
-        kv_pairs.push_back(diag_kv_pair_item_t{"status_code", std::to_string(ultra_test_results[i].status)});
+        std::string measured_dist_str = std::to_string(ultra_test_results[i].measured_distance);
+        std::string status_code_str = std::to_string(ultra_test_results[i].status);
+        kv_pairs.push_back(diag_kv_pair_item_t{"measured_distance", measured_dist_str});
+        kv_pairs.push_back(diag_kv_pair_item_t{"status_code", status_code_str});
         
         if (ultra_test_results[i].status == ULTRA_TEST_PASS)
         {
@@ -144,10 +149,64 @@ void run_self_test_callback(const void *req, void *res)
     }
 
 
+    // Perform IMU self-test
+    write_log("Performing MPU6050 sensor self-test...", LOG_LVL_INFO, FUNCNAME_ONLY);
+    {
+        float test_results[6] = {0, 0, 0, 0, 0, 0};
+        mpu6050_self_test(&mpu6050, test_results);
+
+        diag_publish_item_t pub_item;
+
+        std::vector<diag_kv_pair_item_t> kv_pairs;
+        std::string result_keys[6];
+        std::string test_result_str[6];
+        std::string result_msg;
+        bool test_passed = true;
+
+        for (int i = 0; i < 6; i++)
+        {
+            result_keys[i] = std::string("result_index_" + std::to_string(i));
+            test_result_str[i] = std::to_string(test_results[i]);
+            kv_pairs.push_back(diag_kv_pair_item_t{result_keys[i], test_result_str[i]});
+
+            if ((test_results[i] > mpu6050_selftest_trim_dev_lim) && (test_results[i] < (mpu6050_selftest_trim_dev_lim * -1)))
+            {
+                result_msg = result_msg + "No. " + std::to_string(i) + " limits exceeded";
+                test_passed = false;
+            }
+
+            else
+            {
+                result_msg = result_msg + "No. " + std::to_string(i) + " passed";
+            }
+
+            if (i < 5)
+            {
+                result_msg = result_msg + ", ";
+            }
+        }
+
+        if (test_passed)
+        {
+            std::string diag_msg = DIAG_OK_MSG_MPU6050_TEST_PASSED + result_msg;
+            pub_item = prepare_diag_publish_item(DIAG_LVL_OK, DIAG_NAME_ENV_SENSORS, DIAG_ID_ENV_IMU, diag_msg, &kv_pairs);
+        }
+
+        else
+        {
+            std::string diag_msg = DIAG_ERR_MSG_MPU6050_TEST_FAIL + result_msg;
+            pub_item = prepare_diag_publish_item(DIAG_LVL_ERROR, DIAG_NAME_ENV_SENSORS, DIAG_ID_ENV_IMU, diag_msg, &kv_pairs);
+            res_in->passed = false;
+        }
+
+        self_test_diag_status_reports.push_back(*pub_item.diag_msg);
+        self_test_diag_data_slot_nums.push_back(pub_item.allocated_slot);
+    }
+
+
     res_in->status.data = self_test_diag_status_reports.data();
     res_in->status.size = self_test_diag_status_reports.size();
 
-    // TODO: IMU self-test
     // Omitting motor test as the Motor Safety module practically acts as a constantly running "self-test" for the motors.
 
     write_log("Self-test completed.", LOG_LVL_INFO, FUNCNAME_ONLY);

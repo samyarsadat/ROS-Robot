@@ -18,6 +18,7 @@
 */
 
 #pragma once
+#include "../../Diagnostics_Names.h"
 #include "local_helpers_lib/Common_Definitions.h"
 #include "hardware/i2c.h"
 #include "Diag_Msgs.h"
@@ -74,6 +75,7 @@
 // ---- MicroROS node config ----
 #define UROS_NODE_NAME                     "pico_a"
 #define UROS_NODE_NAMESPACE                "io"
+#define UROS_NODE_DOMAIN_ID                95
 #define AGENT_WAITING_LED_TOGGLE_DELAY_MS  500   // In milliseconds
 #define AGENT_AVAIL_LED_TOGGLE_DELAY_MS    250   // In milliseconds
 
@@ -115,6 +117,7 @@
 #define gear_ratio_motor                80/1
 #define wheel_diameter                  100.0f                  // In millimeters
 #define wheelbase                       140.0f                  // In millimeters
+#define track_width                     250.0f                  // In millimeters
 #define wheel_circumference             (PI * wheel_diameter)   // In millimeters
 #define enc_pulses_per_meter_of_travel  (1000 / wheel_circumference) * (gear_ratio_motor * enc_pulses_per_rot)
 
@@ -123,7 +126,9 @@
 #define base_link_frame_id  (char *) "base_link"
 
 // ---- MPU6050 IMU ----
-#define mpu6050_i2c_address  0x68
+#define mpu6050_i2c_address            0x68
+#define mpu6050_selftest_trim_dev_lim  14
+#define mpu6050_gyro_calib_cycles      100
 
 // ---- Misc. ----
 #define SETUP_TASK_STACK_DEPTH    1024   // In FreeRTOS words

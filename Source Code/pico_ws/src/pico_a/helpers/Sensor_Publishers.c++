@@ -161,7 +161,7 @@ void publish_misc_sens(void *parameters)
         }
 
         // HMC5883L Compass
-        // TODO: NOT INSTALLED YET!
+        // TODO: Compass installed, add code for compass.
         /*if (...)
         {
             misc_sensor_msg.imu_compass.x;

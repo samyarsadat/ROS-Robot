@@ -12,6 +12,11 @@ Source Code/pico_ws/libmicroros/src/log
 Source Code/pico_ws/libmicroros/src/rrp_pico_coms/build
 Source Code/pico_ws/libmicroros/src/rrp_pico_coms/install
 Source Code/pico_ws/libmicroros/src/rrp_pico_coms/log
+Source Code/ros_ws_robot/install
+Source Code/ros_ws_robot/log
+Source Code/ros_ws_robot/build
+**/.idea
+**/__pycache__
 Circuit Diagrams & PCB Files/**/__Previews
 Circuit Diagrams & PCB Files/**/History
 Circuit Diagrams & PCB Files/**/Project *

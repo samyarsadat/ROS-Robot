@@ -36,7 +36,8 @@ float check_return_distance(float dist, std::string_view ultra_hwid)
     if (dist < ultra_min_dist)
     {
         std::vector<diag_kv_pair_item_t> kv_pairs;
-        kv_pairs.push_back(diag_kv_pair_item_t{"measured_distance", std::to_string(dist)});
+        std::string dist_str = std::to_string(dist);
+        kv_pairs.push_back(diag_kv_pair_item_t{"measured_distance", dist_str});
         publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_ULTRASONICS, ultra_hwid, DIAG_WARN_MSG_ULTRA_MIN_LIM_EXCEED, &kv_pairs);
         
         write_log("Ultrasonic sensor distance below minimum limit! " + log_distance, LOG_LVL_WARN, FUNCNAME_LINE_ONLY);
@@ -47,7 +48,8 @@ float check_return_distance(float dist, std::string_view ultra_hwid)
     {
         // NOTE TO SELF: This could become a problem if the robot is placed in an open space where the sensors might not get their signals back.
         std::vector<diag_kv_pair_item_t> kv_pairs;
-        kv_pairs.push_back(diag_kv_pair_item_t{"measured_distance", std::to_string(dist)});
+        std::string dist_str = std::to_string(dist);
+        kv_pairs.push_back(diag_kv_pair_item_t{"measured_distance", dist_str});
         publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_ULTRASONICS, ultra_hwid, DIAG_WARN_MSG_ULTRA_MAX_LIM_EXCEED, &kv_pairs);
 
         write_log("Ultrasonic sensor distance above maximum limit! " + log_distance, LOG_LVL_WARN, FUNCNAME_LINE_ONLY);

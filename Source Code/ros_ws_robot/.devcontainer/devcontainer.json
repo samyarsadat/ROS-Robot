@@ -1,5 +1,5 @@
 /*
-    The ROS robot project - ROS2 Development Workspace (Robot) Devcontainer
+    The ROS robot project - ROS 2 Workspace Devcontainer
     Copyright 2024 Samyar Sadat Akhavi
     Prepared by Samyar Sadat Akhavi, 2024.
  
@@ -22,17 +22,14 @@
 
 
 {
-    "name": "ROS (Robot) Workspace",
-    "remoteUser": "rosdev",
-    "overrideCommand": false,
+    "name": "ROS 2 Workspace (Robot)",
+    "remoteUser": "nonroot",
+    "overrideCommand": true,
+    "postCreateCommand": "/devcon_post_create.sh",
+    "postStartCommand": "/devcon_post_start.sh",
     
     "build": {
-        "dockerfile": "Dockerfile",
-        "args": {
-            "USERNAME": "rosdev",
-            "GID": "1000",
-            "UID": "1000"
-        }
+        "dockerfile": "Dockerfile"
     },
 
     "customizations": {
@@ -47,20 +44,19 @@
                 "timonwong.shellcheck",
                 "yzhang.markdown-all-in-one",
                 "zainchen.json"
-            ],
-
-            "settings": {
-                "files.associations": {
-                    "*.rviz": "yaml",
-                    "*.srdf": "xml",
-                    "*.urdf": "xml",
-                    "*.xacro": "xml"
-                }
-            }
+            ]
         }
     },
 
-    "workspaceFolder": "/home/rosdev/pico_ws",
-    "mounts": [{"source": "${localWorkspaceFolder}/src", "target": "/home/rosdev/ros_ws/src", "type": "bind"}],
-    "runArgs": ["--net=host"]
+    "workspaceFolder": "/home/nonroot/ros_ws",
+    "mounts": [{"source": "${localWorkspaceFolder}/../pico_ws/libmicroros/src/rrp_pico_coms",
+                "target": "/home/nonroot/ros_ws/src/rrp_pico_coms", "type": "bind"}],
+
+    "runArgs": ["--net=host",
+                "--cap-add=SYS_PTRACE",
+                "--security-opt", "seccomp=unconfined",
+                "--gpus", "all",
+                "-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw",
+                "--env=DISPLAY",
+                "-v", "/dev:/dev"]
 }

@@ -43,6 +43,7 @@ uint32_t last_uros_exec_time;
 // ---- Motor encoder counter storage ----
 int32_t enc_r_count_old, enc_l_count_old, total_enc_avg_travel;
 int32_t enc_odom_x_pos, enc_odom_y_pos;
+uint32_t last_motor_odom_calc_time;
 float theta;
 
 // ---- Timers ----
@@ -473,9 +474,16 @@ void publish_odom()
     enc_odom_msg.pose.position.y = (float) enc_odom_y_pos / 1000;   // Convert to meters
     enc_odom_msg.pose.position.z = 0;
     enc_odom_msg.pose.orientation = quat_msg;
-    enc_odom_msg.twist.linear.x = (float) (r_enc_diff_mm + l_enc_diff_mm) / 2;              // Linear velocity
+
+    uint32_t time_diff_ms = (time_us_32() - last_motor_odom_calc_time) / 1000;
+    last_motor_odom_calc_time = time_us_32();
+
+    float r_lin_vel = r_enc_diff_mm / time_diff_ms;
+    float l_lin_vel = l_enc_diff_mm / time_diff_ms;
+
+    enc_odom_msg.twist.linear.x = (float) (r_lin_vel + l_lin_vel) / 2;                      // Linear velocity (m/s)
     enc_odom_msg.twist.linear.y = 0;
-    enc_odom_msg.twist.angular.z = (float) ((r_enc_diff_mm - l_enc_diff_mm) / 360) * 100;   // Anglular velocity
+    enc_odom_msg.twist.angular.z = (float) (r_enc_diff_mm - l_enc_diff_mm) / track_width;   // Anglular velocity
 
     // Publish
     uRosPublishingHandler::PublishItem_t enc_odom;
@@ -560,17 +568,18 @@ bool init_mpu6050()
 
     write_log("MPU6050 WHO_AM_I ID: " + std::to_string(mpu6050_who_am_i(&mpu6050)), LOG_LVL_INFO, FUNCNAME_ONLY);
 
+    // FIXME: IMU has unusual readings sometimes. Looks like a startup config/calib issue.
     if (mpu6050_begin(&mpu6050))
     {
-        mpu6050_set_scale(&mpu6050, MPU6050_SCALE_2000DPS);
-        mpu6050_set_range(&mpu6050, MPU6050_RANGE_16G);
-
         mpu6050_set_temperature_measuring(&mpu6050, true);
         mpu6050_set_gyroscope_measuring(&mpu6050, true);
         mpu6050_set_accelerometer_measuring(&mpu6050, true);
         mpu6050_set_int_free_fall(&mpu6050, true);
         mpu6050_set_int_motion(&mpu6050, false);
         mpu6050_set_int_zero_motion(&mpu6050, false);
+
+        mpu6050_set_scale(&mpu6050, MPU6050_SCALE_250DPS);
+        mpu6050_set_range(&mpu6050, MPU6050_RANGE_2G);
 
         write_log("MPU init successful.", LOG_LVL_INFO, FUNCNAME_ONLY);
         return true;

@@ -24,8 +24,11 @@
 #define DIAG_OK_MSG_MICROSW_LED_TEST_PASS  "Camera LED and microswitch test passed."
 
 // ---- STATUS WARN ----
+#define DIAG_WARN_MSG_DHT11_MEASUREMENT_TIMEOUT  "DHT11 measurement timed out."
 
 // ---- STATUS ERROR ----
 #define DIAG_ERR_MSG_MICROSW_LED_TEST_FAIL  "Camera LED and microswitch test failed."
+#define DIAG_ERR_MSG_DHT11_BAD_CHECKSUM     "DHT11 measurement bad checksum."
+#define DIAG_ERR_MSG_DHT11_UNSPEC_FAIL      "DHT11 unspecified failure."
 
 // ---- STATUS STALE ----

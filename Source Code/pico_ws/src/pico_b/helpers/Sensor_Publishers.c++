@@ -25,6 +25,7 @@
 #include "IO_Helpers_General.h"
 #include "local_helpers_lib/Local_Helpers.h"
 #include "uros_freertos_helpers_lib/uROS_Publishing_Handler.h"
+#include <dht.h>
 
 
 
@@ -35,6 +36,9 @@ extern uRosPublishingHandler *pub_handler;
 
 // ---- Timer execution times storage (milliseconds) ----
 extern uint32_t last_microsw_publish_time, last_other_sensors_publish_time;
+
+// ---- DHT11 sensor ----
+extern float latest_dht_temp_c, latest_dht_humidity;
 
 
 
@@ -98,8 +102,8 @@ void publish_misc_sens(void *parameters)
         }
         
         misc_sensor_msg.battery_current = 0;   // TODO: SENSOR TO BE ADDED
-        misc_sensor_msg.env_temp = 0;          // TODO: SENSOR TO BE ADDED
-        misc_sensor_msg.env_humidity = 0;      // TODO: SENSOR TO BE ADDED
+        misc_sensor_msg.env_temp = latest_dht_temp_c;
+        misc_sensor_msg.env_humidity = latest_dht_humidity;
 
         misc_sensor_msg.camera_led_vals[0] = camera_led_states[0];
         misc_sensor_msg.camera_led_vals[1] = camera_led_states[1];

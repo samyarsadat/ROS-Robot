@@ -21,8 +21,9 @@
 
 
 // ---- STATUS OK ----
-#define DIAG_OK_MSG_IR_EDGE_TEST_PASS  "IR edge sensor self-test passed! [SENSOR: %d]"
-#define DIAG_OK_MSG_ULTRA_TEST_PASS    "Ultrasonic sensor self-test passed! [CODE: %d]"
+#define DIAG_OK_MSG_IR_EDGE_TEST_PASS    "IR edge sensor self-test passed! [SENSOR: %d]"
+#define DIAG_OK_MSG_ULTRA_TEST_PASS      "Ultrasonic sensor self-test passed! [CODE: %d]"
+#define DIAG_OK_MSG_MPU6050_TEST_PASSED  "MPU6050 self-test passed! "
 
 // ---- STATUS WARN ----
 #define DIAG_WARN_MSG_ULTRA_MIN_LIM_EXCEED  "Ultrasonic sensor distance reading exceeded ultra_min_dist"
@@ -32,5 +33,6 @@
 #define DIAG_ERR_MSG_MOTOR_SAFETY       "A MotorSafety condition was triggered"
 #define DIAG_ERR_MSG_IR_EDGE_TEST_FAIL  "IR edge sensor self-test failed! [SENSOR: %d]"
 #define DIAG_ERR_MSG_ULTRA_TEST_FAIL    "Ultrasonic sensor self-test failed! [CODE: %d]"
+#define DIAG_ERR_MSG_MPU6050_TEST_FAIL  "MPU6050 self-test failed! "
 
 // ---- STATUS STALE ----

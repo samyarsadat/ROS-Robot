@@ -25,6 +25,11 @@
 
 
 
+// ------- Global variables -------
+extern mpu6050_t mpu6050;
+
+
+
 // ---- Run calibration functions service callback ----
 void run_calib_callback(const void *req, void *res)
 {
@@ -36,17 +41,8 @@ void run_calib_callback(const void *req, void *res)
     // Perform IMU calibration
     if (req_in->calib_imu)
     {
-        write_log("Calibrating IMU...", LOG_LVL_INFO, FUNCNAME_ONLY);
-
-        //if (!calibrate_mpu6050())
-        if (false)
-        {
-            write_log("IMU calibration failed!", LOG_LVL_ERROR, FUNCNAME_ONLY);
-            res_in->message.data = (char *) "IMU calibration failed!";
-            res_in->message.size = strlen(res_in->message.data);
-            res_in->success = false;
-            return;
-        }
+        write_log("Calibrating IMU gyroscope...", LOG_LVL_INFO, FUNCNAME_ONLY);
+        mpu6050_calibrate_gyro(&mpu6050, mpu6050_gyro_calib_cycles);
     }
 
     // Perform IR edge sensor ambient IR level calibration

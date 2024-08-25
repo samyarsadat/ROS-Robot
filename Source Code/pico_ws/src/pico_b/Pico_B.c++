@@ -33,12 +33,15 @@
 alarm_pool_t *core_1_alarm_pool;
 
 // ---- Timer execution times storage (milliseconds) ----
-uint32_t last_microsw_publish_time, last_other_sensors_publish_time;
+uint32_t last_microsw_publish_time, last_other_sensors_publish_time, last_dht_measurement_time;
 
 // ---- Timers ----
-struct repeating_timer microsw_publish_rt, other_sensors_publish_rt;
-TaskHandle_t microsw_publish_th, other_sensors_publish_th;
+struct repeating_timer microsw_publish_rt, other_sensors_publish_rt, take_dht_measurement_rt;
+TaskHandle_t microsw_publish_th, other_sensors_publish_th, take_dht_measurement_th;
 TimerHandle_t waiting_for_agent_timer;
+
+// ---- DHT11 measurements ----
+float latest_dht_temp_c, latest_dht_humidity;
 
 
 
@@ -47,6 +50,9 @@ TimerHandle_t waiting_for_agent_timer;
 // ---- MicroROS ----
 uRosBridgeAgent *bridge;
 uRosPublishingHandler *pub_handler;
+
+// ---- DHT11 sensor ----
+dht_t dht_env_sens;
 
 
 
@@ -58,6 +64,7 @@ void clean_shutdown()
     write_log("A clean shutdown has been triggered. The program will now shut down.", LOG_LVL_FATAL, FUNCNAME_ONLY);
 
     // Stop all repeating timers
+    cancel_repeating_timer(&take_dht_measurement_rt);
     cancel_repeating_timer(&microsw_publish_rt);
     cancel_repeating_timer(&other_sensors_publish_rt);
 
@@ -112,6 +119,14 @@ bool publish_misc_sens_notify(struct repeating_timer *rt)
     return true;
 }
 
+bool take_dht_measurement_notify(struct repeating_timer *rt)
+{
+    BaseType_t higher_prio_woken;
+    vTaskNotifyGiveFromISR(take_dht_measurement_th, &higher_prio_woken);
+    portYIELD_FROM_ISR(higher_prio_woken);
+    return true;
+}
+
 
 // ---- IRQ callback ----
 void irq_call(uint pin, uint32_t events)
@@ -145,6 +160,45 @@ void en_camera_leds_callback(const void *req, void *res)
 
 // ------- Main program -------
 
+// ---- Take DHT11 measurements task ----
+void take_dht_measurement(void *parameters)
+{
+    while (true)
+    {
+        xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);   // Wait for notification indefinitely
+
+        // Check execution time
+        check_exec_interval(last_dht_measurement_time, (dht_measurement_rt_interval + 100), "Publish interval exceeded limits!", true);
+
+        // Take measurement and update global vars
+        dht_start_measurement(&dht_env_sens);
+        dht_result_t result = dht_finish_measurement_blocking(&dht_env_sens, &latest_dht_humidity, &latest_dht_temp_c);
+
+        switch (result)
+        {
+            case DHT_RESULT_OK:
+                // NOP
+                break;
+
+            case DHT_RESULT_TIMEOUT:
+                write_log("DHT11 measurement timed out!", LOG_LVL_WARN, FUNCNAME_ONLY);
+                publish_diag_report(DIAG_LVL_WARN, DIAG_NAME_ENV_SENSORS, DIAG_ID_ENV_DHT11, DIAG_WARN_MSG_DHT11_MEASUREMENT_TIMEOUT, NULL);
+                break;
+
+            case DHT_RESULT_BAD_CHECKSUM:
+                write_log("DHT11 measurement bad checksum!", LOG_LVL_ERROR, FUNCNAME_ONLY);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_ENV_SENSORS, DIAG_ID_ENV_DHT11, DIAG_ERR_MSG_DHT11_BAD_CHECKSUM, NULL);
+                break;
+            
+            default:
+                write_log("DHT11 unspecified failure.", LOG_LVL_ERROR, FUNCNAME_ONLY);
+                publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_ENV_SENSORS, DIAG_ID_ENV_DHT11, DIAG_ERR_MSG_DHT11_UNSPEC_FAIL, NULL);
+                break;
+        }
+    }
+}
+
+
 // ---- MicroROS executor post-execution function ----
 void uros_post_exec_call()
 {
@@ -174,6 +228,7 @@ void uros_post_exec_call()
 void start_timers()
 {
     write_log("Starting hardware timers...", LOG_LVL_INFO, FUNCNAME_ONLY);
+    add_repeating_timer_ms(dht_measurement_rt_interval, take_dht_measurement_notify, NULL, &take_dht_measurement_rt);
     alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, microsw_pub_rt_interval, publish_microsw_notify, NULL, &microsw_publish_rt);
     alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, sensors_pub_rt_interval, publish_misc_sens_notify, NULL, &other_sensors_publish_rt);
 }
@@ -244,6 +299,9 @@ void setup(void *parameters)
     gpio_set_irq_enabled(ms_back_r, GPIO_IRQ_EDGE_FALL, true);
     gpio_set_irq_enabled(ms_back_l, GPIO_IRQ_EDGE_FALL, true);
 
+    // DHT11 sensor
+    dht_init(&dht_env_sens, DHT11, pio0, dht11_sens, false);
+
     // Misc. init
     adc_init();
     adc_init_mutex();
@@ -253,8 +311,10 @@ void setup(void *parameters)
     write_log("Creating timer tasks...", LOG_LVL_INFO, FUNCNAME_ONLY);
     xTaskCreate(publish_microsw_sens, "microsw_publish", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 3, &microsw_publish_th);
     xTaskCreate(publish_misc_sens, "other_sensors_publish", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 4, &other_sensors_publish_th);
+    xTaskCreate(take_dht_measurement, "dht_measurement_updater", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 5, &take_dht_measurement_th);
     vTaskCoreAffinitySet(microsw_publish_th, (1 << 1));
     vTaskCoreAffinitySet(other_sensors_publish_th, (1 << 1));
+    vTaskCoreAffinitySet(take_dht_measurement_th, (1 << 1));
 
     // Create FreeRTOS timers
     write_log("Creating FreeRTOS software timers...", LOG_LVL_INFO, FUNCNAME_ONLY);

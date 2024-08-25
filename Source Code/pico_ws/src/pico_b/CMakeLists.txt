@@ -42,6 +42,7 @@ target_link_libraries(${PICO_B_NAME} micro_ros
                                      uros_freertos_helpers_lib
                                      FreeRTOS-Kernel
                                      FreeRTOS-Kernel-Heap4
+                                     dht
 )
 
 # Link to include directories
