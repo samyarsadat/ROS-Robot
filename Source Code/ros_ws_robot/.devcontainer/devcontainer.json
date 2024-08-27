@@ -58,5 +58,6 @@
                 "--gpus", "all",
                 "-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw",
                 "--env=DISPLAY",
-                "-v", "/dev:/dev"]
+                "-v", "/dev:/dev",
+                "--device-cgroup-rule=c *:* rmw"]
 }

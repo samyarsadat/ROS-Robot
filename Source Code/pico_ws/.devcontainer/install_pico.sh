@@ -29,78 +29,55 @@ cd $OUTDIR
 GITHUB_PREFIX="https://github.com/raspberrypi/"
 GITHUB_SUFFIX=".git"
 SDK_BRANCH="1.5.1"
+PICOTOOL_BRANCH="1.1.2"
 
 echo "" >> ~/.bashrc
 echo "" >> /home/$NONROOT_USERNAME/.bashrc
 
-for REPO in sdk examples extras playground
-do
-    DEST="$OUTDIR/pico-$REPO"
+DEST="$OUTDIR/pico-sdk"
 
-    if [ -d $DEST ]; then
-        echo "$DEST already exists so skipping"
-    else
-        REPO_URL="${GITHUB_PREFIX}pico-${REPO}${GITHUB_SUFFIX}"
-        echo "Cloning $REPO_URL"
-        git clone -b $SDK_BRANCH $REPO_URL
+if [ -d $DEST ]; then
+    echo "$DEST already exists so skipping"
+else
+    REPO_URL="${GITHUB_PREFIX}pico-sdk${GITHUB_SUFFIX}"
+    echo "Cloning $REPO_URL"
+    git clone -b $SDK_BRANCH $REPO_URL
 
-        # Any submodules
-        cd $DEST
-        git submodule update --init
-        cd $OUTDIR
+    # Any submodules
+    cd $DEST
+    git submodule update --init
+    cd $OUTDIR
 
-        # Define PICO_SDK_PATH in .bashrc
-        VARNAME="PICO_${REPO^^}_PATH"
-        echo "Adding $VARNAME to .bashrc"
-        echo "export $VARNAME=$DEST" >> ~/.bashrc
-        echo "export $VARNAME=$DEST" >> /home/$NONROOT_USERNAME/.bashrc
-        export ${VARNAME}=$DEST
-    fi
-done
-
-cd $OUTDIR
+    # Define PICO_SDK_PATH in .bashrc
+    VARNAME="PICO_SDK_PATH"
+    echo "Adding $VARNAME to .bashrc"
+    echo "export $VARNAME=$DEST" >> ~/.bashrc
+    echo "export $VARNAME=$DEST" >> /home/$NONROOT_USERNAME/.bashrc
+    export ${VARNAME}=$DEST
+fi
 
 # Pick up new variables we just defined
 source ~/.bashrc
 
-# Build a couple of examples
-cd "$OUTDIR/pico-examples"
-mkdir build
-cd build
-cmake ../ -DCMAKE_BUILD_TYPE=Debug
-
-for e in blink hello_world
-do
-    echo "Building $e"
-    cd $e
-    make -j$JNUM
-    cd ..
-done
-
 cd $OUTDIR
 
-# Picoprobe and picotool
-for REPO in picoprobe picotool
-do
-    DEST="$OUTDIR/$REPO"
-    REPO_URL="${GITHUB_PREFIX}${REPO}${GITHUB_SUFFIX}"
-    git clone $REPO_URL
+# Picotool
+DEST="$OUTDIR/picotool"
+REPO_URL="${GITHUB_PREFIX}picotool${GITHUB_SUFFIX}"
+git clone --branch $PICOTOOL_BRANCH $REPO_URL
 
-    # Build both
-    cd $DEST
-    git submodule update --init
-    mkdir build
-    cd build
-    cmake ../
-    make -j$JNUM
+# Build both
+cd $DEST
+git submodule update --init
+mkdir build
+cd build
+cmake ../
+make -j$JNUM
 
-    if [[ "$REPO" == "picotool" ]]; then
-        echo "Installing picotool to /usr/local/bin/picotool"
-        cp picotool /usr/local/bin/
-    fi
+echo "Installing picotool to /usr/local/bin/picotool"
+cp picotool /usr/local/bin/
 
-    cd $OUTDIR
-done
+cd $OUTDIR
 
 # Build OpenOCD
 echo "Building OpenOCD"

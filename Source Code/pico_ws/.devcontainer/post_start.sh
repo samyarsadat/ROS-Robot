@@ -14,4 +14,7 @@ cd $HOME/pico_ws/libmicroros/src && colcon build
 source $HOME/pico_ws/libmicroros/src/install/local_setup.bash
 cd $HOME/pico_ws
 
+#echo "-> Start SSH server..."
+#sudo service ssh start
+
 echo "--> post_start.sh done!"

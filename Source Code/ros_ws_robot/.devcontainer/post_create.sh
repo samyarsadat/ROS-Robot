@@ -13,7 +13,7 @@ sudo chown -R nonroot: $HOME/ros_ws/
 #sudo apt-get update \
 #&& rosdep update \
 #&& cd $HOME/pico_ws/libmicroros \
-#&& sudo rosdep install --from-paths src --ignore-src -y \
+#&& rosdep install --from-paths src --ignore-src -y \
 #&& sudo apt-get autoremove && sudo apt-get autoclean \
 #&& echo "-> Tools installed!"
 

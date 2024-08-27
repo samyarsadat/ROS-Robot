@@ -22,7 +22,7 @@
 
 
 {
-    "name": "MicroROS Workspace",
+    "name": "MicroROS Workspace (Robot)",
     "remoteUser": "nonroot",
     "overrideCommand": true,
     "postCreateCommand": "/devcon_post_create.sh",
