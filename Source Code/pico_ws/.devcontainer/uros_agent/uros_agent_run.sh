@@ -6,4 +6,4 @@
 
 cd ~/pico_ws/uros_agent \
 && source install/local_setup.bash \
-&& ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyACM0 -v 4
+&& ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/$0 -v 4
