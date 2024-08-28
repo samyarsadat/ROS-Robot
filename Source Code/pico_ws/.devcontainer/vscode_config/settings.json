@@ -12,6 +12,7 @@
     "cmake.buildDirectory": "${workspaceFolder}/build",
     "cmake.buildBeforeRun": true,
     "cmake.configureOnOpen": true,
+    "cmake.deleteBuildDirOnCleanConfigure": true,
     "cortex-debug.openocdPath": "openocd",
 
     "cmake.options.statusBarVisibility": "hidden",
