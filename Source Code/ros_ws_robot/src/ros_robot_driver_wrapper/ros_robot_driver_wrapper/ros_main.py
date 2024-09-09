@@ -80,11 +80,11 @@ class RosNode(Node):
             self.ultrasonic_sens_pubs.append(self.create_publisher(Range, f"range_sens/ultrasonic/{name}", qos_profile=RosConfig.QOS_RELIABLE, callback_group=self._reentrant_cb_group))
 
         for i in range(0, 4):
-            name = ros_robot_interface.front_cliff_sensors[i].get_id().split("_")[2:5]
+            name = ros_robot_interface.front_cliff_sensors[i].get_id().split("_")[2:4]
             self.cliff_sens_pubs.append(self.create_publisher(Range, f"range_sens/cliff/{'_'.join(name)}", qos_profile=RosConfig.QOS_RELIABLE, callback_group=self._reentrant_cb_group))
 
         for i in range(0, 4):
-            name = ros_robot_interface.back_cliff_sensors[i].get_id().split("_")[2:5]
+            name = ros_robot_interface.back_cliff_sensors[i].get_id().split("_")[2:4]
             self.cliff_sens_pubs.append(self.create_publisher(Range, f"range_sens/cliff/{'_'.join(name)}", qos_profile=RosConfig.QOS_RELIABLE, callback_group=self._reentrant_cb_group))
 
     @staticmethod

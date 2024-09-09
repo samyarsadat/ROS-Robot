@@ -132,7 +132,7 @@ def micro_switches_callback() -> None:
         msg.min_range = ros_robot_interface.micro_switches[i].get_trigger_distance()
         msg.radiation_type = Range.INFRARED   # Not actually infrared, just a normal micro switches.
         msg.field_of_view = 90.0
-        msg.range = (float("inf") if ros_robot_interface.micro_switches[i].get_latest_state() else float("-inf"))
+        msg.range = (float("-inf") if ros_robot_interface.micro_switches[i].get_latest_state() else float("inf"))
         msg.header.frame_id = RosFrameIds.MICRO_SW_SENS_BASE_FRAME_ID.format(get_ros_node().micro_switch_pubs[i].topic.split("/")[2])
         msg.header.stamp.sec, msg.header.stamp.nanosec = ros_robot_interface.micro_switches[i].get_last_timestamp()
         get_ros_node().micro_switch_pubs[i].publish(msg)

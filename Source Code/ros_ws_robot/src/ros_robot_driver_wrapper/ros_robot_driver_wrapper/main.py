@@ -35,14 +35,18 @@ def main():
     try:
         while True:
             if not wrapper_ros_thread.is_alive():
-                print("The driver wrapper thread has died. Terminating program.")
+                if is_ros_node_initialized():
+                    get_ros_node().get_logger().fatal("The driver wrapper thread has died. Terminating program.")
+                else:
+                    print("The driver wrapper thread has died. Terminating program.")
                 RosRobotDriverThread.stop_ros_thread(True)
                 sys.exit(1)
 
             if not RosRobotDriverThread.is_alive():
                 if is_ros_node_initialized():
                     get_ros_node().get_logger().fatal("The robot driver thread has died. Terminating program.")
-
+                else:
+                    print("The robot driver thread has died. Terminating program.")
                 stop_wrapper_ros_thread = True
                 wrapper_ros_thread.join()
                 sys.exit(1)
