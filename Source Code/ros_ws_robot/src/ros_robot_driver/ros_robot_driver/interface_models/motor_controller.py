@@ -64,6 +64,8 @@ class MotorController(BaseInterface):
             resp = get_ros_node().en_motor_ctrl(False)
 
             if resp:
+                if resp.success:
+                    self._controller_enabled = False
                 return resp.success, resp.message
             return False, RobotConfig.SERVICE_CALL_FAILURE
         return True, RobotConfig.SERVICE_CALL_REDUNDANT
@@ -75,6 +77,8 @@ class MotorController(BaseInterface):
             resp = get_ros_node().en_motor_ctrl(True)
 
             if resp:
+                if resp.success:
+                    self._controller_enabled = True
                 return resp.success, resp.message
             return False, RobotConfig.SERVICE_CALL_FAILURE
         return True, RobotConfig.SERVICE_CALL_REDUNDANT

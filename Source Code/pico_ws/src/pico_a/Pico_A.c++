@@ -219,6 +219,7 @@ void en_motor_ctrl_callback(const void *req, void *res)
         l_motors.disable_controller();
         cancel_repeating_timer(&motor_odom_rt);
         cancel_repeating_timer(&motor_enc_rt);
+        xTaskNotify(motor_odom_th, 0, eNoAction);   // Publish the motor controller states one last time.
     }
 
     else 
@@ -508,7 +509,7 @@ void motor_ctrl_odom_task(void *parameters)
         l_motors.compute_outputs();
 
         publish_motor_ctrl_data();   // Publish motor controller data
-        publish_odom();           // Calculate and publish odometry data
+        publish_odom();              // Calculate and publish odometry data
     }
 }
 
