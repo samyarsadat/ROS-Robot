@@ -154,6 +154,10 @@ class RosRobot:
     def set_diag_recv_callback(self, func: Callable[[DiagnosticsReport], None]):
         self._diagnostics_recv_callback = func
 
+    @staticmethod
+    def ping_driver() -> bool:
+        return True
+
     def _call_diag_recv_safe_ros(self, status: DiagnosticStatus):
         if not self._diagnostics_recv_callback is None:
             report = DiagnosticsReport()

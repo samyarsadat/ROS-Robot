@@ -16,6 +16,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
+import struct
 from ros_robot_driver.interface_data_structs.diagnostics_report import DiagnosticsReport
 from diagnostic_msgs.srv import SelfTest
 
@@ -27,7 +28,7 @@ class SelftestResult:
 
     def from_ros_result(self, result: SelfTest.Response) -> None:
         self.id = result.id
-        self.passed = bool(result.passed)
+        self.passed = struct.unpack("?", result.passed)[0]
         self.status = []
 
         for i, report in enumerate(result.status):
@@ -37,7 +38,7 @@ class SelftestResult:
     def to_ros_result(self) -> SelfTest.Response:
         report = SelfTest.Response()
         report.id = self.id
-        report.passed = bytes(self.passed)
+        report.passed = self.passed.to_bytes(1, "big")
 
         for i, status in enumerate(self.status):
             report.status.append(status.to_ros_message())

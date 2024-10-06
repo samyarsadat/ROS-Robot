@@ -45,6 +45,7 @@ class RosNode(Node):
         self._emer_stop_cb_group = MutuallyExclusiveCallbackGroup()
 
         self.diagnostics_pub = self.create_publisher(DiagnosticStatus, "diagnostics", qos_profile=RosConfig.QOS_RELIABLE, callback_group=self._reentrant_cb_group)
+        self.ping_driver_srv = self.create_service(GetBool, "diagnostics/ping_driver", self._ping_driver_srv_call, qos_profile=RosConfig.QOS_RELIABLE, callback_group=self._reentrant_cb_group)
         self.enable_relay_srv = self.create_service(SetBool, "enable/set_relay", self._enable_relay_srv_call, qos_profile=RosConfig.QOS_RELIABLE)
         self.battery_info_pub = self.create_publisher(BatteryState, "electrical/battery_state", qos_profile=RosConfig.QOS_BEST_EFFORT, callback_group=self._reentrant_cb_group)
         self.encoder_odom_pub = self.create_publisher(Odometry, "pos_data/encoder_odom", qos_profile=RosConfig.QOS_RELIABLE, callback_group=self._reentrant_cb_group)
@@ -86,6 +87,11 @@ class RosNode(Node):
         for i in range(0, 4):
             name = ros_robot_interface.back_cliff_sensors[i].get_id().split("_")[2:4]
             self.cliff_sens_pubs.append(self.create_publisher(Range, f"range_sens/cliff/{'_'.join(name)}", qos_profile=RosConfig.QOS_RELIABLE, callback_group=self._reentrant_cb_group))
+
+    @staticmethod
+    def _ping_driver_srv_call(req: GetBool.Request, res: GetBool.Response) -> GetBool.Response:
+        res.data = ros_robot_interface.ping_driver()
+        return res
 
     @staticmethod
     def _enable_relay_srv_call(req: SetBool.Request, res: SetBool.Response) -> SetBool.Response:

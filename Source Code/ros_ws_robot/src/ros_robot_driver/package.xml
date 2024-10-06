@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>ros_robot_driver</name>
-  <version>2024.10.4</version>
+  <version>2024.10.6</version>
   <description>The ROS Robot Project: Robot hardware interface/abstraction (driver) package.</description>
   <maintainer email="samyarsadat@gigawhat.net">Samyar Sadat Akhavi</maintainer>
   <license>GPL-3.0-only</license>

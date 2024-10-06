@@ -204,6 +204,8 @@ void run_self_test_callback(const void *req, void *res)
     }
 
 
+    res_in->id.data = (char *) "Pico A";
+    res_in->id.size = strlen(res_in->id.data);
     res_in->status.data = self_test_diag_status_reports.data();
     res_in->status.size = self_test_diag_status_reports.size();
 

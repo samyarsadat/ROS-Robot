@@ -49,6 +49,7 @@ void run_self_test_callback(const void *req, void *res)
 
     diagnostic_msgs__srv__SelfTest_Request *req_in = (diagnostic_msgs__srv__SelfTest_Request *) req;
     diagnostic_msgs__srv__SelfTest_Response *res_in = (diagnostic_msgs__srv__SelfTest_Response *) res;
+    res_in->passed = false;
 
     write_log("Received self-test request.", LOG_LVL_INFO, FUNCNAME_ONLY);
     disable_diag_pub();
@@ -57,7 +58,7 @@ void run_self_test_callback(const void *req, void *res)
     // Perform camera LED and microswitch self-test
     write_log("Performing camera LED and microswitch self-test...", LOG_LVL_INFO, FUNCNAME_ONLY);
     uint32_t start_time = time_us_32();
-    bool triggered_microsws[4] = { false };   // [front_right, front_left, back_right, back_left]
+    bool triggered_microsws[4] = {false};   // [front_right, front_left, back_right, back_left]
     bool microsws_passed = false;
     
     taskENTER_CRITICAL();
@@ -120,6 +121,8 @@ void run_self_test_callback(const void *req, void *res)
     }
 
 
+    res_in->id.data = (char *) "Pico B";
+    res_in->id.size = strlen(res_in->id.data);
     res_in->status.data = self_test_diag_status_reports.data();
     res_in->status.size = self_test_diag_status_reports.size();
 

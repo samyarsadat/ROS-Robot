@@ -92,5 +92,7 @@ void run_calib_callback(const void *req, void *res)
         }
     }
 
+    res_in->message.data = (char *) "All requested calibrations completed successfully!";
+    res_in->message.size = strlen(res_in->message.data);
     res_in->success = true;
 }

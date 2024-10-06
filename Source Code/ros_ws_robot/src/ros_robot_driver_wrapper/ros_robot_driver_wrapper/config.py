@@ -16,7 +16,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-PROGRAM_VERSION = "2024.9.3"
+PROGRAM_VERSION = "2024.10.6"
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, LivelinessPolicy
 import sys
 
@@ -24,7 +24,7 @@ import sys
 # ---- Program Info ----
 class ProgramInfoConfig:
     VERSION = PROGRAM_VERSION
-    VERSION_DATE = "2024/08/03 @ 15:32PM UTC"
+    VERSION_DATE = "2024/10/06 @ 1:30 UTC"
 
 
 class ProgramConfig:
