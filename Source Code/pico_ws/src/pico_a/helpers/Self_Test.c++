@@ -97,8 +97,17 @@ void run_self_test_callback(const void *req, void *res)
             pub_item = prepare_diag_publish_item(DIAG_LVL_OK, DIAG_NAME_IR_EDGE, HW_ID, buffer, &kv_pairs);
         }
 
-        self_test_diag_status_reports.push_back(*pub_item.diag_msg);
-        self_test_diag_data_slot_nums.push_back(pub_item.allocated_slot);
+        if (pub_item.allocated_slot >= 0)
+        {
+            self_test_diag_status_reports.push_back(*pub_item.diag_msg);
+            self_test_diag_data_slot_nums.push_back(pub_item.allocated_slot);
+        }
+
+        else
+        {
+            write_log("Failed to allocate diagnostic slot!", LOG_LVL_ERROR, FUNCNAME_LINE_ONLY);
+        }
+        
         loop_index ++;
     }
 
@@ -143,8 +152,17 @@ void run_self_test_callback(const void *req, void *res)
             res_in->passed = false;
         }
 
-        self_test_diag_status_reports.push_back(*pub_item.diag_msg);
-        self_test_diag_data_slot_nums.push_back(pub_item.allocated_slot);
+        if (pub_item.allocated_slot >= 0)
+        {
+            self_test_diag_status_reports.push_back(*pub_item.diag_msg);
+            self_test_diag_data_slot_nums.push_back(pub_item.allocated_slot);
+        }
+
+        else
+        {
+            write_log("Failed to allocate diagnostic slot!", LOG_LVL_ERROR, FUNCNAME_LINE_ONLY);
+        }
+
         loop_index ++;
     }
 
@@ -199,8 +217,16 @@ void run_self_test_callback(const void *req, void *res)
             res_in->passed = false;
         }
 
-        self_test_diag_status_reports.push_back(*pub_item.diag_msg);
-        self_test_diag_data_slot_nums.push_back(pub_item.allocated_slot);
+        if (pub_item.allocated_slot >= 0)
+        {
+            self_test_diag_status_reports.push_back(*pub_item.diag_msg);
+            self_test_diag_data_slot_nums.push_back(pub_item.allocated_slot);
+        }
+
+        else
+        {
+            write_log("Failed to allocate diagnostic slot!", LOG_LVL_ERROR, FUNCNAME_LINE_ONLY);
+        }
     }
 
 

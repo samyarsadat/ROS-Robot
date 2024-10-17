@@ -97,8 +97,17 @@ void run_self_test_callback(const void *req, void *res)
             microsws_passed = true;
             
             diag_publish_item_t pub_item = prepare_diag_publish_item(DIAG_LVL_OK, DIAG_NAME_SYSTEM, DIAG_ID_SYS_GENERAL, DIAG_OK_MSG_MICROSW_LED_TEST_PASS, NULL);
-            self_test_diag_status_reports.push_back(*pub_item.diag_msg);
-            self_test_diag_data_slot_nums.push_back(pub_item.allocated_slot);
+            
+            if (pub_item.allocated_slot >= 0)
+            {
+                self_test_diag_status_reports.push_back(*pub_item.diag_msg);
+                self_test_diag_data_slot_nums.push_back(pub_item.allocated_slot);
+            }
+
+            else
+            {
+                write_log("Failed to allocate diagnostic slot!", LOG_LVL_ERROR, FUNCNAME_LINE_ONLY);
+            }
             
             vTaskDelay(pdMS_TO_TICKS(1000));
             break;
@@ -116,8 +125,17 @@ void run_self_test_callback(const void *req, void *res)
         kv_pairs.push_back(diag_kv_pair_item_t{"sensor_pass_states", pass_states});
 
         diag_publish_item_t pub_item = prepare_diag_publish_item(DIAG_LVL_ERROR, DIAG_NAME_SYSTEM, DIAG_ID_SYS_GENERAL, DIAG_ERR_MSG_MICROSW_LED_TEST_FAIL, &kv_pairs);
-        self_test_diag_status_reports.push_back(*pub_item.diag_msg);
-        self_test_diag_data_slot_nums.push_back(pub_item.allocated_slot);
+        
+        if (pub_item.allocated_slot >= 0)
+        {
+            self_test_diag_status_reports.push_back(*pub_item.diag_msg);
+            self_test_diag_data_slot_nums.push_back(pub_item.allocated_slot);
+        }
+
+        else
+        {
+            write_log("Failed to allocate diagnostic slot!", LOG_LVL_ERROR, FUNCNAME_LINE_ONLY);
+        }
     }
 
 
