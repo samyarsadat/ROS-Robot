@@ -37,22 +37,16 @@ jobs:
             - name: Copy FreeRTOS Kernel Import File
               shell: bash
               run: |
-                  cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
-                  "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
+                  cp "source_code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
+                  "source_code/pico_ws/FreeRTOS_Kernel_import.cmake"
 
             - name: Generate Pico SDK Headers
               uses: samyarsadat/Pico-Build-Action@v1
               with:
-                  source_dir: "Source Code/pico_ws"
+                  source_dir: "source_code/pico_ws"
                   output_dir: "build"
                   cmake_config_only: "true"
                   cmake_args: "-DCMAKE_BUILD_TYPE=Release"
-
-            # This step is required because of a bug in micro_ros_setup's firmware workspace creation script.
-            # This bug causes the script to fail if the path to the script's working directory contains spaces.
-            - name: Rename Source Code Directory
-              run: |
-                  mv "Source Code/" "source_code/"
 
             - name: Initialize CodeQL
               uses: github/codeql-action/init@v3

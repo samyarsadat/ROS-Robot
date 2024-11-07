@@ -16,11 +16,7 @@
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
 name: CodeQL Analysis - Pico Source
-
-on:
-    push:
-    schedule:
-        - cron: "50 16 * * MON"   # Every Monday at 4:50 PM UTC
+on: push
 
 jobs:
     analyze_uros:

@@ -38,13 +38,13 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   name: uros_library_artifacts
-                  path: "Source Code/pico_ws/libmicroros/firmware/build"
+                  path: "source_code/pico_ws/libmicroros/firmware/build"
 
             - name: Copy FreeRTOS Kernel Import File
               shell: bash
               run: |
-                  cp "Source Code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
-                  "Source Code/pico_ws/FreeRTOS_Kernel_import.cmake"
+                  cp "source_code/pico_ws/libfreertos/FreeRTOS-Kernel/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake" \
+                  "source_code/pico_ws/FreeRTOS_Kernel_import.cmake"
 
             - name: Initialize CodeQL
               uses: github/codeql-action/init@v3
@@ -57,7 +57,7 @@ jobs:
               id: build
               shell: bash
               run: |
-                  bash ".github/workflows/codeql-pico-scripts/pico-build.sh" "Source Code/pico_ws"
+                  bash ".github/workflows/codeql-pico-scripts/pico-build.sh" "source_code/pico_ws"
 
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v3
