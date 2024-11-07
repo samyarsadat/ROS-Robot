@@ -2,7 +2,7 @@
 
 <p align="center">
 	<br>
-	<a href="https://www.ros.org"><img src="https://github.com/samyarsadat/ROS-Robot/raw/stage-1/Assets/Logos/ROS_logo.svg"></a><br>
+	<a href="https://www.ros.org"><img src="https://github.com/samyarsadat/ROS-Robot/raw/stage-1/assets/logos/ROS_logo.svg"></a><br>
 	<br>
 	<br>
 	<a href="LICENSE"><img src="https://img.shields.io/github/license/samyarsadat/ROS-Robot?color=blue"></a>
@@ -19,7 +19,7 @@
 
 <br><br>
 
-<img src="Assets/Renders/GitHub_Render_1_Edited.png">
+<img src="assets/renders/GitHub_Render_1_Edited.png">
 This is a 3D render of the CAD designs.
 <br><br>
 
@@ -66,13 +66,13 @@ ROS is used to handle communications between multiple nodes either on the same m
 or between external nodes (i.e. the two Raspberry Pi Picos running microROS). 
 Both Raspberry Pi Picos are connected to the Pi 4 via USB cables.<br>
 <br>
-More details regarding the electronics design [here](Circuit%20Diagrams%20%26%20PCB%20Files/).<br>
+More details regarding the electronics design [here](electronics/).<br>
 <br>
 
 #### Mechanical Design Overview
 The mechanical design of the robot is quite simple. 
 The chassis of the robot is 3D printed in two halves using PLA filament (more details regarding 3D printing 
-[here](CAD%20Files/STL%20files/)) and the robot uses four geared DC motors 
+[here](cad_files/stl_files/)) and the robot uses four geared DC motors 
 (Namiki 22CL-3501PG) in a differential drive configuration.<be>
 
 <br>
@@ -84,16 +84,16 @@ Their names and purposes are as follows:
 **.github**<br>
 GitHub issue templates, pull request templates, etc.<br>
 
-**Assets**<br>
+**assets**<br>
 Assets used on GitHub (such as images used in this README file).<br>
 
-**CAD Files**<br>
+**cad_files**<br>
 3D CAD design files and 3D printing files for the chassis and other mechanical parts of the robot.<br>
 
-**Circuit Diagrams & PCB Files**<br>
+**electronics**<br>
 Overall circuit diagrams and PCB design files for the robot.<br>
 
-**Source Code**<br>
+**source_code**<br>
 Source code for the ROS package of the robot and for the firmware of the Raspberry Pi Picos.<br>
 
 

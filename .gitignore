@@ -1,27 +1,29 @@
-CAD Files/swxJRNL.swj
-CAD Files/G-Code
-CAD Files/~$*.sldprt
-CAD Files/~$*.sldasm
-CAD Files/**/~$*.sldprt
-CAD Files/**/~$*.sldasm
-Source Code/pico_ws/build
-Source Code/pico_ws/libmicroros/firmware
-Source Code/pico_ws/libmicroros/src/build
-Source Code/pico_ws/libmicroros/src/install
-Source Code/pico_ws/libmicroros/src/log
-Source Code/pico_ws/libmicroros/src/rrp_pico_coms/build
-Source Code/pico_ws/libmicroros/src/rrp_pico_coms/install
-Source Code/pico_ws/libmicroros/src/rrp_pico_coms/log
-Source Code/ros_ws_robot/install
-Source Code/ros_ws_robot/log
-Source Code/ros_ws_robot/build
+cad_files/swxJRNL.swj
+cad_files/G-Code
+**/~$*.sldprt
+**/~$*.SLDPRT
+**/~$*.sldasm
+**/~$*.SLDASM
+**/~$*.sldblk
+**/~$*.SLDBLK
+source_code/pico_ws/build
+source_code/pico_ws/libmicroros/firmware
+source_code/pico_ws/libmicroros/src/build
+source_code/pico_ws/libmicroros/src/install
+source_code/pico_ws/libmicroros/src/log
+source_code/pico_ws/libmicroros/src/rrp_pico_coms/build
+source_code/pico_ws/libmicroros/src/rrp_pico_coms/install
+source_code/pico_ws/libmicroros/src/rrp_pico_coms/log
+source_code/ros_ws_robot/install
+source_code/ros_ws_robot/log
+source_code/ros_ws_robot/build
 **/.idea
 **/__pycache__
-Circuit Diagrams & PCB Files/**/__Previews
-Circuit Diagrams & PCB Files/**/History
-Circuit Diagrams & PCB Files/**/Project *
-Circuit Diagrams & PCB Files/**/*.Cam
-Circuit Diagrams & PCB Files/**/*.OutJob
-Circuit Diagrams & PCB Files/**/*.PrjPcbStructure
-Testing Data
+electronics/**/__Previews
+electronics/**/History
+electronics/**/Project *
+electronics/**/*.Cam
+electronics/**/*.OutJob
+electronics/**/*.PrjPcbStructure
+testing_data
 **/desktop.ini
