@@ -343,8 +343,8 @@ void cmd_vel_call(const void *msgin)
     float angular = msg->angular.z;     // rad/s
     float linear = msg->linear.x;       // m/s
 
-    float motor_l_speed_ms = linear - (angular * ((wheelbase / 1000) / 2));             // Calculate motor speeds in m/s
-    float motor_r_speed_ms = linear + (angular * ((wheelbase / 1000) / 2));
+    float motor_l_speed_ms = linear - (angular * (track_width / 1000)) / 2;             // Calculate motor speeds in m/s
+    float motor_r_speed_ms = linear + (angular * (track_width / 1000)) / 2;
 
     float motor_l_speed_rpm = (motor_l_speed_ms / (wheel_circumference / 1000)) * 60;   // Convert motor speeds from m/s to RPM
     float motor_r_speed_rpm = (motor_r_speed_ms / (wheel_circumference / 1000)) * 60;
@@ -767,7 +767,7 @@ int main()
     write_log("MicroROS pre-init...", LOG_LVL_INFO, FUNCNAME_LINE_ONLY);
     bridge = uRosBridgeAgent::get_instance();
     pub_handler = uRosPublishingHandler::get_instance();
-    bridge->pre_init(uros_init, clean_shutdown, uros_post_exec_call);
+    bridge->pre_init(uros_init, clean_shutdown, uros_post_exec_call, EXECUTOR_EXEC_INTERVAL_MS, EXECUTOR_EXEC_TIME_LIMIT_MS, EXECUTOR_TIMEOUT_MS);
     pub_handler->pre_init(bridge);
     set_diag_pub_queue(pub_handler->get_queue_handle());
 
