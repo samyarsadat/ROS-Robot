@@ -41,7 +41,7 @@ uint32_t last_motor_odom_time, last_ultrasonic_publish_time, last_edge_ir_publis
 uint32_t last_uros_exec_time;
 
 // ---- Motor encoder counter storage ----
-int32_t enc_r_count_old, enc_l_count_old, total_enc_avg_travel;
+int32_t enc_r_count_old, enc_l_count_old;
 int32_t enc_odom_x_pos, enc_odom_y_pos;
 uint32_t last_motor_odom_calc_time;
 float theta;
@@ -430,6 +430,9 @@ void publish_odom()
     int32_t r_enc_counts = r_motors.get_avg_enc_pulse_count();
     int32_t l_enc_counts = l_motors.get_avg_enc_pulse_count();
 
+    uint32_t time_diff_ms = (time_us_32() - last_motor_odom_calc_time) / 1000;
+    last_motor_odom_calc_time = time_us_32();
+
     int16_t r_enc_diff = r_enc_counts - enc_r_count_old;
     int16_t l_enc_diff = l_enc_counts - enc_l_count_old;
 
@@ -437,17 +440,16 @@ void publish_odom()
     enc_l_count_old = l_enc_counts;
 
     // Convert to millimeters
-    float r_enc_mm = (((float) r_enc_counts / (enc_pulses_per_rot * gear_ratio_motor)) * wheel_circumference);
-    float l_enc_mm = (((float) l_enc_counts / (enc_pulses_per_rot * gear_ratio_motor)) * wheel_circumference);
-    float r_enc_diff_mm = (((float) r_enc_diff / (enc_pulses_per_rot * gear_ratio_motor)) * wheel_circumference);
-    float l_enc_diff_mm = (((float) l_enc_diff / (enc_pulses_per_rot * gear_ratio_motor)) * wheel_circumference);
+    float r_enc_mm = ((float) r_enc_counts / (enc_pulses_per_rot * gear_ratio_motor)) * wheel_circumference;
+    float l_enc_mm = ((float) l_enc_counts / (enc_pulses_per_rot * gear_ratio_motor)) * wheel_circumference;
+    float r_enc_diff_mm = ((float) r_enc_diff / (enc_pulses_per_rot * gear_ratio_motor)) * wheel_circumference;
+    float l_enc_diff_mm = ((float) l_enc_diff / (enc_pulses_per_rot * gear_ratio_motor)) * wheel_circumference;
 
     // Calculate the total distance travelled by taking the average of both sides (in millimeters)
-    float enc_avg_travel_diff = ((r_enc_diff_mm + l_enc_diff_mm) / 2.0f);
-    total_enc_avg_travel += enc_avg_travel_diff;
+    float enc_avg_travel_diff = (r_enc_diff_mm + l_enc_diff_mm) / 2.0f;
 
     // Calculate rotation
-    theta += (float) (r_enc_diff_mm - l_enc_diff_mm) / 360;
+    theta += (float) (r_enc_diff_mm - l_enc_diff_mm) / track_width;
     if (theta > PI) { theta -= TAU; }
     else if (theta < (-PI)) { theta += TAU; }
 
@@ -471,20 +473,18 @@ void publish_odom()
     enc_odom_msg.child_frame_id.data = base_link_frame_id;
     enc_odom_msg.child_frame_id.size = strlen(enc_odom_msg.child_frame_id.data);
 
-    enc_odom_msg.pose.position.x = (float) enc_odom_x_pos / 1000;   // Convert to meters
-    enc_odom_msg.pose.position.y = (float) enc_odom_y_pos / 1000;   // Convert to meters
-    enc_odom_msg.pose.position.z = 0;
+    enc_odom_msg.pose.position.x = enc_odom_x_pos / 1000.0f;   // Convert to meters
+    enc_odom_msg.pose.position.y = enc_odom_y_pos / 1000.0f;   // Convert to meters
     enc_odom_msg.pose.orientation = quat_msg;
 
-    uint32_t time_diff_ms = (time_us_32() - last_motor_odom_calc_time) / 1000;
-    last_motor_odom_calc_time = time_us_32();
+    enc_odom_msg.twist.linear.x = ((r_enc_diff_mm / time_diff_ms) + (l_enc_diff_mm / time_diff_ms)) / 2;         // Linear velocity (m/s)
+    enc_odom_msg.twist.angular.z = ((r_enc_diff_mm - l_enc_diff_mm) * 1000.0f) / (track_width * time_diff_ms);   // Anglular velocity (rad/s)
 
-    float r_lin_vel = r_enc_diff_mm / time_diff_ms;
-    float l_lin_vel = l_enc_diff_mm / time_diff_ms;
-
-    enc_odom_msg.twist.linear.x = (float) (r_lin_vel + l_lin_vel) / 2;                      // Linear velocity (m/s)
-    enc_odom_msg.twist.linear.y = 0;
-    enc_odom_msg.twist.angular.z = (float) (r_enc_diff_mm - l_enc_diff_mm) / track_width;   // Anglular velocity
+    // Alternate linear and angular velocity formulae
+    /*float r_vel_mms = (wheel_circumference * ((r_motors.get_encs_array()[0]->get_direction() == MotorEncoder::FORWARD) ? r_motors.get_avg_rpm() : r_motors.get_avg_rpm() * -1)) / 60;
+    float l_vel_mms = (wheel_circumference * ((l_motors.get_encs_array()[0]->get_direction() == MotorEncoder::FORWARD) ? l_motors.get_avg_rpm() : l_motors.get_avg_rpm() * -1)) / 60;
+    enc_odom_msg.twist.linear.x = ((r_vel_mms / 1000.0f) + (r_vel_mms / 1000.0f)) / 2;   // Linear velocity (m/s)
+    enc_odom_msg.twist.angular.z = (r_vel_mms - l_vel_mms) / track_width;                // Anglular velocity (rad/s)*/
 
     // Publish
     uRosPublishingHandler::PublishItem_t enc_odom;
@@ -558,6 +558,7 @@ void uros_post_exec_call()
 
 
 // ---- MPU6050 init ----
+// IMU DISABLED FOR NOW!
 bool init_mpu6050()
 {
     // Init pins
@@ -570,7 +571,7 @@ bool init_mpu6050()
     write_log("MPU6050 WHO_AM_I ID: " + std::to_string(mpu6050_who_am_i(&mpu6050)), LOG_LVL_INFO, FUNCNAME_ONLY);
 
     // FIXME: IMU has unusual readings sometimes. Looks like a startup config/calib issue.
-    if (mpu6050_begin(&mpu6050))
+    /*if (mpu6050_begin(&mpu6050))
     {
         mpu6050_set_temperature_measuring(&mpu6050, true);
         mpu6050_set_gyroscope_measuring(&mpu6050, true);
@@ -588,7 +589,8 @@ bool init_mpu6050()
 
     write_log("MPU init failed.", LOG_LVL_WARN, FUNCNAME_ONLY);
     publish_diag_report(DIAG_LVL_ERROR, DIAG_NAME_ENV_SENSORS, DIAG_ID_ENV_IMU, DIAG_ERR_MSG_INIT_FAILED, NULL);
-    return false;
+    return false;*/
+    return true;
 }
 
 

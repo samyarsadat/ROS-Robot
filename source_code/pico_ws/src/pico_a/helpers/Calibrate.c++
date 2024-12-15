@@ -39,11 +39,12 @@ void run_calib_callback(const void *req, void *res)
     write_log("Received calibration request.", LOG_LVL_INFO, FUNCNAME_ONLY);
 
     // Perform IMU calibration
-    if (req_in->calib_imu)
+    // IMU DISABLED FOR NOW!
+    /*if (req_in->calib_imu)
     {
         write_log("Calibrating IMU gyroscope...", LOG_LVL_INFO, FUNCNAME_ONLY);
         mpu6050_calibrate_gyro(&mpu6050, mpu6050_gyro_calib_cycles);
-    }
+    }*/
 
     // Perform IR edge sensor ambient IR level calibration
     if (req_in->calib_ir_edge)

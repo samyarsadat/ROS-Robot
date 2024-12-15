@@ -168,7 +168,8 @@ void run_self_test_callback(const void *req, void *res)
 
 
     // Perform IMU self-test
-    write_log("Performing MPU6050 sensor self-test...", LOG_LVL_INFO, FUNCNAME_ONLY);
+    // IMU DISABLED FOR NOW!
+    /*write_log("Performing MPU6050 sensor self-test...", LOG_LVL_INFO, FUNCNAME_ONLY);
     {
         float test_results[6] = {0, 0, 0, 0, 0, 0};
         mpu6050_self_test(&mpu6050, test_results);
@@ -227,7 +228,7 @@ void run_self_test_callback(const void *req, void *res)
         {
             write_log("Failed to allocate diagnostic slot!", LOG_LVL_ERROR, FUNCNAME_LINE_ONLY);
         }
-    }
+    }*/
 
 
     res_in->id.data = (char *) "Pico A";

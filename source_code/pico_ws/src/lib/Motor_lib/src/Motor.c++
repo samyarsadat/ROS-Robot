@@ -83,6 +83,10 @@ void Motor::set_control_mode(control_mode mode)
 /*  Sets the target speed for the PID controller.
  *  Only used when the controller is in PID mode.
  *  
+ *  Note: absolute value of input is taken. Negative
+ *        input values will not result in a change of
+ *        rotational direction.
+ *  
  *  Arguments:
  *    float rpm: target RPM.
  * 
@@ -175,6 +179,8 @@ void Motor::disable_controller()
 
 
 /*  Returns the average RPM of all of the defined encoders.
+ * 
+ *  Note: returns absolute RPM.
  *  
  *  Arguments:
  *    None
@@ -221,6 +227,8 @@ int32_t Motor::get_avg_enc_pulse_count()
 
 
 /*  Returns the set RPM target for PID control.
+ * 
+ *  Note: returns absolute RPM.
  *  
  *  Arguments:
  *    None

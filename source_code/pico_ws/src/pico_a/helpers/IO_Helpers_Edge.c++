@@ -75,21 +75,22 @@ bool calibrate_ir_offset()
 {
     if (check_bool((take_mux_mutex() && adc_take_mutex()), RT_LOG_ONLY_CHECK))
     {
-        uint32_t readings_total;
+        uint32_t readings_total = 0;
         gpio_put(ir_en_pin, LOW);
         set_mux_io_mode(INPUT_ADC);
         sleep_us(50);
 
-        for (int i = 0; i < num_ir_sensors; i++)
+        for (int i = 0; i < num_ir_sensors - 1; i++)   // (num_ir_sensors - 1) because the last sensor is faulty.
         {
             set_mux_addr(i + 8);
-            readings_total = readings_total + adc_read();
+            sleep_us((i == 0) ? 1000 : 100);   // This delay significantly improves reading accuracy.
+            readings_total += (4095 - adc_read());
         }
 
         adc_release_mutex();
         release_mux_mutex();
 
-        ambient_reading = (4095 - (readings_total / num_ir_sensors));
+        ambient_reading = readings_total / (num_ir_sensors - 1);   // (num_ir_sensors - 1) because the last sensor is faulty.
         return true;
     }
 

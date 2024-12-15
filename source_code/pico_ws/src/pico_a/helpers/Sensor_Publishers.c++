@@ -56,7 +56,9 @@ void publish_ultra(void *parameters)
         // Check execution time
         check_exec_interval(last_ultrasonic_publish_time, (ultra_pub_rt_interval + 50), "Publish interval exceeded limits!", true);
 
-        uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
+        // TODO: Ultrasonics diabled awaiting optimisations.
+
+        /*uint32_t timestamp_sec = to_ms_since_boot(get_absolute_time()) / 1000;
         uint32_t timestamp_nanosec = (to_ms_since_boot(get_absolute_time()) - (timestamp_sec * 1000)) * 1000000;
 
         ultrasonic_sensor_msg.time.sec = timestamp_sec;
@@ -70,7 +72,7 @@ void publish_ultra(void *parameters)
         uRosPublishingHandler::PublishItem_t pub_item;
         pub_item.publisher = &ultrasonic_sensor_pub;
         pub_item.message = &ultrasonic_sensor_msg;
-        xQueueSendToBack(pub_handler->get_queue_handle(), (void *) &pub_item, 0);
+        xQueueSendToBack(pub_handler->get_queue_handle(), (void *) &pub_item, 0);*/
     }
 }
 
@@ -143,7 +145,7 @@ void publish_misc_sens(void *parameters)
         }
 
         // MPU6050 IMU
-        if (check_bool(mpu6050_event(&mpu6050) == 1, RT_SOFT_CHECK))
+        /*if (check_bool(mpu6050_event(&mpu6050) == 1, RT_SOFT_CHECK))
         {
             mpu6050_vectorf_t *mpu_accel = mpu6050_get_accelerometer(&mpu6050);
             mpu6050_vectorf_t *mpu_gyro = mpu6050_get_gyroscope(&mpu6050);
@@ -158,7 +160,7 @@ void publish_misc_sens(void *parameters)
 
             misc_sensor_msg.imu_freefall_int = (interrupts->isFreefall == 1);
             misc_sensor_msg.imu_temp = mpu6050_get_temperature_c(&mpu6050);
-        }
+        }*/
 
         // HMC5883L Compass
         // TODO: Compass installed, add code for compass.

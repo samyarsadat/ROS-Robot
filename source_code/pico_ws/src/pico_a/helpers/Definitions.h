@@ -78,15 +78,15 @@
 #define UROS_NODE_DOMAIN_ID                95
 #define AGENT_WAITING_LED_TOGGLE_DELAY_MS  500   // In milliseconds
 #define AGENT_AVAIL_LED_TOGGLE_DELAY_MS    250   // In milliseconds
-#define EXECUTOR_EXEC_INTERVAL_MS          90    // In milliseconds
-#define EXECUTOR_EXEC_TIME_LIMIT_MS        115   // In milliseconds
+#define EXECUTOR_EXEC_INTERVAL_MS          75    // In milliseconds
+#define EXECUTOR_EXEC_TIME_LIMIT_MS        100   // In milliseconds
 #define EXECUTOR_TIMEOUT_MS                20    // In milliseconds
 
 // ---- Repeating timer intervals ----
-#define motor_odom_rt_interval          100   // In milliseconds
+#define motor_odom_rt_interval          50    // In milliseconds
 #define ultra_pub_rt_interval           200   // In milliseconds
-#define edge_ir_pub_rt_interval         115   // In milliseconds
-#define sensors_pub_rt_interval         105   // In milliseconds
+#define edge_ir_pub_rt_interval         100   // In milliseconds
+#define sensors_pub_rt_interval         500   // In milliseconds
 #define motor_enc_method_2_rt_interval  150   // In milliseconds
 
 // ---- Ultrasonic sensor specs ----
