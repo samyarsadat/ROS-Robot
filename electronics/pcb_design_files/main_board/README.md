@@ -21,6 +21,17 @@
 ## Important Note #2:
 *On this revision of the PCB, there are two five-pin connectors for the motor encoders. I had initially planned to have one common current limiting resistor for all the encoders, however, this did not work. As a result, I have added a small proto board that splits the two five-pin connectors into four four-pin connectors (one connector per encoder) and adds individual 120ohm current limiting resistors for each encoder. These extra resistors and the four-pin connectors will be incorporated onto the board itself for rev. 2.*
 
+## Important Note #3:
+*On this revision of the PCB, all `5V` ultrasonic sensors connect to Pico A through a multiplexer. As a result of this design decision, we cannot use hardware interrupts
+when taking measurements. This means that the processor has to wait (after sending a trigger pulse) until either A) a signal is received from the sensor; or B) until a 24ms
+timeout is reached. To prevent RTOS task switching during this period (task switching causes unstable readings due to timing variations), a critical section is entered. 
+Entering a critical section in FreeRTOS results in all other tasks temporarily entering a suspended state (until the critical section is "exitted" from), even those 
+running on the other core of the Pico. This process is repeated for all four ultrasonic sensors (although the front ultrasonic can be optimized to use hardware interrupts 
+as its signal pin does not go through the multiplexer) every 200 milliseconds. Given that Pico A also handles motor control and odometry (which are highly time-sensetive
+tasks), I have decided to attach all four ultrasonic sensors as well as (potentially) the IMU and magnetometer to a third Raspberry Pi Pico (Pico C).*<br>
+<br>
+*More details regarding Pico C and its wiring diagram etc. will be added later, as I have not yet connected it.*
+
 <br>
 
 ## Board Modification #1:
