@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-FROM samyarsadat/custom_base_images:base-ros-humble
+FROM samyarsadat/custom_base_images:base-ros-vulcanexus-humble
 ENV USERNAME=nonroot
 
 
@@ -29,10 +29,10 @@ USER root
 RUN usermod -aG dialout ${USERNAME}
 
 # Post create and start scripts
-COPY post_start.sh /post_start.sh
+COPY entrypoint.sh /entrypoint.sh
 USER root
-RUN chmod +x /post_start.sh
-USER ${USERNAME}
+RUN chmod +x /entrypoint.sh
 
 # Entrypoint
-ENTRYPOINT ["/bin/bash", "/post_start.sh"]
+USER ${USERNAME}
+ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]

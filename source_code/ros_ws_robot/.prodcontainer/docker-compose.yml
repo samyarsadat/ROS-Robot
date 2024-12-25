@@ -28,5 +28,6 @@ services:
         device_cgroup_rules:
             - "c *:* rmw"
         volumes:
-            - ../:/home
+            - ../:/home/nonroot/ros_ws
+            - ../../pico_ws/libmicroros/src/rrp_pico_coms:/home/nonroot/ros_ws/src/rrp_pico_coms
             - /dev:/dev

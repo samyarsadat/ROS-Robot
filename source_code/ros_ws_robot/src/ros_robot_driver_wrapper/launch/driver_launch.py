@@ -19,7 +19,7 @@
 import os
 import launch
 from ament_index_python import get_package_share_directory
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, TimerAction, LogInfo
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
@@ -38,5 +38,12 @@ def generate_launch_description():
     )
 
     return launch.LaunchDescription([
-        agents_launch, driver_launch
+        agents_launch,
+        TimerAction(
+            period=3.5,
+            actions=[
+                LogInfo(msg="Starting driver node(s)..."),
+                driver_launch
+            ]
+        )
     ])

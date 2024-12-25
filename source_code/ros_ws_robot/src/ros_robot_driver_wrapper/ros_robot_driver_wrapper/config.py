@@ -16,7 +16,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-PROGRAM_VERSION = "2024.10.6"
+PROGRAM_VERSION = "2024.12.26"
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, LivelinessPolicy
 import sys
 
@@ -24,7 +24,7 @@ import sys
 # ---- Program Info ----
 class ProgramInfoConfig:
     VERSION = PROGRAM_VERSION
-    VERSION_DATE = "2024/10/06 @ 1:30 UTC"
+    VERSION_DATE = "2024/12/26 @ 9:32 UTC"
 
 
 class ProgramConfig:
@@ -34,7 +34,7 @@ class ProgramConfig:
 # ---- ROS Config ----
 class RosConfig:
     NODE_NAME = "robot_driver_wrapper_node"
-    NODE_NAMESPACE = sys.argv[1] if len(sys.argv) > 1 else "ros_robot"
+    NODE_NAMESPACE = "ros_robot"    # TODO: make configurable
     EXECUTOR_DOMAIN_ID = None
     EXECUTOR_TIMEOUT = 0.05         # 50ms
     EXECUTOR_SHUTDOWN_TIMEOUT = 5   # 5s
