@@ -14,9 +14,9 @@ source_code/pico_ws/libmicroros/src/log
 source_code/pico_ws/libmicroros/src/rrp_pico_coms/build
 source_code/pico_ws/libmicroros/src/rrp_pico_coms/install
 source_code/pico_ws/libmicroros/src/rrp_pico_coms/log
-source_code/ros_ws_robot/install
-source_code/ros_ws_robot/log
-source_code/ros_ws_robot/build
+source_code/ros_ws_robot_infra/install
+source_code/ros_ws_robot_infra/log
+source_code/ros_ws_robot_infra/build
 **/.idea
 **/__pycache__
 electronics/**/__Previews
