@@ -11,12 +11,12 @@ done
 
 cd "$HOME/ros_robot" || exit 1
 git fetch origin
-IS_UPTODATE=$(git diff origin/main)
+IS_UPTODATE=$(git diff origin/stage-1)
 
 if [ "$IS_UPTODATE" != "" ] || [ "$FORCE_RESET" == "true" ]; then
     git clean -dfx
     git reset --recurse-submodules --hard
-    git pull origin main
+    git pull origin stage-1
     git submodule update --recursive
 fi
 
