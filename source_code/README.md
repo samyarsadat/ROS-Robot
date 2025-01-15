@@ -8,7 +8,7 @@ This directory contains the source code and related files (such as Dockerfiles f
 
 ### Directories
  - **pico_ws:** Raspberry Pi Pico workspace. Contains the source code for Raspberry Pi Pico firmware, the source code for the ROS package that contains the custom message definitions that are used by the Picos to communicate with the main Raspberry Pi computer, and a devcontainer for building the firmware and the ROS package. It also contains pre-built binaries for the Picos.
- - **ros_ws_robot:** Robot ROS workspace. Contains the source code for all of the ROS packages that run on the robot, a devcontainer for developing and building the packages, and a Dockerfile for deploying the packages to the robot.
+ - **ros_ws_robot_infra:** Robot infrastructure ROS workspace. Contains the source code for all of the base ROS packages that run on the robot (i.e. the driver, the camera image publisher, robot description, LiDAR, etc.), a devcontainer for developing and building the packages, and a Dockerfile for deploying the packages to the robot.
  - **ros_ws_workstation:** Workstation ROS workspace. Contains the source code for all of the ROS packages that run on the workstation (ROS base station), a devcontainer for developing and building the packages, and a Dockerfile for running the packages on the workstation.<br><br>
 
 ***W.I.P.***

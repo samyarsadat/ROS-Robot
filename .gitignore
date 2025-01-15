@@ -18,6 +18,7 @@ source_code/ros_ws_robot_infra/install
 source_code/ros_ws_robot_infra/log
 source_code/ros_ws_robot_infra/build
 **/.idea
+**/.venv
 **/__pycache__
 electronics/**/__Previews
 electronics/**/History
