@@ -6,7 +6,8 @@ cad_files/G-Code
 **/~$*.SLDASM
 **/~$*.sldblk
 **/~$*.SLDBLK
-source_code/pico_ws/build
+source_code/pico_ws/build/**
+!source_code/pico_ws/build/.gitkeep
 source_code/pico_ws/libmicroros/firmware
 source_code/pico_ws/libmicroros/src/build
 source_code/pico_ws/libmicroros/src/install

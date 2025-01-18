@@ -1,6 +1,6 @@
 #  The ROS robot project - ROS 2 Deployment Dockerfile
-#  Copyright 2024 Samyar Sadat Akhavi
-#  Prepared by Samyar Sadat Akhavi, 2024.
+#  Copyright 2024-2025 Samyar Sadat Akhavi
+#  Prepared by Samyar Sadat Akhavi, 2024-2025.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -15,8 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-FROM samyarsadat/custom_base_images:base-ros-vulcanexus-humble
-ENV USERNAME=nonroot
+FROM samyarsadat/custom_base_images:base-ros-vulcanexus-jazzy
 
 
 # Install pip

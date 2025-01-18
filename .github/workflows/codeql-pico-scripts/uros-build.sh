@@ -3,8 +3,8 @@
 #  This is a modified version of the scripts from the MicroROS Build Action.
 #  This workaround is necessary because CodeQL needs run in the same environment as the build script.
 #
-#  Copyright 2024 Samyar Sadat Akhavi
-#  Written by Samyar Sadat Akhavi, 2024.
+#  Copyright 2024-2025 Samyar Sadat Akhavi
+#  Written by Samyar Sadat Akhavi, 2024-2025.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
 set -e
-export ROS_DISTRO="humble"
 
 # Get arguments
 MICROROS_DIR_PATH=$1

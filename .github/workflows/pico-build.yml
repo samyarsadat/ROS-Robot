@@ -1,6 +1,6 @@
 #  The ROS robot project - Raspberry Pi Pico source code build workflow.
-#  Copyright 2024 Samyar Sadat Akhavi
-#  Written by Samyar Sadat Akhavi, 2024.
+#  Copyright 2024-2025 Samyar Sadat Akhavi
+#  Written by Samyar Sadat Akhavi, 2024-2025.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ jobs:
 
             - name: Build MicroROS Library
               id: build
-              uses: samyarsadat/MicroROS-Build-Action@v1
+              uses: samyarsadat/MicroROS-Build-Action@v1-jazzy
               with:
                   microros_dir: "source_code/pico_ws/libmicroros"
                   clone_microros_setup: "false"

@@ -1,6 +1,6 @@
 #  The ROS robot project - ROS2 Production (Workstation) Dockerfile
-#  Copyright 2024 Samyar Sadat Akhavi
-#  Prepared by Samyar Sadat Akhavi, 2024.
+#  Copyright 2024-2025 Samyar Sadat Akhavi
+#  Prepared by Samyar Sadat Akhavi, 2024-2025.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -15,4 +15,4 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-FROM ros:humble
+FROM samyarsadat/custom_base_images:desktop-full-ros-jazzy

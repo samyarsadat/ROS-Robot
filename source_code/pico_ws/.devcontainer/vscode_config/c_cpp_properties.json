@@ -13,7 +13,7 @@
             },
 
             "includePath": [
-                "/opt/ros/humble/include/**",
+                "/opt/ros/${ROS_DISTRO}/include/**",
                 "/usr/include/**",
                 "${PICO_SDK_PATH}/**",
                 "${workspaceFolder}/src/**",

@@ -1,6 +1,6 @@
 #  The ROS robot project - ROS 2 Workspace Dockerfile
-#  Copyright 2024 Samyar Sadat Akhavi
-#  Prepared by Samyar Sadat Akhavi, 2024.
+#  Copyright 2024-2025 Samyar Sadat Akhavi
+#  Prepared by Samyar Sadat Akhavi, 2024-2025.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
 #  https://circuitdigest.com/microcontroller-projects/how-to-program-raspberry-pi-pico-using-c
 #  https://github.com/BrunoB81HK/ros2-workspace-devcontainer-template
 
-FROM samyarsadat/custom_base_images:desktop-full-ros-humble
-ENV USERNAME=nonroot
+FROM samyarsadat/custom_base_images:desktop-full-ros-jazzy
 
 
 # Install pip

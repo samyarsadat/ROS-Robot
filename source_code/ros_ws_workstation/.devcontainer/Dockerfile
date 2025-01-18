@@ -1,6 +1,6 @@
 #  The ROS robot project - ROS2 Development Workspace (Workstation) Dockerfile
-#  Copyright 2024 Samyar Sadat Akhavi
-#  Prepared by Samyar Sadat Akhavi, 2024.
+#  Copyright 2024-2025 Samyar Sadat Akhavi
+#  Prepared by Samyar Sadat Akhavi, 2024-2025.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -19,27 +19,11 @@
 #  https://github.com/joshnewans/dockerfile_example/blob/main/Dockerfile
 #  https://github.com/BrunoB81HK/ros2-workspace-devcontainer-template
 
-FROM ros:humble
+FROM samyarsadat/custom_base_images:base-ros-jazzy
 
-
-# Install git & pip
+# Install pip
 RUN apt-get update \
-    && apt-get install -y git python3-pip \
-    && rm -rf /var/lib/apt/lists/* && apt-get autoremove && apt-get autoclean
-
-# Create non-root user
-ARG USERNAME=rosdev
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    && mkdir /home/$USERNAME/.config && chown $USER_UID:$USER_GID /home/$USERNAME/.config
-
-# Install and configure SUDO
-RUN apt-get update \
-    && apt-get install -y sudo \
-    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    && apt-get install -y python3-pip \
     && rm -rf /var/lib/apt/lists/* && apt-get autoremove && apt-get autoclean
 
 # Copy configuration files

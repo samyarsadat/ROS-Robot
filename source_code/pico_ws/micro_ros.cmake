@@ -19,7 +19,6 @@ target_include_directories(micro_ros PUBLIC
     ${MICRO_ROS_PATH}/include/diagnostic_msgs
     ${MICRO_ROS_PATH}/include/example_interfaces
     ${MICRO_ROS_PATH}/include/geometry_msgs
-    ${MICRO_ROS_PATH}/include/rrp_pico_coms
     ${MICRO_ROS_PATH}/include/lifecycle_msgs
     ${MICRO_ROS_PATH}/include/micro_ros_msgs
     ${MICRO_ROS_PATH}/include/nav_msgs
@@ -32,11 +31,14 @@ target_include_directories(micro_ros PUBLIC
     ${MICRO_ROS_PATH}/include/rmw
     ${MICRO_ROS_PATH}/include/ros2_temperature
     ${MICRO_ROS_PATH}/include/rosgraph_msgs
+    ${MICRO_ROS_PATH}/include/rosidl_dynamic_typesupport
     ${MICRO_ROS_PATH}/include/rosidl_runtime_c
     ${MICRO_ROS_PATH}/include/rosidl_typesupport_c
     ${MICRO_ROS_PATH}/include/rosidl_typesupport_interface
     ${MICRO_ROS_PATH}/include/rosidl_typesupport_introspection_c
+    ${MICRO_ROS_PATH}/include/rrp_pico_coms
     ${MICRO_ROS_PATH}/include/sensor_msgs
+    ${MICRO_ROS_PATH}/include/service_msgs
     ${MICRO_ROS_PATH}/include/shape_msgs
     ${MICRO_ROS_PATH}/include/statistics_msgs
     ${MICRO_ROS_PATH}/include/std_msgs
@@ -45,6 +47,7 @@ target_include_directories(micro_ros PUBLIC
     ${MICRO_ROS_PATH}/include/test_msgs
     ${MICRO_ROS_PATH}/include/tracetools
     ${MICRO_ROS_PATH}/include/trajectory_msgs
+    ${MICRO_ROS_PATH}/include/type_description_interfaces
     ${MICRO_ROS_PATH}/include/unique_identifier_msgs
     ${MICRO_ROS_PATH}/include/visualization_msgs
 )
