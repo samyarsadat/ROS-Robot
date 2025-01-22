@@ -1,21 +1,18 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>ros_robot_driver</name>
-  <version>2025.1.18</version>
-  <description>The ROS Robot Project: Robot hardware interface/abstraction (driver) package.</description>
+  <name>ros_robot_bringup</name>
+  <version>2025.1.22</version>
+  <description>The ROS Robot Project: Robot infrastructure bringup package.</description>
   <maintainer email="samyarsadat@gigawhat.net">Samyar Sadat Akhavi</maintainer>
   <license>GPL-3.0-only</license>
 
-  <depend>rclpy</depend>
-  <depend>std_msgs</depend>
-  <depend>sensor_msgs</depend>
-  <depend>diagnostic_msgs</depend>
-  <depend>nav_msgs</depend>
-  <depend>rrp_pico_coms</depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>ros_robot_driver_wrapper</exec_depend>
+  <exec_depend>camera_ros</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
-  <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
   <test_depend>python3-pytest</test_depend>
 

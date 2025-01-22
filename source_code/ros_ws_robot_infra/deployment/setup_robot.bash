@@ -36,6 +36,10 @@ git clone https://github.com/samyarsadat/ROS-Robot ./ros_robot --recurse-submodu
 SOURCE_CODE_PATH="$HOME/ros_robot/source_code"
 sudo chmod +s "$SOURCE_CODE_PATH/ros_ws_robot_infra/deployment/run_driver.bash"
 
+cd "$SOURCE_CODE_PATH/ros_camera_ws" || exit 1
+ROS_DISTRO=$ROS_DISTRO bash ./build_setup_camera_ros.sh
+bash ./build_camera_ros.sh
+
 cd "$SOURCE_CODE_PATH/pico_ws/libmicroros" || exit 1
 colcon build --packages-select rrp_pico_coms
 source "./install/local_setup.sh"

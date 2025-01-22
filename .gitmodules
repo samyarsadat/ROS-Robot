@@ -33,3 +33,4 @@
 [submodule "The camera_ros Package"]
 	path = source_code/ros_camera_ws/src/camera_ros
 	url = https://github.com/christianrauch/camera_ros
+	ignore = all
