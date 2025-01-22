@@ -1,7 +1,17 @@
 #!/bin/bash
+ROS_DISTRO="jazzy"
+NON_ROSDEP_DEPS=""
 set -e
 
-sudo apt-get update && sudo apt-get install ca-certificates curl
+sudo apt-get install software-properties-common
+sudo add-apt-repository universe -y
+sudo apt-get update && sudo apt-get install ca-certificates curl -y
+
+sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+sudo curl -sSL https://raw.githubusercontent.com/eProsima/vulcanexus/main/vulcanexus.key -o /usr/share/keyrings/vulcanexus-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/vulcanexus-archive-keyring.gpg] http://repo.vulcanexus.org/debian $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/vulcanexus.list > /dev/null
+
 sudo install -m 0755 -d /etc/apt/keyrings
 sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
@@ -9,17 +19,37 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.
      $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo apt-get update && sudo apt-get upgrade -y
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin vulcanexus-$ROS_DISTRO-base python3-pip
+source /opt/vulcanexus/$ROS_DISTRO/setup.bash
 sudo systemctl status docker -n 0
 
 sudo groupadd -f docker
 sudo usermod -aG docker $USER
 sudo usermod -aG dialout $USER
 
+sudo rosdep init
+rosdep update
+
 cd "$HOME" || exit 1
 git clone https://github.com/samyarsadat/ROS-Robot ./ros_robot --recurse-submodules
-cd ./ros_robot || exit 1
-sudo chmod +s "./source_code/ros_ws_robot_infra/deployment/run_driver.bash"
+SOURCE_CODE_PATH="$HOME/ros_robot/source_code"
+sudo chmod +s "$SOURCE_CODE_PATH/ros_ws_robot_infra/deployment/run_driver.bash"
 
+# RESERVED FOR FUTURE USE.
+#cd "$SOURCE_CODE_PATH/pico_ws/libmicroros" || exit 1
+#colcon build --packages-select rrp_pico_coms
+#source "./install/local_setup.sh"
+#
+#cd "$SOURCE_CODE_PATH/ros_ws_robot_infra" || exit 1
+#colcon build --packages-select ros_robot_msgs
+#source "./install/local_setup.sh"
+#
+#export PIP_BREAK_SYSTEM_PACKAGES=1
+#rosdep install --from-paths src -y --ignore-src
+#sudo apt-get install $NON_ROSDEP_DEPS -y
+#colcon build --packages-skip ros_robot_msgs
+
+sudo apt-get autoremove -y
+sudo apt-get autoclean -y
 newgrp docker

@@ -2,7 +2,7 @@
 This directory contains the source code and related files (such as Dockerfiles for deployment, devconainers for development) for Raspberry Pi Pico firmware and all custom ROS packages that I have written for this project.<br><br>
 
 ### Operating Systems & Software Versions
-**Raspberry Pi OS:** Raspberry Pi OS, ROS2 running in an Ubuntu 24.04 Docker Container.<br>
+**Raspberry Pi OS:** Ubuntu 24.04, Vulcanexus ROS 2 installation. Debian Docker container for RPi AI Kit.<br>
 **Workstation OS:** Ubuntu 24.04, ROS2 running in an Ubuntu 24.04 Docker Container.<br>
 **ROS2 Distribution:** ROS2 Jazzy Jalisco.<br><br>
 
