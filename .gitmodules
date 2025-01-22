@@ -24,3 +24,12 @@
 	url = https://github.com/micro-ROS/micro_ros_setup
 	branch = jazzy
 	ignore = all
+
+[submodule "Raspberry Pi's libcamera Fork"]
+	path = source_code/ros_camera_ws/src/libcamera
+	url = https://github.com/raspberrypi/libcamera
+	ignore = all
+
+[submodule "The camera_ros Package"]
+	path = source_code/ros_camera_ws/src/camera_ros
+	url = https://github.com/christianrauch/camera_ros
