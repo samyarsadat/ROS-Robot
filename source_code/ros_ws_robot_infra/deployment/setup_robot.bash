@@ -20,7 +20,7 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.
      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 sudo apt-get update && sudo apt-get upgrade -y
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin vulcanexus-$ROS_DISTRO-base python3-pip
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin vulcanexus-$ROS_DISTRO-base python3-pip -y
 source /opt/vulcanexus/$ROS_DISTRO/setup.bash
 sudo systemctl status docker -n 0
 
