@@ -36,19 +36,18 @@ git clone https://github.com/samyarsadat/ROS-Robot ./ros_robot --recurse-submodu
 SOURCE_CODE_PATH="$HOME/ros_robot/source_code"
 sudo chmod +s "$SOURCE_CODE_PATH/ros_ws_robot_infra/deployment/run_driver.bash"
 
-# RESERVED FOR FUTURE USE.
-#cd "$SOURCE_CODE_PATH/pico_ws/libmicroros" || exit 1
-#colcon build --packages-select rrp_pico_coms
-#source "./install/local_setup.sh"
-#
-#cd "$SOURCE_CODE_PATH/ros_ws_robot_infra" || exit 1
-#colcon build --packages-select ros_robot_msgs
-#source "./install/local_setup.sh"
-#
+cd "$SOURCE_CODE_PATH/pico_ws/libmicroros" || exit 1
+colcon build --packages-select rrp_pico_coms
+source "./install/local_setup.sh"
+
+cd "$SOURCE_CODE_PATH/ros_ws_robot_infra" || exit 1
+colcon build --packages-select ros_robot_msgs
+source "./install/local_setup.sh"
+
 #export PIP_BREAK_SYSTEM_PACKAGES=1
 #rosdep install --from-paths src -y --ignore-src
 #sudo apt-get install $NON_ROSDEP_DEPS -y
-#colcon build --packages-skip ros_robot_msgs
+colcon build --packages-skip ros_robot_msgs
 
 sudo apt-get autoremove -y
 sudo apt-get autoclean -y

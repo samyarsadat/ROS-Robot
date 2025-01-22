@@ -1,4 +1,5 @@
 #!/bin/bash
+ROS_DISTRO="jazzy"
 set -e
 
 SOURCE_CODE_PATH="$HOME/ros_robot/source_code"
