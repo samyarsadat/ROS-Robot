@@ -17,19 +17,31 @@
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
 import launch
-import launch_ros.actions
 from launch.actions import RegisterEventHandler, LogInfo, DeclareLaunchArgument, EmitEvent
 from launch.event_handlers import OnProcessExit
 from launch.events import Shutdown
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
+package_name = "ros_robot_driver_wrapper"
 
 
 def generate_launch_description():
-    pico_domain_id_arg = DeclareLaunchArgument("pico_domain_id", default_value="95")             # TODO: Currently non-functional
-    robot_namespace_arg = DeclareLaunchArgument("robot_namespace", default_value="ros_robot")    # TODO: Currently non-functional
-    launch_driver = launch_ros.actions.Node(package="ros_robot_driver_wrapper", executable="ros_robot_driver", name="ros_robot_driver")
+    pico_domain_id_arg = DeclareLaunchArgument("pico_domain_id", default_value="95")
+    robot_namespace_arg = DeclareLaunchArgument("namespace", default_value="ros_robot")
+    node_name_arg = DeclareLaunchArgument("node_name", default_value="ros_robot_driver")
+
+    launch_driver = Node(
+        package=package_name,
+        executable="ros_robot_driver",
+        namespace=LaunchConfiguration("namespace"),
+        name=LaunchConfiguration("node_name"),
+        parameters=[{
+            "pico_domain_id": LaunchConfiguration("pico_domain_id")
+        }]
+    )
 
     return launch.LaunchDescription([
-        pico_domain_id_arg, robot_namespace_arg, launch_driver,
+        pico_domain_id_arg, robot_namespace_arg, node_name_arg, launch_driver,
         RegisterEventHandler(
             OnProcessExit(
                 target_action=launch_driver,

@@ -18,6 +18,7 @@
 import sys
 import threading
 import traceback
+import concurrent.futures
 from time import sleep
 from ros_robot_driver.ros_main import RosRobotDriverThread
 from ros_robot_driver_wrapper.config import RosConfig, ProgramConfig
@@ -27,10 +28,12 @@ from ros_robot_driver_wrapper.ros_main import is_ros_node_initialized
 
 def main():
     stop_wrapper_ros_thread = False
-    wrapper_ros_thread = threading.Thread(target=ros_executor_thread, args=(lambda: stop_wrapper_ros_thread, ), name=RosConfig.THREAD_NAME)
+    param_future = concurrent.futures.Future()
+    wrapper_ros_thread = threading.Thread(target=ros_executor_thread, args=(lambda: stop_wrapper_ros_thread, param_future), name=RosConfig.THREAD_NAME)
 
     wrapper_ros_thread.start()
-    RosRobotDriverThread.start_thread()
+    node_name, domain_id = param_future.result()
+    RosRobotDriverThread.start_thread(domain_id, node_name + "_pico")
 
     try:
         while True:
@@ -39,7 +42,7 @@ def main():
                     get_ros_node().get_logger().fatal("The driver wrapper thread has died. Terminating program.")
                 else:
                     print("The driver wrapper thread has died. Terminating program.")
-                RosRobotDriverThread.stop_ros_thread(True)
+                RosRobotDriverThread.stop_thread(True)
                 sys.exit(1)
 
             if not RosRobotDriverThread.is_alive():

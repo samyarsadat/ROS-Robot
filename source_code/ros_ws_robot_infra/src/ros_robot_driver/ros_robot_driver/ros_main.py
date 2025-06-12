@@ -1,7 +1,7 @@
 #  The ROS robot project (Robot Driver Package)
 #  ROS setup, node, and executor
-#  Copyright 2024 Samyar Sadat Akhavi
-#  Written by Samyar Sadat Akhavi, 2024.
+#  Copyright 2024-2025 Samyar Sadat Akhavi
+#  Written by Samyar Sadat Akhavi, 2024-2025.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -67,8 +67,8 @@ class RosNode(Node):
 
         return future.result()
 
-    def __init__(self, context: rclpy.Context):
-        super().__init__(context=context, node_name=RosConfig.NODE_NAME, namespace=RosConfig.NODE_NAMESPACE)
+    def __init__(self, context: rclpy.Context, node_name: str):
+        super().__init__(context=context, node_name=node_name, namespace=RosConfig.NODE_NAMESPACE)
         self.get_logger().info("Creating publishers, subscribers, and services servers...")
 
         self._reentrant_cb_group = ReentrantCallbackGroup()
@@ -339,13 +339,14 @@ def get_ros_node() -> RosNode:
     global pico_ros_node
     return pico_ros_node
 
-def _ros_executor_thread(stop_thread) -> None:
+def _ros_executor_thread(stop_thread, domain_id: int, node_name: str) -> None:
     try:
         internal_context = rclpy.Context()
-        rclpy.init(context=internal_context, domain_id=RosConfig.EXECUTOR_DOMAIN_ID)
+        ros_args = ["--ros-args", "-r"] + [arg for arg in sys.argv if "__ns:=" in arg]  # TODO: FIX THIS!
+        rclpy.init(context=internal_context, domain_id=domain_id, args=ros_args)
 
         global pico_ros_node
-        pico_ros_node = RosNode(internal_context)
+        pico_ros_node = RosNode(internal_context, node_name)
         pico_ros_node.get_logger().info("Driver node initialized!")
 
         executor = MultiThreadedExecutor(context=internal_context)
@@ -358,6 +359,7 @@ def _ros_executor_thread(stop_thread) -> None:
             sys.exit(1)
 
         pico_ros_node.get_logger().info("Starting the executor...")
+        pico_ros_node.get_logger().info(pico_ros_node.get_name())
 
         while not stop_thread():
             executor.spin_once(timeout_sec=RosConfig.EXECUTOR_TIMEOUT)
@@ -375,12 +377,15 @@ def _ros_executor_thread(stop_thread) -> None:
 # ROS thread control.
 class RosRobotDriverThread:
     @staticmethod
-    def start_thread() -> None:
+    def start_thread(domain_id: int = RosConfig.EXECUTOR_DOMAIN_ID, node_name: str = RosConfig.NODE_NAME) -> None:
         global _stop_ros_thread
         global _ros_thread
 
+        if not domain_id:
+            domain_id = RosConfig.EXECUTOR_DOMAIN_ID
+
         if _ros_thread is None:
-            _ros_thread = threading.Thread(target=_ros_executor_thread, args=(lambda: _stop_ros_thread, ), name=RosConfig.THREAD_NAME)
+            _ros_thread = threading.Thread(target=_ros_executor_thread, args=(lambda: _stop_ros_thread, domain_id, node_name), name=RosConfig.THREAD_NAME)
             _ros_thread.start()
 
     @staticmethod

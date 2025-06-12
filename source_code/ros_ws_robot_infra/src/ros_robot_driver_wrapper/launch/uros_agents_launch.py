@@ -17,24 +17,41 @@
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
 import launch
-import launch_ros.actions
-from launch.actions import DeclareLaunchArgument
+from ament_index_python import has_resource
+from launch import LaunchContext
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
+
+
+def generate_agent_node_description(context: LaunchContext, name: str) -> Node:
+    return Node(
+        package="micro_ros_agent",
+        executable="micro_ros_agent",
+        name=f"{LaunchConfiguration("agent_name_prefix").perform(context)}{name}_uros_agent",
+        namespace=LaunchConfiguration("namespace"),
+        arguments=["serial", "--dev", LaunchConfiguration(f"{name}_dev")]
+    )
 
 
 def generate_launch_description():
-    pico_a_dev_arg = DeclareLaunchArgument("pico_a_dev", default_value="/dev/ttyACM0")
-    pico_b_dev_arg = DeclareLaunchArgument("pico_b_dev", default_value="/dev/ttyACM1")
-    pico_c_dev_arg = DeclareLaunchArgument("pico_c_dev", default_value="/dev/ttyACM2")
+    if not has_resource("packages", "micro_ros_agent"):
+        raise RuntimeError("The `micro_ros_agent` package must be installed!")
 
-    launch_agent_a = launch_ros.actions.Node(package="micro_ros_agent", executable="micro_ros_agent", name="pico_a_uros_agent",
-                                             arguments=["serial", "--dev", LaunchConfiguration("pico_a_dev")])
-    launch_agent_b = launch_ros.actions.Node(package="micro_ros_agent", executable="micro_ros_agent", name="pico_b_uros_agent",
-                                             arguments=["serial", "--dev", LaunchConfiguration("pico_b_dev")])
-    launch_agent_c = launch_ros.actions.Node(package="micro_ros_agent", executable="micro_ros_agent", name="pico_c_uros_agent",
-                                             arguments=["serial", "--dev", LaunchConfiguration("pico_c_dev")])
+    namespace_arg = DeclareLaunchArgument("namespace", default_value="ros_robot")
+    agent_name_prefix_arg = DeclareLaunchArgument("agent_name_prefix", default_value="")
+
+    pico_dev_args = [
+        DeclareLaunchArgument("pico_a_dev", default_value="/dev/ttyACM0"),
+        DeclareLaunchArgument("pico_b_dev", default_value="/dev/ttyACM1"),
+        DeclareLaunchArgument("pico_c_dev", default_value="/dev/ttyACM2")
+    ]
+
+    agent_node_ofs = [
+        OpaqueFunction(function=lambda context: [generate_agent_node_description(context, "pico_a")]),
+        OpaqueFunction(function=lambda context: [generate_agent_node_description(context, "pico_b")])
+    ]
 
     return launch.LaunchDescription([
-        pico_a_dev_arg, pico_b_dev_arg, pico_c_dev_arg,
-        launch_agent_a, launch_agent_b
-    ])
+        namespace_arg, agent_name_prefix_arg
+    ] + pico_dev_args + agent_node_ofs)

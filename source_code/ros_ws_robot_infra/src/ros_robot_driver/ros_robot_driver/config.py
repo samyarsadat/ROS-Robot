@@ -16,14 +16,14 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-PROGRAM_VERSION = "2025.1.18"
+PROGRAM_VERSION = "2025.2.23"
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, LivelinessPolicy
 
 
 # ---- Program Info ----
 class ProgramInfoConfig:
     VERSION = PROGRAM_VERSION
-    VERSION_DATE = "2025-01-18 @ 20:15 UTC"
+    VERSION_DATE = "2025-02-23 @ 00:52 UTC"
 
 
 # ---- ROS Config ----

@@ -1,0 +1,7 @@
+# Camera node parameters
+width: 1152
+height: 648
+mode_width: 2304
+mode_height: 1296
+jpeg_quality: 75
+FrameDurationLimits: [66667, 66667]  # 15 FPS

@@ -16,11 +16,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
+import concurrent.futures
 import rclpy
 from diagnostic_msgs.msg import DiagnosticStatus
 from diagnostic_msgs.srv import SelfTest
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
+from rclpy import Parameter
 from rclpy.callback_groups import ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup
 from rclpy.executors import ExternalShutdownException
 from rclpy.executors import MultiThreadedExecutor
@@ -189,7 +191,7 @@ def get_ros_node() -> RosNode:
     global robot_ros_node
     return robot_ros_node
 
-def ros_executor_thread(stop_thread) -> None:
+def ros_executor_thread(stop_thread, param_future: concurrent.futures.Future) -> None:
     try:
         internal_context = rclpy.Context()
         rclpy.init(context=internal_context, domain_id=RosConfig.EXECUTOR_DOMAIN_ID)
@@ -197,6 +199,9 @@ def ros_executor_thread(stop_thread) -> None:
         global robot_ros_node
         robot_ros_node = RosNode(internal_context)
         robot_ros_node.get_logger().info("Driver wrapper node initialized!")
+
+        pico_domain_id = robot_ros_node.declare_parameter("pico_domain_id", Parameter.Type.INTEGER)
+        param_future.set_result((robot_ros_node.get_name(), pico_domain_id.value if pico_domain_id.type_ == Parameter.Type.INTEGER else None))
 
         executor = MultiThreadedExecutor(context=internal_context)
         executor.add_node(robot_ros_node)
