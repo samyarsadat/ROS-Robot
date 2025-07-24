@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="body" params="wheel_radius namespace">
+        <xacro:property name="body_mesh_file" value="package://ros_robot_description/meshes/robot_body.dae" />
+        <xacro:property name="mass" value="2.2" />
+        <xacro:property name="inertia_ixx" value="0.01051" />
+        <xacro:property name="inertia_iyy" value="0.01893" />
+        <xacro:property name="inertia_izz" value="0.02458" />
+        <xacro:property name="depth" value="0.3" />
+        <xacro:property name="width" value="0.21" />
+        <xacro:property name="height" value="0.115" />
+        <xacro:property name="camera_res" value="1280 720" />
+        <xacro:property name="camera_fps" value="20" />
+        <xacro:property name="camera_fov" value="120" />
+
+        <link name="base_link" />
+        
+        <joint name="base_to_body_joint" type="fixed">
+            <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0" />
+            <parent link="base_link" />
+            <child link="body_link" />
+        </joint>
+
+        <link name="body_link">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <mesh filename="${body_mesh_file}" scale="1.0 1.0 1.0" />
+                </geometry>
+            </visual>
+
+            <collision>
+                <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+                <geometry>
+                    <box size="${depth} ${width} ${height}" />
+                </geometry>
+            </collision>
+
+            <inertial>
+                <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+                <mass value="${mass}" />
+                <inertia ixx="${inertia_ixx}" iyy="${inertia_iyy}" izz="${inertia_izz}" />
+            </inertial>
+        </link>
+
+        <joint name="imu_joint" type="fixed">
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <parent link="body_link" />
+            <child link="imu_link" />
+        </joint>
+
+        <link name="imu_link" />
+
+        <xacro:include filename="$(find ros_robot_description)/urdf/components/camera_led.xacro" />
+        <xacro:property name="cam_led_x" value="${(depth/2)-0.003}" />
+        <xacro:camera_led parent_link="body_link" name_prefix="tl" xyz="${cam_led_x} 0.018 0.08856" rpy="0 0 0" namespace="${namespace}" />
+        <xacro:camera_led parent_link="body_link" name_prefix="tr" xyz="${cam_led_x} -0.018 0.08856" rpy="0 0 0" namespace="${namespace}" />
+        <xacro:camera_led parent_link="body_link" name_prefix="bl" xyz="${cam_led_x} 0.018 0.06856" rpy="0 0 0" namespace="${namespace}" />
+        <xacro:camera_led parent_link="body_link" name_prefix="br" xyz="${cam_led_x} -0.018 0.06856" rpy="0 0 0" namespace="${namespace}" />
+
+        <xacro:include filename="$(find ros_robot_description)/urdf/components/ir_cliff_sensor.xacro" />
+        <xacro:property name="cliff_sens_z" value="-0.01" />
+        <xacro:property name="cliff_sens_fx" value="${depth/2}" />
+        <xacro:property name="cliff_sens_bx" value="${-depth/2}" />
+        <xacro:ir_cliff_sensor parent_link="body_link" name_prefix="f1" xyz="${cliff_sens_fx} 0.095 ${cliff_sens_z}" rpy="0 0 0" namespace="${namespace}" />
+        <xacro:ir_cliff_sensor parent_link="body_link" name_prefix="f2" xyz="${cliff_sens_fx} 0.0316 ${cliff_sens_z}" rpy="0 0 0" namespace="${namespace}" />
+        <xacro:ir_cliff_sensor parent_link="body_link" name_prefix="f3" xyz="${cliff_sens_fx} -0.0316 ${cliff_sens_z}" rpy="0 0 0" namespace="${namespace}" />
+        <xacro:ir_cliff_sensor parent_link="body_link" name_prefix="f4" xyz="${cliff_sens_fx} -0.095 ${cliff_sens_z}" rpy="0 0 0" namespace="${namespace}" />
+        <xacro:ir_cliff_sensor parent_link="body_link" name_prefix="b1" xyz="${cliff_sens_bx} 0.095 ${cliff_sens_z}" rpy="0 0 ${pi}" namespace="${namespace}" />
+        <xacro:ir_cliff_sensor parent_link="body_link" name_prefix="b2" xyz="${cliff_sens_bx} 0.0316 ${cliff_sens_z}" rpy="0 0 ${pi}" namespace="${namespace}" />
+        <xacro:ir_cliff_sensor parent_link="body_link" name_prefix="b3" xyz="${cliff_sens_bx} -0.0316 ${cliff_sens_z}" rpy="0 0 ${pi}" namespace="${namespace}" />
+        <xacro:ir_cliff_sensor parent_link="body_link" name_prefix="b4" xyz="${cliff_sens_bx} -0.095 ${cliff_sens_z}" rpy="0 0 ${pi}" namespace="${namespace}" />
+
+        <xacro:include filename="$(find ros_robot_description)/urdf/components/micro_switch.xacro" />
+        <xacro:property name="micro_switch_z" value="0.01811" />
+        <xacro:property name="micro_switch_x_ofst" value="${(depth/2)-0.005}" />
+        <xacro:micro_switch parent_link="body_link" name_prefix="fr" xyz="${micro_switch_x_ofst} -0.0898 ${micro_switch_z}" rpy="0 0 0" namespace="${namespace}" />
+        <xacro:micro_switch parent_link="body_link" name_prefix="fl" xyz="${micro_switch_x_ofst} 0.0898 ${micro_switch_z}" rpy="0 0 0" namespace="${namespace}" />
+        <xacro:micro_switch parent_link="body_link" name_prefix="br" xyz="${-micro_switch_x_ofst} -0.0898 ${micro_switch_z}" rpy="0 0 ${pi}" namespace="${namespace}" />
+        <xacro:micro_switch parent_link="body_link" name_prefix="bl" xyz="${-micro_switch_x_ofst} 0.0898 ${micro_switch_z}" rpy="0 0 ${pi}" namespace="${namespace}" />
+
+        <xacro:include filename="$(find ros_robot_description)/urdf/components/rpi_camera.xacro" />
+        <xacro:rpi_camera parent_link="body_link" xyz="${(depth/2)+0.01} 0 0.07856" rpy="0 0 0" namespace="${namespace}" 
+                          fov="${camera_fov}" resolution="${camera_res}" fps="${camera_fps}" />
+
+        <xacro:include filename="$(find ros_robot_description)/urdf/components/rplidar_a1.xacro" />
+        <xacro:rplidar parent_link="body_link" name_prefix="lidar" xyz="0.08 0 ${height}" rpy="0 0 0" namespace="${namespace}" />
+
+        <xacro:include filename="$(find ros_robot_description)/urdf/components/ultrasonic.xacro" />
+        <xacro:ultrasonic type="srf05" parent_link="body_link" name_prefix="front" xyz="${(depth/2)-0.017} 0 0.03909" rpy="0 0 0" namespace="${namespace}" />
+        <xacro:ultrasonic type="hysrf05" parent_link="body_link" name_prefix="back" xyz="${(-depth/2)+0.0165} 0 0.03856" rpy="0 0 ${pi}" namespace="${namespace}" />
+        <xacro:ultrasonic type="hysrf05" parent_link="body_link" name_prefix="right" xyz="0 ${(-width/2)+0.0165} 0.07145" rpy="0 0 ${pi/2}" namespace="${namespace}" />
+        <xacro:ultrasonic type="hysrf05" parent_link="body_link" name_prefix="left" xyz="0 ${(width/2)-0.0165} 0.07145" rpy="0 0 ${-pi/2}" namespace="${namespace}" />
+    </xacro:macro>
+</robot>

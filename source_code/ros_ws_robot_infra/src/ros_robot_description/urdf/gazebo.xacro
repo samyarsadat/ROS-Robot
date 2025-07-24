@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+    <!-- Noise values are for the MPU6050 -->
+    <xacro:macro name="imu" params="reference_frame namespace:=''">
+        <xacro:property name="namespace_fmt" value="${namespace + '/' if namespace != '' else ''}" />
+
+        <xacro:macro name="gaussian_noise" params="stddev bias_mean:=0 bias_stddev:=0 precision:=0 mean:=0">
+            <noise type="gaussian">
+                <stddev>${stddev}</stddev>
+                <bias_mean>${bias_mean}</bias_mean>
+                <bias_stddev>${bias_stddev}</bias_stddev>
+                <precision>${precision}</precision>
+                <mean>${mean}</mean>
+            </noise>
+        </xacro:macro>
+
+        <gazebo reference="${reference_frame}">
+            <sensor name="${namespace_fmt}imu" type="imu">
+                <update_rate>20</update_rate>
+                <topic>${namespace_fmt}imu/data_raw</topic>
+                <gz_frame_id>${namespace_fmt}imu_link</gz_frame_id>
+                <visualize>false</visualize>
+                
+                <imu>
+                    <angular_velocity>
+                        <x><xacro:gaussian_noise stddev="0.08" bias_mean="0.5" bias_stddev="0.15" precision="0.005" /></x>
+                        <y><xacro:gaussian_noise stddev="0.08" bias_mean="0.5" bias_stddev="0.15" precision="0.005" /></y>
+                        <z><xacro:gaussian_noise stddev="0.08" bias_mean="0.5" bias_stddev="0.15" precision="0.005" /></z>
+                    </angular_velocity>
+                    <linear_acceleration>
+                        <x><xacro:gaussian_noise stddev="0.063" bias_mean="0.1" bias_stddev="0.03" precision="0.0002" /></x>
+                        <y><xacro:gaussian_noise stddev="0.063" bias_mean="0.1" bias_stddev="0.03" precision="0.0002" /></y>
+                        <z><xacro:gaussian_noise stddev="0.063" bias_mean="0.1" bias_stddev="0.03" precision="0.0002" /></z>
+                    </linear_acceleration>
+                </imu>
+            </sensor>
+        </gazebo>
+    </xacro:macro>
+</robot>

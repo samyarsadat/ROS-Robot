@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="ultrasonic" params="type parent_link name_prefix namespace xyz rpy">
+        <xacro:property name="namespace_fmt" value="${namespace + '/' if namespace != '' else ''}" />
+        <xacro:property name="mesh_file" value="package://ros_robot_description/meshes/components/ultrasonic_${type}.dae" />
+
+        <xacro:if value="${type == 'hysrf05'}">
+            <xacro:property name="min_meas_dist" value="0.02" />
+            <xacro:property name="max_meas_dist" value="4.5" />
+            <xacro:property name="meas_res" value="0.003" />
+            <xacro:property name="meas_fov" value="30" />
+            <xacro:property name="sens_x_offset" value="0.02" />
+            <xacro:property name="gauss_std_dev" value="0.02" />
+        </xacro:if>
+        <xacro:if value="${type == 'srf05'}">
+            <xacro:property name="min_meas_dist" value="0.01" />
+            <xacro:property name="max_meas_dist" value="4.0" />
+            <xacro:property name="meas_res" value="0.003" />
+            <xacro:property name="meas_fov" value="30" />
+            <xacro:property name="sens_x_offset" value="0.01746" />
+            <xacro:property name="gauss_std_dev" value="0.01" />
+        </xacro:if>
+
+        <joint name="${name_prefix}_ultrasonic_joint" type="fixed">
+            <parent link="${parent_link}" />
+            <child link="${name_prefix}_ultrasonic_link" />
+            <origin xyz="${xyz}" rpy="${rpy}" />
+        </joint>
+
+        <link name="${name_prefix}_ultrasonic_link">
+            <visual>
+                <origin xyz="${xyz}" rpy="${rpy}" />
+                <geometry>
+                    <mesh filename="${mesh_file}" scale="1.0 1.0 1.0" />
+                </geometry>
+            </visual>
+        </link>
+
+        <gazebo reference="${name_prefix}_ultrasonic_link">
+            <sensor type="gpu_lidar" name="${namespace_fmt}${name_prefix}_ultrasonic_sensor">
+                <pose>${sens_x_offset} 0 0 0 0 0</pose>
+                <update_rate>10</update_rate>
+                <topic>${namespace_fmt}${name_prefix}_ultrasonic/range</topic>
+                <gz_frame_id>${namespace_fmt}${name_prefix}_ultrasonic_link</gz_frame_id>
+                <visualize>false</visualize>
+
+                <lidar>
+                    <scan>
+                        <horizontal>
+                            <samples>5</samples>
+                            <resolution>1</resolution>
+                            <min_angle>${((meas_fov/2)/180)*-pi}</min_angle>
+                            <max_angle>${((meas_fov/2)/180)*pi}</max_angle>
+                        </horizontal>
+                        <vertical>
+                            <samples>5</samples>
+                            <resolution>1</resolution>
+                            <min_angle>${((meas_fov/2)/180)*-pi}</min_angle>
+                            <max_angle>${((meas_fov/2)/180)*pi}</max_angle>
+                        </vertical>
+                    </scan>
+                    <range>
+                        <min>${min_meas_dist}</min>
+                        <max>${max_meas_dist}</max>
+                        <resolution>${meas_res}</resolution>
+                    </range>
+                    <noise type="gaussian">
+                        <stddev>${gauss_std_dev}</stddev>
+                    </noise>
+                </lidar>
+            </sensor>
+        </gazebo>
+    </xacro:macro>
+</robot>

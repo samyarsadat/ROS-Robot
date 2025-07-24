@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="camera_led" params="parent_link name_prefix namespace xyz rpy">
+        <xacro:property name="mesh_file" value="package://ros_robot_description/meshes/components/camera_led.dae" />
+        <xacro:property name="namespace_fmt" value="${namespace + '/' if namespace != '' else ''}" />
+
+        <joint name="${name_prefix}_cam_led_joint" type="fixed">
+            <parent link="${parent_link}" />
+            <child link="${name_prefix}_cam_led_link" />
+            <origin xyz="${xyz}" rpy="${rpy}" />
+        </joint>
+
+        <link name="${name_prefix}_cam_led_link">
+            <visual>
+                <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+                <geometry>
+                    <mesh filename="${mesh_file}" scale="1.0 1.0 1.0" />
+                </geometry>
+            </visual>
+        </link>
+
+        <gazebo reference="${name_prefix}_cam_led_link">
+            <light type="point" name="${namespace_fmt}${name_prefix}_cam_led_light">
+                <diffuse>1 1 1 1</diffuse>
+                <attenuation>
+                    <range>1</range>
+                    <constant>0.5</constant>
+                    <linear>0.1</linear>
+                    <quadratic>0.05</quadratic>
+                </attenuation>
+                <cast_shadows>false</cast_shadows>
+            </light>
+        </gazebo>
+    </xacro:macro>
+</robot>
