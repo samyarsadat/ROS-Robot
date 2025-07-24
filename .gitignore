@@ -32,3 +32,4 @@ electronics/**/*.OutJob
 electronics/**/*.PrjPcbStructure
 testing_data
 **/desktop.ini
+**/.vscode
