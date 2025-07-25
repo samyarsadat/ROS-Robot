@@ -46,7 +46,7 @@ For Pico B, `GP8` and `GP9` can be used for UART, as they are already free.*
 <br>
 <br>
 
-## Improvements for Rev. 2 (Stage 4):
+## Improvements for Rev. 2:
  - **1.**&nbsp; *Add diode (or `P-FET`) to Raspberry Pi Pico `VSYS` for power ORing. (https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf)*
  - **2.**&nbsp; *Combine power pins of the IR edge sensors to reduce wire count.*
  - **3.**&nbsp; *Add mounting supports for the `MPU6050` module.*

@@ -22,7 +22,7 @@
 <br>
 
 <img src="assets/renders/GitHub_Render_1_Edited.png">
-This is a 3D render of the CAD designs.
+This is a 3D render of the CAD drawings.
 
 <br>
 <br>
