@@ -8,7 +8,7 @@
 	<br>
 	<a href="LICENSE"><img src="https://img.shields.io/github/license/samyarsadat/ROS-Robot?color=blue"></a>
 	|
-	<a href="#stages"><img src="https://img.shields.io/badge/Current_Stage-One-red"></a>
+	<img src="https://img.shields.io/badge/version-1-red">
 	|
 	<a href="../../issues"><img src="https://img.shields.io/github/issues/samyarsadat/ROS-Robot"></a>
 </p>
@@ -25,12 +25,13 @@
 This is a 3D render of the CAD designs.
 
 <br>
+<br>
 
 ## Overview
 ### Future Re-design
 This is the first revision of the robot. It features a camera for object detection, and a LiDAR sensor for SLAM.
 
-I will begin deisgn work on the second revision/re-design of this robot as soon as this revision is in a state were it can perform mapping and navigation (SLAM), and basic object detection using the camera.
+I will begin deisgn work on the second revision/re-design of this robot as soon as this revision is in a state where it can perform mapping and navigation (SLAM), and basic object detection using the camera.
 
 <br>
 
