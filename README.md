@@ -45,8 +45,7 @@ More details regarding the electronics design [here](electronics/).\
 <br>
 
 #### Mechanical Design Overview
-The mechanical design of the robot is quite simple. The chassis of the robot is 3D printed in two halves using PLA filament (more details regarding 3D printing [here](cad_files/stl_files/)) and the robot uses four geared DC motors 
-(Namiki 22CL-3501PG) in a differential drive configuration.
+The mechanical design of the robot is quite simple. The chassis of the robot is 3D printed in two halves using PLA filament (more details regarding 3D printing [here](cad_files/stl_files/)) and the robot uses four geared DC motors (Namiki 22CL-3501PG) in a differential drive configuration.
 
 <br>
 
