@@ -20,28 +20,21 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import PathJoinSubstitution, LaunchConfiguration
 from launch_ros.descriptions import ComposableNode
 from launch_ros.substitutions import FindPackageShare
-package_name = "ros_robot_bringup"
+package_name = "ros_robot_camera"
 
 
 def get_camera_launch_arguments() -> list[DeclareLaunchArgument]:
     ros_robot_bringup_pkg = FindPackageShare(package_name)
-    args = []
-
-    camera_arg_name = "camera"
-    args.append(DeclareLaunchArgument(camera_arg_name, default_value="0"))
-
-    config_file_arg_name = "config_file"
-    config_file_default = PathJoinSubstitution([ros_robot_bringup_pkg, "config", "camera_config.yaml"])
-    args.append(DeclareLaunchArgument(config_file_arg_name, default_value=config_file_default))
-
-    ci_url_arg_name = "camera_info_url"
-    ci_url_default = PathJoinSubstitution([ros_robot_bringup_pkg, "config", "camera_calib.yaml"])
-    args.append(DeclareLaunchArgument(ci_url_arg_name, default_value=ci_url_default))
-
-    node_name_arg_name = "node_name"
-    args.append(DeclareLaunchArgument(node_name_arg_name, default_value="camera_node"))
-
-    return args
+    return [
+        DeclareLaunchArgument("camera", default_value="0"),
+        DeclareLaunchArgument("node_name", default_value="camera_node"),
+        DeclareLaunchArgument("config_file", default_value=PathJoinSubstitution(
+            [ros_robot_bringup_pkg, "config", "camera_config.yaml"]
+        )),
+        DeclareLaunchArgument("camera_info_url", default_value=PathJoinSubstitution(
+            [ros_robot_bringup_pkg, "config", "camera_calib.yaml"]
+        ))
+    ]
 
 
 def get_composable_camera_node() -> ComposableNode:
@@ -54,5 +47,7 @@ def get_composable_camera_node() -> ComposableNode:
             "camera": LaunchConfiguration("camera"),
             "camera_info_url": LaunchConfiguration("camera_info_url")
         }],
-        extra_arguments=[{"use_intra_process_comms": True}]
+        extra_arguments=[{
+            "use_intra_process_comms": True
+        }]
     )

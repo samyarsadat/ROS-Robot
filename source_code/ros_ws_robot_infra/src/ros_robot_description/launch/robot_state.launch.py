@@ -65,6 +65,8 @@ def generate_launch_description():
         namespace_arg,
         mock_joints_arg,
         SetParameter(name="use_sim_time", value=use_sim_lc),
+        SetRemap("/tf", "tf"),
+        SetRemap("/tf_static", "tf_static"),
         robot_state_pub_node,
         joint_state_publisher_node,
     ])

@@ -1,0 +1,9 @@
+camera:
+    simulation:
+        res_width: "1280"
+        res_height: "720"
+        framerate: "25"
+
+imu:
+    simulation:
+        update_rate: "20"

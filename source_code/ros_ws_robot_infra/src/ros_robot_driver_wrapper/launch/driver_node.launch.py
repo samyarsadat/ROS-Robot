@@ -37,7 +37,11 @@ def generate_launch_description():
         name=LaunchConfiguration("node_name"),
         parameters=[{
             "pico_domain_id": LaunchConfiguration("pico_domain_id")
-        }]
+        }],
+        remappings = [
+            ("/tf", "tf"),
+            ("/tf_static", "tf_static")
+        ]
     )
 
     return launch.LaunchDescription([

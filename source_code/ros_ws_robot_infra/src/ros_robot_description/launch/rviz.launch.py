@@ -18,24 +18,25 @@
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import EnvironmentVariable, LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node, SetParameter
 from launch_ros.substitutions import FindPackageShare
 package_name="ros_robot_description"
 
 
 def generate_launch_description():
-    rviz_config_file = PathJoinSubstitution([FindPackageShare("rosbot_description"), "rviz", "ros_robot.rviz"])
+    rviz_config_file = PathJoinSubstitution([FindPackageShare(package_name), "rviz", "ros_robot.rviz"])
 
     namespace_arg = DeclareLaunchArgument("namespace", default_value="")
-    use_sim_arg = DeclareLaunchArgument("use_sim", default_value="False",  choices=["True", "False"])
+    use_sim_arg = DeclareLaunchArgument("use_sim", default_value="False", choices=["True", "False"])
     rviz_config_arg = DeclareLaunchArgument("rviz_config", default_value=rviz_config_file)
 
     rviz_node = Node(
         package="rviz2",
         executable="rviz2",
         namespace=LaunchConfiguration("namespace"),
-        arguments=["-d", LaunchConfiguration("rviz_config")]
+        arguments=["-d", LaunchConfiguration("rviz_config")],
+        remappings=[("/tf", "tf"), ("/tf_static", "tf_static")]
     )
 
     return LaunchDescription([

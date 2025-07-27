@@ -53,6 +53,7 @@
                 "target": "/home/nonroot/ros_ws/src/rrp_pico_coms", "type": "bind"}],
 
     "runArgs": ["--net=host",
+                "--privileged",
                 "--cap-add=SYS_PTRACE",
                 "--security-opt", "seccomp=unconfined",
                 "--gpus", "all",

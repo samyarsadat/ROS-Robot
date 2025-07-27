@@ -50,3 +50,5 @@ class RosFrameIds:
     BACK_CLIFF_SENS_BASE_FRAME_ID = "cliff_sens_back_{}"
     ULTRASONIC_SENS_BASE_FRAME_ID = "ultrasonic_sens_{}"
     MICRO_SW_SENS_BASE_FRAME_ID = "micro_switch_{}"
+    RIGHT_WHEEL_JOINTS = ["fr_wheel_joint", "br_wheel_joint"]
+    LEFT_WHEEL_JOINTS = ["fl_wheel_joint", "bl_wheel_joint"]

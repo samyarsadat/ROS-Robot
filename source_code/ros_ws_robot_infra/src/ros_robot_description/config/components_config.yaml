@@ -1,0 +1,15 @@
+ir_cliff_sensor:
+    simulation:
+        update_rate: "20"
+
+micro_switch:
+    simulation:
+        update_rate: "20"
+
+rplidar:
+    simulation:
+        update_rate: "10"
+
+ultrasonic:
+    simulation:
+        update_rate: "10"

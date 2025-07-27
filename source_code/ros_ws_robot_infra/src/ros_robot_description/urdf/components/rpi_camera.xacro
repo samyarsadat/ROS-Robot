@@ -25,7 +25,7 @@
             <child link="${name_prefix_fmt}camera_optical_link" />
         </joint>
 
-        <link name="${name_prefix_fmt}camera_optical_link"></link>
+        <link name="${name_prefix_fmt}camera_optical_link" />
 
         <gazebo reference="${name_prefix_fmt}camera_link">
             <sensor type="camera" name="${namespace_fmt}${name_prefix_fmt}camera">

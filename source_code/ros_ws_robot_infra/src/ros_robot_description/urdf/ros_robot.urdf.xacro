@@ -2,22 +2,24 @@
 <robot name="ros_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
     <xacro:arg name="namespace" default="" />
     <xacro:arg name="use_sim" default="false" />
-    
+
+    <xacro:property name="wheel_shaft_z_offset" value="0.02" />
     <xacro:property name="wheel_radius" value="0.05" />
     <xacro:property name="wheel_thickness" value="0.015" />
     <xacro:property name="track_width" value="0.25" />
     <xacro:property name="wheelbase" value="0.14" />
 
-    <xacro:include filename="$(find ros_robot_description)/urdf/materials.xacro" />
+    <xacro:include filename="$(find ros_robot_description)/urdf/utils/materials.xacro" />
+    <xacro:include filename="$(find ros_robot_description)/urdf/utils/common_macros.xacro" />
     <xacro:include filename="$(find ros_robot_description)/urdf/gazebo.xacro" ns="gazebo" />
     <xacro:include filename="$(find ros_robot_description)/urdf/body.xacro" />
     <xacro:include filename="$(find ros_robot_description)/urdf/wheel.xacro" />
 
-    <xacro:body wheel_radius="${wheel_radius}" namespace="$(arg namespace)" />
-    <xacro:wheel position="fr" wheel_radius="${wheel_radius}" wheel_thickness="${wheel_thickness}" wheelbase="${wheelbase}" track_width="${track_width}" />
-    <xacro:wheel position="fl" wheel_radius="${wheel_radius}" wheel_thickness="${wheel_thickness}" wheelbase="${wheelbase}" track_width="${track_width}" />
-    <xacro:wheel position="br" wheel_radius="${wheel_radius}" wheel_thickness="${wheel_thickness}" wheelbase="${wheelbase}" track_width="${track_width}" />
-    <xacro:wheel position="bl" wheel_radius="${wheel_radius}" wheel_thickness="${wheel_thickness}" wheelbase="${wheelbase}" track_width="${track_width}" />
+    <xacro:body wheel_radius="${wheel_radius}" whl_z_offset="${wheel_shaft_z_offset}" namespace="$(arg namespace)" />
+    <xacro:wheel position="fr" wheel_radius="${wheel_radius}" wheel_thickness="${wheel_thickness}" wheelbase="${wheelbase}" track_width="${track_width}" whl_z_offset="${wheel_shaft_z_offset}" />
+    <xacro:wheel position="fl" wheel_radius="${wheel_radius}" wheel_thickness="${wheel_thickness}" wheelbase="${wheelbase}" track_width="${track_width}" whl_z_offset="${wheel_shaft_z_offset}" />
+    <xacro:wheel position="br" wheel_radius="${wheel_radius}" wheel_thickness="${wheel_thickness}" wheelbase="${wheelbase}" track_width="${track_width}" whl_z_offset="${wheel_shaft_z_offset}" />
+    <xacro:wheel position="bl" wheel_radius="${wheel_radius}" wheel_thickness="${wheel_thickness}" wheelbase="${wheelbase}" track_width="${track_width}" whl_z_offset="${wheel_shaft_z_offset}" />
 
     <xacro:unless value="$(arg use_sim)">
     </xacro:unless>

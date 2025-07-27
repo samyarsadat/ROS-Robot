@@ -7,7 +7,7 @@ import xacro
 def test_robot_desc():
     test_vals = {
         "namespace": ["", "my_robot"],
-        "use_sim": ["True", "False"]
+        "use_sim": ["False", "True"]
     }
 
     value_combos = list(itertools.product(*test_vals.values()))

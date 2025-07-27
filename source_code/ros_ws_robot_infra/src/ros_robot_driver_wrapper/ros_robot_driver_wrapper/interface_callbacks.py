@@ -16,14 +16,17 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-from geometry_msgs.msg import Twist, Pose
+import math
+from builtin_interfaces.msg import Time
+from geometry_msgs.msg import Twist, Pose, TransformStamped
 from nav_msgs.msg import Odometry
+from ros2topic.verb import pub
 from ros_robot_driver.driver_impl import ros_robot_interface
 from ros_robot_driver.interface_data_structs.diagnostics_report import DiagnosticsReport
 from ros_robot_driver_wrapper.config import RosFrameIds
 from ros_robot_driver_wrapper.ros_main import get_ros_node
 from ros_robot_msgs.msg import FPSwitches, MotorCtrlState
-from sensor_msgs.msg import BatteryState, Imu, Temperature, RelativeHumidity, Range
+from sensor_msgs.msg import BatteryState, Imu, Temperature, RelativeHumidity, Range, JointState
 from ros_robot_driver_wrapper.utils import euler_to_quaternion
 
 
@@ -58,6 +61,19 @@ def encoder_odometry_callback() -> None:
     msg.child_frame_id = ros_robot_interface.encoder_odometry.get_child_frame_id()
     msg.header.frame_id = ros_robot_interface.encoder_odometry.get_header_frame_id()
     msg.header.stamp.sec, msg.header.stamp.nanosec = ros_robot_interface.encoder_odometry.get_last_timestamp()
+
+    transform = TransformStamped()
+    transform.header.stamp = msg.header.stamp
+    transform.header.frame_id = ros_robot_interface.encoder_odometry.get_header_frame_id()
+    transform.child_frame_id = ros_robot_interface.encoder_odometry.get_child_frame_id()
+    transform.transform.translation.x = ros_robot_interface.encoder_odometry.get_position()[0]
+    transform.transform.translation.y = ros_robot_interface.encoder_odometry.get_position()[1]
+    transform.transform.translation.z = 0
+    transform.transform.rotation.x = ros_robot_interface.encoder_odometry.get_orientation()[0]
+    transform.transform.rotation.y = ros_robot_interface.encoder_odometry.get_orientation()[1]
+    transform.transform.rotation.z = ros_robot_interface.encoder_odometry.get_orientation()[2]
+    transform.transform.rotation.w = ros_robot_interface.encoder_odometry.get_orientation()[3]
+    get_ros_node().base_odom_tf.sendTransform(transform)
     get_ros_node().encoder_odom_pub.publish(msg)
 
 
@@ -80,6 +96,15 @@ def imu_sens_callback() -> None:
     get_ros_node().imu_sens_pub.publish(msg)
 
 
+def pub_wheel_joint_state(frame_ids: str, enc_counts: list, rpms: list, dirs: list, stamp: Time):
+    joint_state = JointState()
+    joint_state.header.stamp = stamp
+    joint_state.name = frame_ids
+    joint_state.velocity = [((rpm / 60) * 2 * math.pi) * (1 if dirs[i] else -1) for i, rpm in enumerate(rpms)]
+    joint_state.position = [(count / ros_robot_interface.motor_wheel_info.get_encoder_ppr()) * 2 * math.pi for count in enc_counts]
+    get_ros_node().joint_state_pub.publish(joint_state)
+
+
 def left_mtr_ctrl_callback() -> None:
     msg = MotorCtrlState()
     msg.target_dir = ros_robot_interface.left_motor_controller.get_target_dir()
@@ -93,6 +118,11 @@ def left_mtr_ctrl_callback() -> None:
     msg.total_current = ros_robot_interface.left_motor_controller.get_power_current_ma()
     msg.driver_out_voltage = ros_robot_interface.left_motor_controller.get_power_output_voltage()
     msg.time.sec, msg.time.nanosec = ros_robot_interface.left_motor_controller.get_last_timestamp()
+
+    pub_wheel_joint_state(RosFrameIds.LEFT_WHEEL_JOINTS,
+                          ros_robot_interface.left_motor_controller.get_enc_pulse_counts(),
+                          ros_robot_interface.left_motor_controller.get_measured_rpms(),
+                          ros_robot_interface.left_motor_controller.get_measured_dirs(), msg.time)
     get_ros_node().left_mtr_ctrl_pub.publish(msg)
 
 
@@ -109,6 +139,11 @@ def right_mtr_ctrl_callback() -> None:
     msg.total_current = ros_robot_interface.right_motor_controller.get_power_current_ma()
     msg.driver_out_voltage = ros_robot_interface.right_motor_controller.get_power_output_voltage()
     msg.time.sec, msg.time.nanosec = ros_robot_interface.right_motor_controller.get_last_timestamp()
+
+    pub_wheel_joint_state(RosFrameIds.RIGHT_WHEEL_JOINTS,
+                          ros_robot_interface.right_motor_controller.get_enc_pulse_counts(),
+                          ros_robot_interface.right_motor_controller.get_measured_rpms(),
+                          ros_robot_interface.right_motor_controller.get_measured_dirs(), msg.time)
     get_ros_node().right_mtr_ctrl_pub.publish(msg)
 
 

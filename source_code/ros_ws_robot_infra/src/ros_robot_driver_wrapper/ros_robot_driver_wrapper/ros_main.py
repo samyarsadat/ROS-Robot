@@ -29,11 +29,12 @@ from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from ros_robot_driver_wrapper.config import RosConfig
 from ros_robot_driver.driver_impl import ros_robot_interface
-from sensor_msgs.msg import BatteryState, Imu, Temperature, RelativeHumidity, Range
+from sensor_msgs.msg import BatteryState, Imu, Temperature, RelativeHumidity, Range, JointState
 from std_msgs.msg import Empty
 from std_srvs.srv import SetBool
 from ros_robot_msgs.srv import SetCameraLeds, GetCameraLeds, SetPidTunings, RunCalibrationsA, GetBool
 from ros_robot_msgs.msg import FPSwitches, MotorCtrlState
+from tf2_ros import TransformBroadcaster
 
 
 # ---- ROS Node ----
@@ -45,6 +46,10 @@ class RosNode(Node):
         self._reentrant_cb_group = ReentrantCallbackGroup()
         self._selftest_calib_cb_group = MutuallyExclusiveCallbackGroup()
         self._emer_stop_cb_group = MutuallyExclusiveCallbackGroup()
+
+        self.base_odom_tf = TransformBroadcaster(self)
+        self.joint_state_pub = self.create_publisher(JointState, "joint_states", qos_profile=RosConfig.QOS_RELIABLE)
+        self.last_joint_state_time = self.get_clock().now()
 
         self.diagnostics_pub = self.create_publisher(DiagnosticStatus, "diagnostics", qos_profile=RosConfig.QOS_RELIABLE, callback_group=self._reentrant_cb_group)
         self.ping_driver_srv = self.create_service(GetBool, "diagnostics/ping_driver", self._ping_driver_srv_call, qos_profile=RosConfig.QOS_RELIABLE, callback_group=self._reentrant_cb_group)

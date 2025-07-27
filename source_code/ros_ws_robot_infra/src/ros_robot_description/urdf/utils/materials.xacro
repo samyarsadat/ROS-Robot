@@ -3,7 +3,7 @@
     <material name="solid_red">
         <color rgba="1 0 0 1" />
     </material>
-    
+
     <material name="solid_white">
         <color rgba="1 1 1 1" />
     </material>

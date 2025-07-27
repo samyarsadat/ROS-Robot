@@ -1,5 +1,4 @@
 #  The ROS robot project (camera_ros launch)
-#  MicroROS agent(s) launch description
 #  Copyright 2024 Samyar Sadat Akhavi
 #  Written by Samyar Sadat Akhavi, 2024.
 #
@@ -20,29 +19,29 @@ import launch
 from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
-from ros_robot_bringup.cam_launch_utils import get_camera_launch_arguments
+from ros_robot_camera.launch_utils import get_camera_launch_arguments
 from ament_index_python.resources import has_resource
 
 
 def generate_launch_description():
+    namespace_arg = DeclareLaunchArgument("namespace", default_value="ros_robot")
+
     if not has_resource("packages", "camera_ros"):
         raise RuntimeError("The `camera_ros` package must be installed!")
-
-    namespace_arg_name = "namespace"
-    namespace_arg = DeclareLaunchArgument(namespace_arg_name, default_value="ros_robot")
 
     camera_node = Node(
         package="camera_ros",
         executable="camera_node",
         name=LaunchConfiguration("node_name"),
-        namespace=LaunchConfiguration(namespace_arg_name),
+        namespace=LaunchConfiguration("namespace"),
         parameters=[LaunchConfiguration("config_file"), {
             "camera": LaunchConfiguration("camera"),
             "camera_info_url": LaunchConfiguration("camera_info_url")
         }],
     )
 
-    return launch.LaunchDescription(get_camera_launch_arguments() + [
+    return launch.LaunchDescription(
+        get_camera_launch_arguments() + [
         namespace_arg,
         camera_node
     ])

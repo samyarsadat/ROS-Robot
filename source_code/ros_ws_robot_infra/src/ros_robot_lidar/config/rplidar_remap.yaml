@@ -1,0 +1,7 @@
+remappings:
+    rplidar_laser_filter:
+        - from: scan_filtered
+          to: lidar/scan_filtered
+    -*-:
+        - from: scan
+          to: lidar/scan

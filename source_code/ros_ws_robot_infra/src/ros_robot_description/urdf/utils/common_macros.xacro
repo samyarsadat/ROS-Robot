@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+    <xacro:macro name="gaussian_noise" params="stddev bias_mean:=0 bias_stddev:=0 precision:=0 mean:=0">
+        <noise type="gaussian">
+            <stddev>${stddev}</stddev>
+            <bias_mean>${bias_mean}</bias_mean>
+            <bias_stddev>${bias_stddev}</bias_stddev>
+            <precision>${precision}</precision>
+            <mean>${mean}</mean>
+        </noise>
+    </xacro:macro>
+
+    <!-- Credit: https://github.com/joshnewans/articubot_one/blob/main/description/inertial_macros.xacro -->
+    <xacro:macro name="inertial_box" params="mass x y z *origin">
+        <inertial>
+            <xacro:insert_block name="origin"/>
+            <mass value="${mass}" />
+            <inertia
+                ixx="${(1/12)*mass*(y*y+z*z)}" ixy="0.0" ixz="0.0"
+                iyy="${(1/12)*mass*(x*x+z*z)}" iyz="0.0"
+                izz="${(1/12)*mass*(x*x+y*y)}"
+            />
+        </inertial>
+    </xacro:macro>
+
+    <xacro:macro name="inertial_cylinder" params="mass length radius *origin">
+        <inertial>
+            <xacro:insert_block name="origin"/>
+            <mass value="${mass}" />
+            <inertia
+                ixx="${(1/12)*mass*(3*radius*radius+length*length)}" ixy="0.0" ixz="0.0"
+                iyy="${(1/12)*mass*(3*radius*radius+length*length)}" iyz="0.0"
+                izz="${(1/2)*mass*(radius*radius)}"
+            />
+        </inertial>
+    </xacro:macro>
+</robot>

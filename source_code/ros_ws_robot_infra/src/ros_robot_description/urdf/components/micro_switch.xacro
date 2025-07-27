@@ -4,6 +4,9 @@
         <xacro:property name="mesh_file" value="package://ros_robot_description/meshes/components/micro_switch.dae" />
         <xacro:property name="namespace_fmt" value="${namespace + '/' if namespace != '' else ''}" />
 
+        <xacro:property name="component_config_file" value="$(find ros_robot_description)/config/components_config.yaml" />
+        <xacro:property name="component_config" value="${xacro.load_yaml(component_config_file)['micro_switch']}"/>
+
         <joint name="${name_prefix}_microswitch_joint" type="fixed">
             <parent link="${parent_link}" />
             <child link="${name_prefix}_microswitch_link" />
@@ -12,14 +15,13 @@
 
         <link name="${name_prefix}_microswitch_link">
             <visual>
-                <origin xyz="${xyz}" rpy="${rpy}" />
                 <geometry>
                     <mesh filename="${mesh_file}" scale="1.0 1.0 1.0" />
                 </geometry>
             </visual>
 
             <collision name="${name_prefix}_microswitch_collision">
-                <origin xyz="0.004" rpy="0 0 0" />
+                <origin xyz="0.004 0 0" rpy="0 0 0" />
                 <geometry>
                     <box size="0.018 0.006 0.02"/>
                 </geometry>
@@ -28,7 +30,7 @@
 
         <gazebo reference="${name_prefix}_microswitch_link">
             <sensor type="contact" name="${namespace_fmt}${name_prefix}_microswitch_sensor">
-                <update_rate>50</update_rate>
+                <update_rate>${component_config["simulation"]["update_rate"]}</update_rate>
                 <topic>${namespace_fmt}${name_prefix}_microswitch/contact</topic>
                 <gz_frame_id>${namespace_fmt}${name_prefix}_microswitch_link</gz_frame_id>
 

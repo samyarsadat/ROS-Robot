@@ -1,0 +1,13 @@
+/**/rplidar_laser_filter:
+    ros__parameters:
+        filter_1:
+            name: box_filter
+            type: laser_filters/LaserScanBoxFilter
+            params:
+                box_frame: base_link
+                max_x: 0.0
+                min_x: 0.0
+                max_y: 0.0
+                min_y: 0.0
+                max_z: 0.0
+                min_z: 0.0
