@@ -22,37 +22,32 @@ from launch.event_handlers import OnProcessExit
 from launch.events import Shutdown
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from launch_utils.log_styles import Ansi
 package_name = "ros_robot_driver_wrapper"
 
 
 def generate_launch_description():
     pico_domain_id_arg = DeclareLaunchArgument("pico_domain_id", default_value="95")
-    robot_namespace_arg = DeclareLaunchArgument("namespace", default_value="ros_robot")
-    node_name_arg = DeclareLaunchArgument("node_name", default_value="ros_robot_driver")
 
     launch_driver = Node(
         package=package_name,
         executable="ros_robot_driver",
-        namespace=LaunchConfiguration("namespace"),
-        name=LaunchConfiguration("node_name"),
         parameters=[{
             "pico_domain_id": LaunchConfiguration("pico_domain_id")
         }],
-        remappings = [
-            ("/tf", "tf"),
-            ("/tf_static", "tf_static")
-        ]
+    )
+
+    driver_exit_handler = RegisterEventHandler(
+        OnProcessExit(
+            target_action=launch_driver,
+            on_exit=[
+                LogInfo(msg=f"{Ansi.YELLOW}Driver exited, shutting down.{Ansi.RESET}"),
+                EmitEvent(event=Shutdown(reason="Driver node exited."))
+            ]
+        )
     )
 
     return launch.LaunchDescription([
-        pico_domain_id_arg, robot_namespace_arg, node_name_arg, launch_driver,
-        RegisterEventHandler(
-            OnProcessExit(
-                target_action=launch_driver,
-                on_exit=[
-                    LogInfo(msg="Driver exited, shutting down."),
-                    EmitEvent(event=Shutdown(reason="Driver node exited."))
-                ]
-            )
-        ),
+        pico_domain_id_arg, launch_driver,
+        driver_exit_handler
     ])

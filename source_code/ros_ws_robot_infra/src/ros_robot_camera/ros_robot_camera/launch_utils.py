@@ -16,36 +16,25 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import PathJoinSubstitution, LaunchConfiguration
+from launch.substitutions import PathJoinSubstitution
 from launch_ros.descriptions import ComposableNode
 from launch_ros.substitutions import FindPackageShare
 package_name = "ros_robot_camera"
 
 
-def get_camera_launch_arguments() -> list[DeclareLaunchArgument]:
-    ros_robot_bringup_pkg = FindPackageShare(package_name)
-    return [
-        DeclareLaunchArgument("camera", default_value="0"),
-        DeclareLaunchArgument("node_name", default_value="camera_node"),
-        DeclareLaunchArgument("config_file", default_value=PathJoinSubstitution(
-            [ros_robot_bringup_pkg, "config", "camera_config.yaml"]
-        )),
-        DeclareLaunchArgument("camera_info_url", default_value=PathJoinSubstitution(
-            [ros_robot_bringup_pkg, "config", "camera_calib.yaml"]
-        ))
-    ]
+def get_camera_config_path(filename) -> PathJoinSubstitution:
+    return PathJoinSubstitution(
+        [FindPackageShare(package_name), "config", filename]
+    )
 
-
-def get_composable_camera_node() -> ComposableNode:
+def get_composable_camera_node(config_file, calib_file, name="camera_node", camera="0") -> ComposableNode:
     return ComposableNode(
         package="camera_ros",
         plugin="camera::CameraNode",
-        name=LaunchConfiguration("node_name"),
-        namespace=LaunchConfiguration("namespace", default="ros_robot"),
-        parameters=[LaunchConfiguration("config_file"), {
-            "camera": LaunchConfiguration("camera"),
-            "camera_info_url": LaunchConfiguration("camera_info_url")
+        name=name,
+        parameters=[get_camera_config_path(config_file), {
+            "camera": camera,
+            "camera_info_url": get_camera_config_path(calib_file),
         }],
         extra_arguments=[{
             "use_intra_process_comms": True

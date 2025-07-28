@@ -48,9 +48,8 @@ cd "$SOURCE_CODE_PATH/ros_ws_robot_infra" || exit 1
 colcon build --packages-select ros_robot_msgs
 source "./install/local_setup.sh"
 
-#export PIP_BREAK_SYSTEM_PACKAGES=1
-#rosdep install --from-paths src -y --ignore-src
-#sudo apt-get install $NON_ROSDEP_DEPS -y
+export PIP_BREAK_SYSTEM_PACKAGES=1
+rosdep install --from-paths src --ignore-src -r -y
 colcon build --packages-skip ros_robot_msgs
 
 sudo apt-get autoremove -y

@@ -17,44 +17,39 @@
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
 import launch
-from launch.actions import IncludeLaunchDescription, TimerAction, LogInfo, DeclareLaunchArgument
+from launch.actions import IncludeLaunchDescription, TimerAction, LogInfo
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import PathJoinSubstitution
+from launch_ros.substitutions import FindPackageShare
+from launch_utils.log_styles import Ansi
+
 package_name = "ros_robot_driver_wrapper"
 
 
 def generate_launch_description():
-    namespace_arg = DeclareLaunchArgument("namespace", default_value="")
-    namespace_lc = LaunchConfiguration("namespace")
+    this_package_share = FindPackageShare(package_name)
 
     agents_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            PathJoinSubstitution([package_name, "launch", "uros_agents.launch.py"])
-        ),
-        launch_arguments={
-            "namespace": namespace_lc
-        }.items()
+            PathJoinSubstitution([this_package_share, "launch", "uros_agents.launch.py"])
+        )
     )
 
     driver_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            PathJoinSubstitution([package_name, "launch", "driver_node.launch.py"])
-        ),
-        launch_arguments={
-            "namespace": namespace_lc
-        }.items()
+            PathJoinSubstitution([this_package_share, "launch", "driver_node.launch.py"])
+        )
     )
 
     driver_launch_timer = TimerAction(
         period=3.5,
         actions=[
-            LogInfo(msg="Starting driver node(s)..."),
+            LogInfo(msg=f"{Ansi.BLUE}Starting driver node(s)...{Ansi.RESET}"),
             driver_launch
         ]
     )
 
     return launch.LaunchDescription([
-        namespace_arg,
         agents_launch,
         driver_launch_timer
     ])

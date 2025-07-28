@@ -1,0 +1,11 @@
+remappings:
+    - from: scan_filtered
+      to: lidar/scan_filtered
+    - from: scan
+      to: lidar/scan
+    - from: /tf
+      to: tf
+    - from: /tf_static
+      to: tf_static
+    - from: /diagnostics
+      to: diagnostics

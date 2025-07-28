@@ -17,33 +17,24 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-from launch_utils.remap_utils import load_remappings
 package_name="ros_robot_lidar"
 
 
 def generate_launch_description():
-    namespace_arg = DeclareLaunchArgument("namespace", default_value="")
-
     lf_config = "rplidar_laser_filter.yaml"
-    rmp_config = "rplidar_remap.yaml"
 
-    node_name = "rplidar_laser_filter"
     laser_filter_node = Node(
         package="laser_filters",
         executable="scan_to_scan_filter_chain",
-        name=node_name,
+        name="rplidar_laser_filter",
         parameters=[
             PathJoinSubstitution([FindPackageShare(package_name), "config", lf_config])
         ],
-        remappings=load_remappings(package_name, rmp_config, node_name),
-        namespace=LaunchConfiguration("namespace"),
     )
 
     return LaunchDescription([
-        namespace_arg,
         laser_filter_node
     ])

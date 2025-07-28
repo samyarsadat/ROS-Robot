@@ -21,33 +21,25 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-from launch_utils.remap_utils import load_remappings
 package_name = "ros_robot_lidar"
 
 
 def generate_launch_description():
-    namespace_arg = DeclareLaunchArgument("namespace", default_value="")
-    serial_port_arg = DeclareLaunchArgument("serial_port", default_value="/dev/ttyUSB0")
-
+    serial_port_arg = DeclareLaunchArgument("rplidar_serial_port", default_value="/dev/ttyUSB0")
     rp_config_file = "rplidar_config.yaml"
-    rmp_config_file = "rplidar_remap.yaml"
 
-    node_name = "rplidar_node"
     laser_filter_node = Node(
         package="rplidar_ros",
         executable="rplidar_composition",
-        name=node_name,
+        name="rplidar_node",
         parameters=[
-            {"serial_port": LaunchConfiguration("serial_port")},
+            {"serial_port": LaunchConfiguration("rplidar_serial_port")},
             PathJoinSubstitution([FindPackageShare(package_name), "config", rp_config_file]),
         ],
-        remappings=load_remappings(package_name, rmp_config_file, node_name),
         output="screen",
-        namespace=LaunchConfiguration("namespace"),
     )
 
     return LaunchDescription([
-        namespace_arg,
         serial_port_arg,
         laser_filter_node
     ])

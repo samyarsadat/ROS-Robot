@@ -40,6 +40,7 @@ RUN usermod -aG dialout ${USERNAME}
 # Post create and start scripts
 COPY post_create.sh /devcon_post_create.sh
 COPY post_start.sh /devcon_post_start.sh
+COPY roslaunch_fix.sh /roslaunch_fix.sh
 USER root
 RUN chmod +x /devcon_post_start.sh && chmod +x /devcon_post_create.sh
 USER ${USERNAME}

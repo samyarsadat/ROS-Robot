@@ -1,5 +1,5 @@
 #  The ROS robot project (launch file utils)
-#  Load topic remappings from a YAML file.
+#  ANSI styles and colors.
 #  Copyright 2024 Samyar Sadat Akhavi
 #  Written by Samyar Sadat Akhavi, 2024.
 #
@@ -16,23 +16,17 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-from ament_index_python import get_package_share_directory
-from launch_ros.actions import SetRemap
-import yaml
-import os
+from enum import Enum
 
-
-def load_remappings(package: str, filename: str) -> list[SetRemap]:
-    remapping_file = os.path.join(
-        get_package_share_directory(package),
-        "config", filename
-    )
-
-    with open(remapping_file, "r") as f:
-        data = yaml.safe_load(f)
-
-    ret_list = []
-    for entry in data.get("remappings", []):
-        ret_list.append(SetRemap(entry["from"], entry["to"]))
-
-    return ret_list
+class Ansi(Enum):
+    RED = "\033[0;31m"
+    GREEN = "\033[0;32m"
+    YELLOW = "\033[0;33m"
+    BLUE = "\033[0;34m"
+    MAGENTA = "\033[0;35m"
+    CYAN = "\033[0;36m"
+    WHITE = "\033[0;37m"
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+    ITALIC = "\033[3m"
