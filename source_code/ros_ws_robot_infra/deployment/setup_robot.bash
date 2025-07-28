@@ -52,6 +52,8 @@ export PIP_BREAK_SYSTEM_PACKAGES=1
 rosdep install --from-paths src --ignore-src -r -y
 colcon build --packages-skip ros_robot_msgs
 
+bash "$SOURCE_CODE_PATH/ros_ws_robot_infra/deployment/roslaunch_fix.sh"
+
 sudo apt-get autoremove -y
 sudo apt-get autoclean -y
 newgrp docker

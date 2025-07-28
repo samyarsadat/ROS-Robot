@@ -41,7 +41,7 @@ def generate_launch_description():
         DeclareLaunchArgument("pico_b_dev", default_value="/dev/ttyACM1")
     ]
 
-    return launch.LaunchDescription([
+    return launch.LaunchDescription(pico_dev_args + [
         generate_agent_node_description("pico_a"),
         generate_agent_node_description("pico_b")
-    ] + pico_dev_args)
+    ])
