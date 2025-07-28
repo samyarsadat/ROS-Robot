@@ -52,7 +52,25 @@ export PIP_BREAK_SYSTEM_PACKAGES=1
 rosdep install --from-paths src --ignore-src -r -y
 colcon build --packages-skip ros_robot_msgs
 
-bash "$SOURCE_CODE_PATH/ros_ws_robot_infra/deployment/roslaunch_fix.sh"
+# ------ TEMPORARY ROS LAUNCH FIX ------
+mkdir $HOME/roslaunch
+cd $HOME/roslaunch
+
+PR_NUMBER=893
+git clone https://github.com/ros2/launch.git .
+git fetch origin pull/$PR_NUMBER/head:pr-$PR_NUMBER
+git checkout pr-$PR_NUMBER
+
+rosdep install --from-paths . --ignore-src -r -y
+source /opt/ros/"$ROS_DISTRO"/setup.bash
+colcon build
+source "$HOME"/roslaunch/install/setup.bash
+
+if [[ "$(ros2 pkg prefix launch)" != "$HOME/roslaunch/install/launch" ]]; then
+    echo "ROS Launch fix installation failed!"
+    exit 1
+fi
+# ------ TEMPORARY ROS LAUNCH FIX ------
 
 sudo apt-get autoremove -y
 sudo apt-get autoclean -y
