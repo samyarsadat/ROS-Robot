@@ -44,7 +44,7 @@ def battery_info_callback() -> None:
     msg.design_capacity = ros_robot_interface.battery.get_battery_capacity_ah()
     msg.power_supply_technology = ros_robot_interface.battery.get_battery_technology().value
     msg.power_supply_health = BatteryState.POWER_SUPPLY_HEALTH_GOOD
-    msg.header.stamp.sec, msg.header.stamp.nanosec = ros_robot_interface.battery.get_last_timestamp()
+    msg.header.stamp = get_ros_node().get_clock().now().to_msg()
     get_ros_node().battery_info_pub.publish(msg)
 
 
@@ -60,10 +60,10 @@ def encoder_odometry_callback() -> None:
     msg.pose.pose = pose
     msg.child_frame_id = ros_robot_interface.encoder_odometry.get_child_frame_id()
     msg.header.frame_id = ros_robot_interface.encoder_odometry.get_header_frame_id()
-    msg.header.stamp.sec, msg.header.stamp.nanosec = ros_robot_interface.encoder_odometry.get_last_timestamp()
+    msg.header.stamp = get_ros_node().get_clock().now().to_msg()
 
     transform = TransformStamped()
-    transform.header.stamp = msg.header.stamp
+    transform.header.stamp = get_ros_node().get_clock().now().to_msg()
     transform.header.frame_id = ros_robot_interface.encoder_odometry.get_header_frame_id()
     transform.child_frame_id = ros_robot_interface.encoder_odometry.get_child_frame_id()
     transform.transform.translation.x = ros_robot_interface.encoder_odometry.get_position()[0]
@@ -81,7 +81,7 @@ def fp_switches_callback() -> None:
     msg = FPSwitches()
     msg.switch_1 = ros_robot_interface.fp_switches.get_switch_1_state()
     msg.switch_2 = ros_robot_interface.fp_switches.get_switch_2_state()
-    msg.time.sec, msg.time.nanosec = ros_robot_interface.fp_switches.get_last_timestamp()
+    msg.time = get_ros_node().get_clock().now().to_msg()
     get_ros_node().front_panel_switches_pub.publish(msg)
 
 
@@ -91,14 +91,14 @@ def imu_sens_callback() -> None:
     msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w = euler_to_quaternion(orient_euler_x, orient_euler_y, orient_euler_z)
     msg.linear_acceleration.x, msg.linear_acceleration.y, msg.linear_acceleration.z = ros_robot_interface.imu_compass.get_accel()
     msg.angular_velocity.x, msg.angular_velocity.y, msg.angular_velocity.z = ros_robot_interface.imu_compass.get_gyro()
-    msg.header.stamp.sec, msg.header.stamp.nanosec = ros_robot_interface.imu_compass.get_last_timestamp()
+    msg.header.stamp = get_ros_node().get_clock().now().to_msg()
     msg.header.frame_id = RosFrameIds.IMU_FRAME_ID
     get_ros_node().imu_sens_pub.publish(msg)
 
 
-def pub_wheel_joint_state(frame_ids: str, enc_counts: list, rpms: list, dirs: list, stamp: Time):
+def pub_wheel_joint_state(frame_ids: str, enc_counts: list, rpms: list, dirs: list):
     joint_state = JointState()
-    joint_state.header.stamp = stamp
+    joint_state.header.stamp = get_ros_node().get_clock().now().to_msg()
     joint_state.name = frame_ids
     joint_state.velocity = [((rpm / 60) * 2 * math.pi) * (1 if dirs[i] else -1) for i, rpm in enumerate(rpms)]
 
@@ -120,12 +120,12 @@ def left_mtr_ctrl_callback() -> None:
     msg.controller_enabled = ros_robot_interface.left_motor_controller.is_enabled()
     msg.total_current = ros_robot_interface.left_motor_controller.get_power_current_ma()
     msg.driver_out_voltage = ros_robot_interface.left_motor_controller.get_power_output_voltage()
-    msg.time.sec, msg.time.nanosec = ros_robot_interface.left_motor_controller.get_last_timestamp()
+    msg.time = get_ros_node().get_clock().now().to_msg()
 
     pub_wheel_joint_state(RosFrameIds.LEFT_WHEEL_JOINTS,
                           ros_robot_interface.left_motor_controller.get_enc_pulse_counts(),
                           ros_robot_interface.left_motor_controller.get_measured_rpms(),
-                          ros_robot_interface.left_motor_controller.get_measured_dirs(), msg.time)
+                          ros_robot_interface.left_motor_controller.get_measured_dirs())
     get_ros_node().left_mtr_ctrl_pub.publish(msg)
 
 
@@ -141,12 +141,12 @@ def right_mtr_ctrl_callback() -> None:
     msg.controller_enabled = ros_robot_interface.right_motor_controller.is_enabled()
     msg.total_current = ros_robot_interface.right_motor_controller.get_power_current_ma()
     msg.driver_out_voltage = ros_robot_interface.right_motor_controller.get_power_output_voltage()
-    msg.time.sec, msg.time.nanosec = ros_robot_interface.right_motor_controller.get_last_timestamp()
+    msg.time = get_ros_node().get_clock().now().to_msg()
 
     pub_wheel_joint_state(RosFrameIds.RIGHT_WHEEL_JOINTS,
                           ros_robot_interface.right_motor_controller.get_enc_pulse_counts(),
                           ros_robot_interface.right_motor_controller.get_measured_rpms(),
-                          ros_robot_interface.right_motor_controller.get_measured_dirs(), msg.time)
+                          ros_robot_interface.right_motor_controller.get_measured_dirs())
     get_ros_node().right_mtr_ctrl_pub.publish(msg)
 
 
@@ -158,7 +158,7 @@ def temperature_sensor_callback() -> None:
     msg_temp.header.stamp.sec, msg_temp.header.stamp.nanosec = ros_robot_interface.temperature_sensor.get_last_timestamp()
     msg_humidity.relative_humidity = ros_robot_interface.temperature_sensor.get_humidity_percent()
     msg_humidity.header.frame_id = RosFrameIds.TEMP_SENS_FRAME_ID
-    msg_humidity.header.stamp.sec, msg_humidity.header.stamp.nanosec = ros_robot_interface.temperature_sensor.get_last_timestamp()
+    msg_humidity.header = get_ros_node().get_clock().now().to_msg()
     get_ros_node().env_temp_sens_pub.publish(msg_temp)
     get_ros_node().env_humidity_sens_pub.publish(msg_humidity)
 
@@ -172,7 +172,7 @@ def micro_switches_callback() -> None:
         msg.field_of_view = 90.0
         msg.range = (float("-inf") if ros_robot_interface.micro_switches[i].get_latest_state() else float("inf"))
         msg.header.frame_id = RosFrameIds.MICRO_SW_SENS_BASE_FRAME_ID.format(get_ros_node().micro_switch_pubs[i].topic.split("/")[2])
-        msg.header.stamp.sec, msg.header.stamp.nanosec = ros_robot_interface.micro_switches[i].get_last_timestamp()
+        msg.header.stamp = get_ros_node().get_clock().now().to_msg()
         get_ros_node().micro_switch_pubs[i].publish(msg)
 
 
@@ -185,7 +185,7 @@ def ultrasonic_sens_callback() -> None:
         msg.radiation_type = Range.ULTRASOUND
         msg.range = ros_robot_interface.ultrasonic_sensors[i].get_distance()
         msg.header.frame_id = RosFrameIds.ULTRASONIC_SENS_BASE_FRAME_ID.format(get_ros_node().ultrasonic_sens_pubs[i].topic.split("/")[2])
-        msg.header.stamp.sec, msg.header.stamp.nanosec = ros_robot_interface.ultrasonic_sensors[i].get_last_timestamp()
+        msg.header.stamp = get_ros_node().get_clock().now().to_msg()
         get_ros_node().ultrasonic_sens_pubs[i].publish(msg)
 
 
@@ -198,7 +198,7 @@ def cliff_sens_callback() -> None:
         msg.radiation_type = Range.INFRARED
         msg.range = (float("inf") if ros_robot_interface.front_cliff_sensors[i].get_latest_state() else float("-inf"))
         msg.header.frame_id = RosFrameIds.FRONT_CLIFF_SENS_BASE_FRAME_ID.format(i + 1)
-        msg.header.stamp.sec, msg.header.stamp.nanosec = ros_robot_interface.front_cliff_sensors[i].get_last_timestamp()
+        msg.header.stamp = get_ros_node().get_clock().now().to_msg()
         get_ros_node().cliff_sens_pubs[i].publish(msg)
 
     for i in range(0, 4):
@@ -209,21 +209,21 @@ def cliff_sens_callback() -> None:
         msg.radiation_type = Range.INFRARED
         msg.range = (float("inf") if ros_robot_interface.back_cliff_sensors[i].get_latest_state() else float("-inf"))
         msg.header.frame_id = RosFrameIds.BACK_CLIFF_SENS_BASE_FRAME_ID.format(i + 1)
-        msg.header.stamp.sec, msg.header.stamp.nanosec = ros_robot_interface.back_cliff_sensors[i].get_last_timestamp()
+        msg.header.stamp = get_ros_node().get_clock().now().to_msg()
         get_ros_node().cliff_sens_pubs[i + 4].publish(msg)
 
 
 def pico_a_temp_callback() -> None:
     msg = Temperature()
     msg.temperature = ros_robot_interface.pico_a_temp.get_temp()
-    msg.header.stamp.sec, msg.header.stamp.nanosec = ros_robot_interface.pico_b_temp.get_last_timestamp()
+    msg.header.stamp = get_ros_node().get_clock().now().to_msg()
     get_ros_node().pico_a_cpu_temp_pub.publish(msg)
 
 
 def pico_b_temp_callback() -> None:
     msg = Temperature()
     msg.temperature = ros_robot_interface.pico_b_temp.get_temp()
-    msg.header.stamp.sec, msg.header.stamp.nanosec = ros_robot_interface.pico_b_temp.get_last_timestamp()
+    msg.header.stamp = get_ros_node().get_clock().now().to_msg()
     get_ros_node().pico_b_cpu_temp_pub.publish(msg)
 
 
