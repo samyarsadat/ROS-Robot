@@ -32,6 +32,8 @@ if [ "$IS_UPTODATE" != "" ] || [ "$FORCE_REBUILD" == "true" ]; then
     
     cd "$SOURCE_CODE_PATH/ros_ws_robot_infra" || exit 1
     colcon build
+
+    bash "$SOURCE_CODE_PATH/ros_camera_ws/build_camera_ros.sh"
 fi
 
 echo "All up to date with $GIT_BRANCH."

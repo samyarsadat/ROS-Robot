@@ -68,7 +68,7 @@ class RosNode(Node):
         return future.result()
 
     def __init__(self, context: rclpy.Context, node_name: str):
-        super().__init__(context=context, node_name=node_name, namespace=RosConfig.NODE_NAMESPACE)
+        super().__init__(context=context, node_name=node_name)
         self.get_logger().info("Creating publishers, subscribers, and services servers...")
 
         self._reentrant_cb_group = ReentrantCallbackGroup()

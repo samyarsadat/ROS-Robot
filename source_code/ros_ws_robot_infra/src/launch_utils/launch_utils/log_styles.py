@@ -16,9 +16,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-from enum import Enum
-
-class Ansi(Enum):
+class Ansi():
     RED = "\033[0;31m"
     GREEN = "\033[0;32m"
     YELLOW = "\033[0;33m"
