@@ -62,7 +62,7 @@
 
 // ---- MicroROS node config ----
 #define UROS_NODE_NAME                     "pico_b"
-#define UROS_NODE_NAMESPACE                "io"
+#define UROS_NODE_NAMESPACE                ""
 #define UROS_NODE_DOMAIN_ID                95
 #define AGENT_WAITING_LED_TOGGLE_DELAY_MS  500   // In milliseconds
 #define AGENT_AVAIL_LED_TOGGLE_DELAY_MS    250   // In milliseconds

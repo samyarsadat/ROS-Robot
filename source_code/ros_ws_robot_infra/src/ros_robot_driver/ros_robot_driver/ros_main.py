@@ -342,8 +342,7 @@ def get_ros_node() -> RosNode:
 def _ros_executor_thread(stop_thread, domain_id: int, node_name: str) -> None:
     try:
         internal_context = rclpy.Context()
-        ros_args = ["--ros-args", "-r"] + [arg for arg in sys.argv if "__ns:=" in arg]  # TODO: FIX THIS!
-        rclpy.init(context=internal_context, domain_id=domain_id, args=ros_args)
+        rclpy.init(context=internal_context, domain_id=domain_id)
 
         global pico_ros_node
         pico_ros_node = RosNode(internal_context, node_name)
