@@ -34,7 +34,7 @@ rosdep update
 cd "$HOME" || exit 1
 git clone https://github.com/samyarsadat/ROS-Robot ./ros_robot --recurse-submodules
 SOURCE_CODE_PATH="$HOME/ros_robot/source_code"
-sudo chmod +s "$SOURCE_CODE_PATH/ros_ws_robot_infra/deployment/run_driver.bash"
+sudo chmod +s "$SOURCE_CODE_PATH/ros_ws_robot_infra/deployment/run_infra.bash"
 
 cd "$SOURCE_CODE_PATH/ros_camera_ws" || exit 1
 ROS_DISTRO=$ROS_DISTRO bash ./build_setup_camera_ros.sh
