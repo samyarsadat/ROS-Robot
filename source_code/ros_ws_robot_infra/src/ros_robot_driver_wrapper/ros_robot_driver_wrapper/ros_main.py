@@ -40,7 +40,7 @@ from tf2_ros import TransformBroadcaster
 # ---- ROS Node ----
 class RosNode(Node):
     def __init__(self, context: rclpy.Context):
-        super().__init__(context=context, node_name=RosConfig.NODE_NAME, namespace=RosConfig.NODE_NAMESPACE)
+        super().__init__(context=context, node_name=RosConfig.NODE_NAME)
         self.get_logger().info("Creating publishers, subscribers, and services servers...")
 
         self._reentrant_cb_group = ReentrantCallbackGroup()
@@ -199,7 +199,7 @@ def get_ros_node() -> RosNode:
 def ros_executor_thread(stop_thread, param_future: concurrent.futures.Future) -> None:
     try:
         internal_context = rclpy.Context()
-        rclpy.init(context=internal_context, domain_id=RosConfig.EXECUTOR_DOMAIN_ID)
+        rclpy.init(context=internal_context, domain_id=0)
 
         global robot_ros_node
         robot_ros_node = RosNode(internal_context)

@@ -19,6 +19,7 @@
 import array
 import sys
 import threading
+import time
 import rclpy
 from asyncio import Future
 from typing import Union
@@ -352,13 +353,16 @@ def _ros_executor_thread(stop_thread, domain_id: int, node_name: str) -> None:
         executor.add_node(pico_ros_node)
         pico_ros_node.get_logger().info("Driver executor initialized!")
 
+        pico_ros_node.get_logger().info("Waiting for services to become available...")
+        while not pico_ros_node._pico_a_get_config_srvcl.service_is_ready():
+            time.sleep(0.1)
+
         pico_ros_node.get_logger().info("Initializing static config info variables...")
         if not pico_ros_node.init_config_vars():
             pico_ros_node.get_logger().fatal("Static config info variable init failed! Exiting...")
             sys.exit(1)
 
         pico_ros_node.get_logger().info("Starting the executor...")
-        pico_ros_node.get_logger().info(pico_ros_node.get_name())
 
         while not stop_thread():
             executor.spin_once(timeout_sec=RosConfig.EXECUTOR_TIMEOUT)
@@ -376,7 +380,7 @@ def _ros_executor_thread(stop_thread, domain_id: int, node_name: str) -> None:
 # ROS thread control.
 class RosRobotDriverThread:
     @staticmethod
-    def start_thread(domain_id: int = RosConfig.EXECUTOR_DOMAIN_ID, node_name: str = RosConfig.NODE_NAME) -> None:
+    def start_thread(node_name: str, domain_id: int = RosConfig.EXECUTOR_DOMAIN_ID) -> None:
         global _stop_ros_thread
         global _ros_thread
 

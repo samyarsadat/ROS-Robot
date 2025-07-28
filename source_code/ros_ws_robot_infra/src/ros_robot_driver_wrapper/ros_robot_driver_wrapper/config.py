@@ -33,9 +33,7 @@ class ProgramConfig:
 
 # ---- ROS Config ----
 class RosConfig:
-    NODE_NAME = "robot_driver_wrapper_node"
-    NODE_NAMESPACE = "ros_robot"
-    EXECUTOR_DOMAIN_ID = None
+    NODE_NAME = "robot_driver_node"
     EXECUTOR_TIMEOUT = 0.05         # 50ms
     EXECUTOR_SHUTDOWN_TIMEOUT = 5   # 5s
     QOS_BEST_EFFORT = QoSProfile(reliability=ReliabilityPolicy.BEST_EFFORT, history=HistoryPolicy.KEEP_LAST, depth=1, liveliness=LivelinessPolicy.AUTOMATIC)

@@ -28,7 +28,6 @@ class ProgramInfoConfig:
 
 # ---- ROS Config ----
 class RosConfig:
-    NODE_NAME = "robot_driver_pico_node"
     EXECUTOR_DOMAIN_ID = 95
     EXECUTOR_TIMEOUT = 0.05         # 50ms
     EXECUTOR_SHUTDOWN_TIMEOUT = 5   # 5s

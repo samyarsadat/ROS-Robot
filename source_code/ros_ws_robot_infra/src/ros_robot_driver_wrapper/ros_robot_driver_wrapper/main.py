@@ -34,7 +34,7 @@ def main():
     wrapper_ros_thread.start()
     node_name, domain_id = param_future.result()
     
-    RosRobotDriverThread.start_thread(domain_id, node_name + "_pico")
+    RosRobotDriverThread.start_thread(node_name + "_pico", domain_id)
 
     try:
         while True:

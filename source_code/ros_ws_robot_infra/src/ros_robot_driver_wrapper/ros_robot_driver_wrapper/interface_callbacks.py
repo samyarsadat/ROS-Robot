@@ -68,7 +68,7 @@ def encoder_odometry_callback() -> None:
     transform.child_frame_id = ros_robot_interface.encoder_odometry.get_child_frame_id()
     transform.transform.translation.x = ros_robot_interface.encoder_odometry.get_position()[0]
     transform.transform.translation.y = ros_robot_interface.encoder_odometry.get_position()[1]
-    transform.transform.translation.z = 0
+    transform.transform.translation.z = 0.0
     transform.transform.rotation.x = ros_robot_interface.encoder_odometry.get_orientation()[0]
     transform.transform.rotation.y = ros_robot_interface.encoder_odometry.get_orientation()[1]
     transform.transform.rotation.z = ros_robot_interface.encoder_odometry.get_orientation()[2]
@@ -101,7 +101,10 @@ def pub_wheel_joint_state(frame_ids: str, enc_counts: list, rpms: list, dirs: li
     joint_state.header.stamp = stamp
     joint_state.name = frame_ids
     joint_state.velocity = [((rpm / 60) * 2 * math.pi) * (1 if dirs[i] else -1) for i, rpm in enumerate(rpms)]
-    joint_state.position = [(count / ros_robot_interface.motor_wheel_info.get_encoder_ppr()) * 2 * math.pi for count in enc_counts]
+
+    motor_ppr = (ros_robot_interface.motor_wheel_info.get_encoder_ppr() *
+                 ros_robot_interface.motor_wheel_info.get_motor_gear_ratio())
+    joint_state.position = [(count / motor_ppr if motor_ppr > 0 else 1) * 2 * math.pi for count in enc_counts]
     get_ros_node().joint_state_pub.publish(joint_state)
 
 
