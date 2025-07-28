@@ -158,7 +158,7 @@ def temperature_sensor_callback() -> None:
     msg_temp.header.stamp.sec, msg_temp.header.stamp.nanosec = ros_robot_interface.temperature_sensor.get_last_timestamp()
     msg_humidity.relative_humidity = ros_robot_interface.temperature_sensor.get_humidity_percent()
     msg_humidity.header.frame_id = RosFrameIds.TEMP_SENS_FRAME_ID
-    msg_humidity.header = get_ros_node().get_clock().now().to_msg()
+    msg_humidity.header.stamp = get_ros_node().get_clock().now().to_msg()
     get_ros_node().env_temp_sens_pub.publish(msg_temp)
     get_ros_node().env_humidity_sens_pub.publish(msg_humidity)
 
