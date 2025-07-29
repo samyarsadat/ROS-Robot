@@ -22,9 +22,9 @@ from launch_ros.substitutions import FindPackageShare
 package_name = "ros_robot_camera"
 
 
-def get_camera_config_path(filename) -> PathJoinSubstitution:
+def get_camera_config_path(filename, url_form: bool=False) -> PathJoinSubstitution:
     return PathJoinSubstitution(
-        [FindPackageShare(package_name), "config", filename]
+        ["file://" if url_form else "", FindPackageShare(package_name), "config", filename]
     )
 
 def get_composable_camera_node(config_file, calib_file, name="camera_node", camera="0") -> ComposableNode:
@@ -34,7 +34,7 @@ def get_composable_camera_node(config_file, calib_file, name="camera_node", came
         name=name,
         parameters=[get_camera_config_path(config_file), {
             "camera": camera,
-            "camera_info_url": get_camera_config_path(calib_file),
+            "camera_info_url": get_camera_config_path(calib_file, True),
         }],
         extra_arguments=[{
             "use_intra_process_comms": True

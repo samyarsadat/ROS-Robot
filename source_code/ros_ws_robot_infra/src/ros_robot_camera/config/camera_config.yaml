@@ -1,9 +1,10 @@
 /**/camera_node:
     ros__parameters:
         # Camera node parameters
+        format: "RGB888"
         width: 1152
         height: 648
-        mode_width: 2304
-        mode_height: 1296
+        sensor_mode: "2304:1296"
         jpeg_quality: 75
         FrameDurationLimits: [66667, 66667]  # 15 FPS
+        frame_id: "camera_optical_link"

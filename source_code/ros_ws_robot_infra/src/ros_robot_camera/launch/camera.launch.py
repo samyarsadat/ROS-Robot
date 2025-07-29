@@ -37,7 +37,7 @@ def generate_launch_description():
         executable="camera_node",
         name="camera_node",
         parameters=[get_camera_config_path(LaunchConfiguration("camera_config_file")), {
-            "camera_info_url": get_camera_config_path(LaunchConfiguration("camera_calib_file")),
+            "camera_info_url": get_camera_config_path(LaunchConfiguration("camera_calib_file"), True),
             "camera": LaunchConfiguration("camera")
         }],
     )
