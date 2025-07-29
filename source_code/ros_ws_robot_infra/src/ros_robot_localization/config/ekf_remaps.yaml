@@ -4,3 +4,5 @@ remappings:
           to: <node_name>/enable
         - from: reset
           to: <node_name>/reset
+        - from: toggle
+          to: <node_name>/toggle
