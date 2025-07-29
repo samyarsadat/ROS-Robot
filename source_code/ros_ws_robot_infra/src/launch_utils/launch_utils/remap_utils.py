@@ -48,7 +48,7 @@ def load_remappings_tuple(package: str, filename: str, node_name: str="") -> lis
 
     for node in data.get("remappings", []):
         if node == "_" or (node == node_name if node_name != "" else True):
-            for rmp in entry.get("remappings", {}).get(node):
+            for rmp in data.get("remappings", {}).get(node):
                 ret_list.append((rmp["from"].replace("<node_name>", node_name),
                                  rmp["to"].replace("<node_name>", node_name)))
     return ret_list
