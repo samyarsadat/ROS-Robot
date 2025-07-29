@@ -27,3 +27,4 @@ roi:
   y_offset: 0
   height: 0
   width: 0
+  do_rectify: false
