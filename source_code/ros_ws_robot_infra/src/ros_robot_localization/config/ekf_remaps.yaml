@@ -1,0 +1,6 @@
+remappings:
+    _:
+        - from: enable
+          to: <node_name>/enable
+        - from: reset
+          to: <node_name>/reset

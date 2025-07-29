@@ -16,16 +16,17 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
-from launch.substitutions import PathJoinSubstitution
+from launch import Substitution
+from launch.substitutions import PathJoinSubstitution, TextSubstitution
 from launch_ros.descriptions import ComposableNode
 from launch_ros.substitutions import FindPackageShare
 package_name = "ros_robot_camera"
 
 
-def get_camera_config_path(filename, url_form: bool=False) -> PathJoinSubstitution:
-    return PathJoinSubstitution(
-        ["file://" if url_form else "", FindPackageShare(package_name), "config", filename]
-    )
+def get_camera_config_path(filename, url_form: bool=False) -> list[Substitution]:
+    return ([TextSubstitution(text="file://")] if url_form else []) + [
+        PathJoinSubstitution([FindPackageShare(package_name), "config", filename])
+    ]
 
 def get_composable_camera_node(config_file, calib_file, name="camera_node", camera="0") -> ComposableNode:
     return ComposableNode(

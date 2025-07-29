@@ -1,0 +1,29 @@
+# Generated using camera_calibration with 239 samples on 29/06/2025.
+# Calibration is valid for the Raspberry Pi Camera 3 (IMX708) wide (120deg FoV).
+image_width: 1152
+image_height: 648
+camera_name: imx708_wide__base_axi_pcie_120000_rp1_i2c_80000_imx708_1a_1152x648_2304x1296_RGGB_PISP_COMP1_RAW
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [489.42079353850079, 0, 571.82142366397954, 0, 490.91183428662572, 317.92457365724084, 0, 0, 1]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [0.047215977745174428, -0.050236429284200114, -0.00062060992039538777, -0.0007823626674615642, 0]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1, 0, 0, 0, 1, 0, 0, 0, 1]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [467.43759155273438, 0, 566.68281257121635, 0, 0, 495.74539184570312, 317.00170864223765, 0, 0, 0, 1, 0]
+binning_x: 0
+binning_y: 0
+roi:
+  x_offset: 0
+  y_offset: 0
+  height: 0
+  width: 0

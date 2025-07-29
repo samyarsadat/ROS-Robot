@@ -1,0 +1,6 @@
+remappings:
+    _:
+        - from: start_motor
+          to: <node_name>/start_motor
+        - from: stop_motor
+          to: <node_name>/stop_motor

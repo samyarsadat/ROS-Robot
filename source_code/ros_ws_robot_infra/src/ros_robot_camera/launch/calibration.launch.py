@@ -1,5 +1,4 @@
-#  The ROS robot project (Robot Driver ROS Wrapper Package)
-#  MicroROS agent(s) launch description
+#  The ROS robot project (camera_ros launch)
 #  Copyright 2024 Samyar Sadat Akhavi
 #  Written by Samyar Sadat Akhavi, 2024.
 #
@@ -18,26 +17,30 @@
 
 import launch
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-
-
-def generate_agent_node_description(name: str) -> Node:
-    return Node(
-        package="micro_ros_agent",
-        executable="micro_ros_agent",
-        name=f"{name}_uros_agent",
-        arguments=["serial", "--dev", LaunchConfiguration(f"{name}_dev")]
-    )
+from launch.substitutions import LaunchConfiguration
 
 
 def generate_launch_description():
-    pico_dev_args = [
-        DeclareLaunchArgument("pico_a_dev", default_value="/dev/ttyACM0"),
-        DeclareLaunchArgument("pico_b_dev", default_value="/dev/ttyACM1")
-    ]
+    camera_node_name_arg = DeclareLaunchArgument("camera_node_name", default_value="camera")
 
-    return launch.LaunchDescription(pico_dev_args + [
-        generate_agent_node_description("pico_a"),
-        generate_agent_node_description("pico_b")
+    camera_node = Node(
+        package="camera_calibration",
+        executable="cameracalibrator",
+        arguments=[
+            '--size', '8x6',
+            '--square', '0.025',
+            '--size', '6x4',
+            '--square', '0.041'
+        ],
+        remappings=[
+            ("image", [LaunchConfiguration("camera_node_name"), "/image_raw"]),
+            ("camera", [LaunchConfiguration("camera_node_name")]),
+            ("camera/set_camera_info", [LaunchConfiguration("camera_node_name"), "/set_camera_info"]),
+        ]
+    )
+
+    return launch.LaunchDescription([
+        camera_node_name_arg,
+        camera_node
     ])

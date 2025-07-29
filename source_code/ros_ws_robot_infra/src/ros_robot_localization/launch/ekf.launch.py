@@ -20,17 +20,20 @@ from launch import LaunchDescription
 from launch.substitutions import PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.actions import Node
+from launch_utils.remap_utils import load_remappings_tuple
 package_name = "ros_robot_localization"
 
 
 def generate_launch_description():
     ekf_config = PathJoinSubstitution([FindPackageShare(package_name), "config", "ekf_conf.yaml"])
 
+    node_name = "ekf_node"
     robot_localization_node = Node(
         package="robot_localization",
         executable="ekf_node",
-        name="ekf_node",
+        name=node_name,
         parameters=[ekf_config],
+        remappings=load_remappings_tuple(package_name, "ekf_remaps.yaml", node_name=node_name)
     )
 
     return LaunchDescription([

@@ -16,23 +16,39 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
+from typing import Union
 from ament_index_python import get_package_share_directory
 from launch_ros.actions import SetRemap
 import yaml
 import os
 
 
-def load_remappings(package: str, filename: str) -> list[SetRemap]:
+def _load_yaml(package: str, filename: str):
     remapping_file = os.path.join(
         get_package_share_directory(package),
         "config", filename
     )
 
     with open(remapping_file, "r") as f:
-        data = yaml.safe_load(f)
+        return yaml.safe_load(f)
 
+
+def load_remappings(package: str, filename: str) -> list[SetRemap]:
+    data = _load_yaml(package, filename)
     ret_list = []
+
     for entry in data.get("remappings", []):
         ret_list.append(SetRemap(entry["from"], entry["to"]))
+    return ret_list
 
+
+def load_remappings_tuple(package: str, filename: str, node_name: str="") -> list[tuple[str, str]]:
+    data = _load_yaml(package, filename)
+    ret_list = []
+
+    for node in data.get("remappings", []):
+        if node == "_" or (node == node_name if node_name != "" else True):
+            entry = data.get("remappings", {}).get(node)[0]
+            ret_list.append((entry["from"].replace("<node_name>", node_name),
+                             entry["to"].replace("<node_name>", node_name)))
     return ret_list

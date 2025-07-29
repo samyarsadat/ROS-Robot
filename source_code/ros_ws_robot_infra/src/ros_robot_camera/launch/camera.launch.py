@@ -19,15 +19,10 @@ import launch
 from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
-from ament_index_python.resources import has_resource
 from ros_robot_camera.launch_utils import get_camera_config_path
-package_name = "ros_robot_camera"
 
 
 def generate_launch_description():
-    if not has_resource("packages", "camera_ros"):
-        raise RuntimeError("The `camera_ros` package must be installed!")
-
     camera_arg = DeclareLaunchArgument("camera", default_value="0")
     camera_config_file_arg = DeclareLaunchArgument("camera_config_file", default_value="camera_config.yaml")
     camera_info_url_arg = DeclareLaunchArgument("camera_calib_file", default_value="camera_calib.yaml")
@@ -35,7 +30,7 @@ def generate_launch_description():
     camera_node = Node(
         package="camera_ros",
         executable="camera_node",
-        name="camera_node",
+        name="camera",
         parameters=[get_camera_config_path(LaunchConfiguration("camera_config_file")), {
             "camera_info_url": get_camera_config_path(LaunchConfiguration("camera_calib_file"), True),
             "camera": LaunchConfiguration("camera")
