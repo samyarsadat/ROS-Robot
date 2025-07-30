@@ -70,10 +70,10 @@
         <xacro:include filename="$(find ros_robot_description)/urdf/components/micro_switch.xacro" />
         <xacro:property name="micro_switch_z" value="0.01811" />
         <xacro:property name="micro_switch_x_ofst" value="${(depth/2)-0.005}" />
-        <xacro:micro_switch parent_link="body_link" name_prefix="fr" xyz="${micro_switch_x_ofst} -0.0898 ${micro_switch_z}" rpy="0 0 0" namespace="${namespace}" />
-        <xacro:micro_switch parent_link="body_link" name_prefix="fl" xyz="${micro_switch_x_ofst} 0.0898 ${micro_switch_z}" rpy="0 0 0" namespace="${namespace}" />
-        <xacro:micro_switch parent_link="body_link" name_prefix="br" xyz="${-micro_switch_x_ofst} -0.0898 ${micro_switch_z}" rpy="0 0 ${pi}" namespace="${namespace}" />
-        <xacro:micro_switch parent_link="body_link" name_prefix="bl" xyz="${-micro_switch_x_ofst} 0.0898 ${micro_switch_z}" rpy="0 0 ${pi}" namespace="${namespace}" />
+        <xacro:micro_switch parent_link="body_link" name_prefix="front_right" xyz="${micro_switch_x_ofst} -0.0898 ${micro_switch_z}" rpy="0 0 0" namespace="${namespace}" />
+        <xacro:micro_switch parent_link="body_link" name_prefix="front_left" xyz="${micro_switch_x_ofst} 0.0898 ${micro_switch_z}" rpy="0 0 0" namespace="${namespace}" />
+        <xacro:micro_switch parent_link="body_link" name_prefix="back_right" xyz="${-micro_switch_x_ofst} -0.0898 ${micro_switch_z}" rpy="0 0 ${pi}" namespace="${namespace}" />
+        <xacro:micro_switch parent_link="body_link" name_prefix="back_left" xyz="${-micro_switch_x_ofst} 0.0898 ${micro_switch_z}" rpy="0 0 ${pi}" namespace="${namespace}" />
 
         <xacro:property name="cam_config" value="${config['camera']}"/>
         <xacro:include filename="$(find ros_robot_description)/urdf/components/rpi_camera.xacro" />
