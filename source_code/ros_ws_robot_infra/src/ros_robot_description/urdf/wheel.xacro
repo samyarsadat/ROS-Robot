@@ -7,28 +7,28 @@
         <xacro:if value="${position == 'fr'}">
             <xacro:property name="pos_x" value="${wheelbase/2.0}" />
             <xacro:property name="pos_y" value="${-track_width/2.0}" />
-            <xacro:property name="mesh_roll" value="${pi/2}" />
+            <xacro:property name="mesh_roll" value="${-pi/2}" />
         </xacro:if>
         <xacro:if value="${position == 'fl'}">
             <xacro:property name="pos_x" value="${wheelbase/2.0}" />
             <xacro:property name="pos_y" value="${track_width/2.0}" />
-            <xacro:property name="mesh_roll" value="${-pi/2}" />
+            <xacro:property name="mesh_roll" value="${pi/2}" />
         </xacro:if>
         <xacro:if value="${position == 'br'}">
             <xacro:property name="pos_x" value="${-wheelbase/2.0}" />
             <xacro:property name="pos_y" value="${-track_width/2.0}" />
-            <xacro:property name="mesh_roll" value="${pi/2}" />
+            <xacro:property name="mesh_roll" value="${-pi/2}" />
         </xacro:if>
         <xacro:if value="${position == 'bl'}">
             <xacro:property name="pos_x" value="${-wheelbase/2.0}" />
             <xacro:property name="pos_y" value="${track_width/2.0}" />
-            <xacro:property name="mesh_roll" value="${-pi/2}" />
+            <xacro:property name="mesh_roll" value="${pi/2}" />
         </xacro:if>
 
         <joint name="${position}_wheel_joint" type="continuous">
             <parent link="body_link" />
             <child link="${position}_wheel_link" />
-            <origin xyz="${pos_x} ${pos_y} ${whl_z_offset}" rpy="${pi/2} 0 0" />
+            <origin xyz="${pos_x} ${pos_y} ${whl_z_offset}" rpy="${-pi/2} 0 0" />
             <axis xyz="0 0 1" />
             <limit effort="1.5" velocity="0.62" />
             <dynamics damping="0.001" friction="0.001" />
