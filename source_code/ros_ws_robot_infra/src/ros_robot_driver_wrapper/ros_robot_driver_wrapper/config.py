@@ -42,11 +42,11 @@ class RosConfig:
 
 
 class RosFrameIds:
-    IMU_FRAME_ID = "imu_sens"
-    TEMP_SENS_FRAME_ID = "temp_sens"
-    FRONT_CLIFF_SENS_BASE_FRAME_ID = "cliff_sens_front_{}"
-    BACK_CLIFF_SENS_BASE_FRAME_ID = "cliff_sens_back_{}"
-    ULTRASONIC_SENS_BASE_FRAME_ID = "ultrasonic_sens_{}"
-    MICRO_SW_SENS_BASE_FRAME_ID = "micro_switch_{}"
+    IMU_FRAME_ID = "imu_link"
+    TEMP_SENS_FRAME_ID = ""
+    FRONT_CLIFF_SENS_BASE_FRAME_ID = "f{}_cliff_sens_link"
+    BACK_CLIFF_SENS_BASE_FRAME_ID = "b{}_cliff_sens_link"
+    ULTRASONIC_SENS_BASE_FRAME_ID = "{}_ultrasonic_emit_link"
+    MICRO_SW_SENS_BASE_FRAME_ID = "{}_microswitch_link"
     RIGHT_WHEEL_JOINTS = ["fr_wheel_joint", "br_wheel_joint"]
     LEFT_WHEEL_JOINTS = ["fl_wheel_joint", "bl_wheel_joint"]
