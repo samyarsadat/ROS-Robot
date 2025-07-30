@@ -82,7 +82,7 @@
                           fps="${cam_config['simulation']['framerate']}" fov="${camera_fov}" />
 
         <xacro:include filename="$(find ros_robot_description)/urdf/components/rplidar_a1.xacro" />
-        <xacro:rplidar parent_link="body_link" xyz="0.08 0 ${height}" rpy="0 0 ${pi}" namespace="${namespace}" />
+        <xacro:rplidar parent_link="body_link" xyz="0.065 0 ${height}" rpy="0 0 ${pi}" namespace="${namespace}" />
 
         <xacro:include filename="$(find ros_robot_description)/urdf/components/ultrasonic.xacro" />
         <xacro:ultrasonic type="srf05" parent_link="body_link" name_prefix="front" xyz="${(depth/2)-0.016} 0 0.03909" rpy="0 0 0" namespace="${namespace}" />
