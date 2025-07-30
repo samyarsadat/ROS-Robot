@@ -5,4 +5,4 @@
         frame_id: "lidar_laser_link"
         inverted: false
         angle_compensate: true
-        scan_mode: "Standard"
+        scan_mode: "Boost"
