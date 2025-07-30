@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:macro name="rpi_camera" params="parent_link name_prefix:='' namespace xyz rpy fov resolution fps">
+    <xacro:macro name="rpi_camera" params="parent_link name_prefix:='' namespace xyz rpy flip_optical:=False fov resolution fps">
         <xacro:property name="mesh_file" value="package://ros_robot_description/meshes/components/rpi_camera.dae" />
         <xacro:property name="namespace_fmt" value="${namespace + '/' if namespace != '' else ''}" />
         <xacro:property name="name_prefix_fmt" value="${name_prefix + '_' if name_prefix != '' else ''}" />
@@ -19,8 +19,9 @@
             </visual>
         </link>
 
+        <xacro:property name="optical_frame_rot" value="${pi/2 if flip_optical else -pi/2}" />
         <joint name="${name_prefix_fmt}camera_optical_joint" type="fixed">
-            <origin xyz="0 0 0" rpy="${pi/2} ${-pi/2} 0" />
+            <origin xyz="0 0 0" rpy="${optical_frame_rot} 0 ${optical_frame_rot}" />
             <parent link="${name_prefix_fmt}camera_link" />
             <child link="${name_prefix_fmt}camera_optical_link" />
         </joint>

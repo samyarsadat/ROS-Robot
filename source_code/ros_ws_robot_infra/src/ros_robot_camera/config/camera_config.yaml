@@ -1,5 +1,6 @@
 /**/camera:
     ros__parameters:
+        role: "video"
         format: "RGB888"
         width: 1152
         height: 648

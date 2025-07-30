@@ -77,7 +77,7 @@
 
         <xacro:property name="cam_config" value="${config['camera']}"/>
         <xacro:include filename="$(find ros_robot_description)/urdf/components/rpi_camera.xacro" />
-        <xacro:rpi_camera parent_link="body_link" xyz="${(depth/2)+0.01} 0 0.09106" rpy="${pi} 0 0" namespace="${namespace}"
+        <xacro:rpi_camera parent_link="body_link" xyz="${(depth/2)+0.01} 0 0.09106" rpy="${pi} 0 0" flip_optical="True" namespace="${namespace}"
                           resolution="${cam_config['simulation']['res_width']+' '+cam_config['simulation']['res_height']}"
                           fps="${cam_config['simulation']['framerate']}" fov="${camera_fov}" />
 
