@@ -19,9 +19,13 @@
             </visual>
         </link>
 
-        <xacro:property name="optical_frame_rot" value="${pi/2 if flip_optical else -pi/2}" />
         <joint name="${name_prefix_fmt}camera_optical_joint" type="fixed">
-            <origin xyz="0 0 0" rpy="${optical_frame_rot} 0 ${optical_frame_rot}" />
+            <xacro:if value="${flip_optical}">
+                <origin xyz="0 0 0" rpy="${pi/2} 0 ${pi/2}" />
+            </xacro:if>
+            <xacro:unless value="${flip_optical}">
+                <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+            </xacro:unless>
             <parent link="${name_prefix_fmt}camera_link" />
             <child link="${name_prefix_fmt}camera_optical_link" />
         </joint>
