@@ -1,0 +1,12 @@
+remappings:
+    _:
+        - from: /map
+          to: map
+        - from: /map_metadata
+          to: map_metadata
+        - from: /trajectories
+          to: trajectories
+        - from: cmd_vel
+          to: cmd_vel_nav
+        - from: cmd_vel_smoothed
+          to: cmd_vel

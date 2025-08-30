@@ -33,15 +33,6 @@ def _load_yaml(package: str, filename: str):
         return yaml.safe_load(f)
 
 
-def load_remappings(package: str, filename: str) -> list[SetRemap]:
-    data = _load_yaml(package, filename)
-    ret_list = []
-
-    for entry in data.get("remappings", []):
-        ret_list.append(SetRemap(entry["from"], entry["to"]))
-    return ret_list
-
-
 def load_remappings_tuple(package: str, filename: str, node_name: str="") -> list[tuple[str, str]]:
     data = _load_yaml(package, filename)
     ret_list = []
@@ -52,3 +43,8 @@ def load_remappings_tuple(package: str, filename: str, node_name: str="") -> lis
                 ret_list.append((rmp["from"].replace("<node_name>", node_name),
                                  rmp["to"].replace("<node_name>", node_name)))
     return ret_list
+
+
+def load_remappings(package: str, filename: str, node_name: str="") -> list[SetRemap]:
+    remaps = load_remappings_tuple(package, filename, node_name)
+    return [SetRemap(set_rmp[0], set_rmp[1]) for set_rmp in remaps]

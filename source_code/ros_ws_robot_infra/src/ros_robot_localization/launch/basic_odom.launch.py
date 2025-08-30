@@ -1,5 +1,5 @@
-#  The ROS robot project (LiDAR package)
-#  Laser filter for RPLiDAR A1 launch file.
+#  The ROS robot project (robot localization)
+#  Basic odom -> base_link broadcaster.
 #  Copyright 2025 Samyar Sadat Akhavi.
 #  Written by Samyar Sadat Akhavi, 2025.
 #
@@ -18,25 +18,21 @@
 
 from launch import LaunchDescription
 from launch.substitutions import PathJoinSubstitution
-from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-from launch_utils.remap_utils import load_remappings_tuple
-package_name="ros_robot_lidar"
+from launch_ros.actions import Node
+package_name = "ros_robot_localization"
 
 
 def generate_launch_description():
-    lf_config = "rplidar_laser_filter.yaml"
-    node_name = "rplidar_laser_filter"
-    laser_filter_node = Node(
-        package="laser_filters",
-        executable="scan_to_scan_filter_chain",
-        name=node_name,
-        parameters=[
-            PathJoinSubstitution([FindPackageShare(package_name), "config", lf_config])
-        ],
-        remappings=load_remappings_tuple(package_name, "rplidar_remaps.yaml", node_name)
+    odom_tf_config = PathJoinSubstitution([FindPackageShare(package_name), "config", "odom_tf_conf.yaml"])
+
+    tf_broadcaster_node = Node(
+        package="odom_to_tf_ros2",
+        executable="odom_to_tf",
+        name="odom_tf_node",
+        parameters=[odom_tf_config]
     )
 
     return LaunchDescription([
-        laser_filter_node
+        tf_broadcaster_node
     ])

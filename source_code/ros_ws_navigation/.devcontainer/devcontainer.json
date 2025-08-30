@@ -22,7 +22,7 @@
 
 
 {
-    "name": "ROS 2 Workspace (Robot)",
+    "name": "ROS 2 Workspace (Navigation)",
     "remoteUser": "nonroot",
     "overrideCommand": true,
     "postCreateCommand": "/devcon_post_create.sh",
@@ -48,11 +48,10 @@
 
     "workspaceFolder": "/home/nonroot/ros_ws",
     "mounts": [{"source": "${localWorkspaceFolder}/src", "target": "/home/nonroot/ros_ws/src", "type": "bind"},
-               {"source": "${localWorkspaceFolder}/../pico_ws/libmicroros/src/rrp_pico_coms", 
-                "target": "/home/nonroot/ros_ws/src/rrp_pico_coms", "type": "bind"}],
+               {"source": "${localWorkspaceFolder}/../ros_ws_robot_infra/src/launch_utils", 
+                "target": "/home/nonroot/ros_ws/src/launch_utils", "type": "bind"}],
 
     "runArgs": ["--net=host",
-                "--privileged",
                 "--cap-add=SYS_PTRACE",
                 "--security-opt", "seccomp=unconfined",
                 "--gpus", "all",

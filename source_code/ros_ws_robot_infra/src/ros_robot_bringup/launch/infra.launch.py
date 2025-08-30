@@ -18,7 +18,7 @@
 
 import launch
 from launch.actions import IncludeLaunchDescription, TimerAction, LogInfo, DeclareLaunchArgument, RegisterEventHandler, Shutdown
-from launch.conditions import IfCondition
+from launch.conditions import IfCondition, UnlessCondition
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
@@ -81,7 +81,15 @@ def generate_launch_description():
     localization_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution([rrp_localization_pkg, "launch", "ekf.launch.py"])
-        )
+        ),
+        condition=IfCondition(LaunchConfiguration("use_ekf"))
+    )
+
+    tf_broadcaster_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution([rrp_localization_pkg, "launch", "basic_odom.launch.py"])
+        ),
+        condition=UnlessCondition(LaunchConfiguration("use_ekf"))
     )
 
     remappings = load_remappings(package_name, "global_remaps.yaml")
@@ -119,5 +127,6 @@ def generate_launch_description():
         lidar_launch,
         lidar_filter_launch,
         localization_launch,
+        tf_broadcaster_launch,
         status_ok
     ])

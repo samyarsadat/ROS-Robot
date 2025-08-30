@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+    <name>ros_robot_navigation</name>
+    <version>0.1.0</version>
+    <description>The ROS Robot Nav2 mapping and navigation package.</description>
+    <maintainer email="samyarsadat@gigawhat.net">Samyar Sadat Akhavi</maintainer>
+    <license>GPL-3.0-only</license>
+
+    <buildtool_depend>ament_cmake</buildtool_depend>
+
+    <exec_depend>launch</exec_depend>
+    <exec_depend>launch_ros</exec_depend>
+    <exec_depend>nav2_common</exec_depend>
+    <exec_depend>nav2_amcl</exec_depend>
+    <exec_depend>nav2_behavior_tree</exec_depend>
+    <exec_depend>nav2_behaviors</exec_depend>
+    <exec_depend>nav2_bt_navigator</exec_depend>
+    <exec_depend>nav2_controller</exec_depend>
+    <exec_depend>nav2_core</exec_depend>
+    <exec_depend>nav2_costmap_2d</exec_depend>
+    <exec_depend>nav2_lifecycle_manager</exec_depend>
+    <exec_depend>nav2_map_server</exec_depend>
+    <exec_depend>nav2_mppi_controller</exec_depend>
+    <exec_depend>nav2_rviz_plugins</exec_depend>
+    <exec_depend>nav2_planner</exec_depend>
+    <exec_depend>nav2_smac_planner</exec_depend>
+    <exec_depend>nav2_smoother</exec_depend>
+    <exec_depend>nav2_velocity_smoother</exec_depend>
+    <exec_depend>nav2_waypoint_follower</exec_depend>
+    <exec_depend>slam_toolbox</exec_depend>
+
+    <test_depend>ament_cmake_pytest</test_depend>
+    <test_depend>python3-pytest</test_depend>
+
+    <export>
+        <build_type>ament_cmake</build_type>
+    </export>
+</package>

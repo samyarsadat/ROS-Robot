@@ -39,7 +39,7 @@ def generate_launch_description():
             PathJoinSubstitution([FindPackageShare(package_name), "config", rp_config_file]),
         ],
         remappings=load_remappings_tuple(package_name, "rplidar_remaps.yaml", node_name=node_name),
-        output="screen",
+        output="screen"
     )
 
     return LaunchDescription([

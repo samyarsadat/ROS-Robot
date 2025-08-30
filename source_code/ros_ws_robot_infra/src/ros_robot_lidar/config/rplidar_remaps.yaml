@@ -1,6 +1,12 @@
 remappings:
     _:
+        - from: scan
+          to: lidar/scan
+    rplidar_node:
         - from: start_motor
           to: <node_name>/start_motor
         - from: stop_motor
           to: <node_name>/stop_motor
+    rplidar_remaps:
+        - from: scan_filtered
+          to: lidar/scan_filtered
