@@ -4,14 +4,14 @@ This directory contains the source code and related files (such as Dockerfiles f
 <br>
 
 ### Operating Systems & Software Versions
-**Raspberry Pi OS:** Ubuntu 24.04, Vulcanexus ROS 2 installation. Debian Docker container for RPi AI Kit.<br>
-**Workstation OS:** Ubuntu 24.04, using Docker containers.<br>
-**ROS2 Distribution:** ROS2 Jazzy Jalisco.<br><br>
+**Raspberry Pi OS:** Ubuntu 24.04, Vulcanexus ROS 2 installation. Debian Docker container for RPi AI Kit.\
+**Workstation OS:** Ubuntu 24.04, using Docker containers.\
+**ROS2 Distribution:** ROS2 Jazzy Jalisco.
+
+<br>
 
 ### Directories
  - **pico_ws:** Raspberry Pi Pico workspace. Contains the source code for Raspberry Pi Pico firmware, the source code for the ROS package that contains the custom message definitions that are used by the Picos to communicate with the main Raspberry Pi computer, and a devcontainer for building the firmware and the ROS package. It also contains pre-built binaries for the Picos.
  - **ros_ws_robot_infra:** Robot infrastructure ROS workspace. Contains the source code for all of the base ROS packages that run on the robot (i.e. the driver, the camera image publisher, robot description, LiDAR, etc.), a devcontainer for developing and building the packages, and a Dockerfile for deploying the packages to the robot.
- - **ros_ws_workstation:** Workstation ROS workspace. Contains the source code for all of the ROS packages that run on the workstation, a devcontainer for developing and building the packages, and a Dockerfile for running the packages on the workstation.<br><br>
+ - **ros_ws_navigation:** Robot navigation ROS workspace. All navigation (nav2) and SLAM related packages and configuration files are here.
  - **ros_camera_ws:** This workspace is for buildind the `camera_ros` package with Raspberry Pi's fork of the `libcamera` library.
-
-***W.I.P.***
