@@ -1,0 +1,16 @@
+/**/twist_mux:
+    ros__parameters:
+        topics:
+            joystick:
+                topic: /remote/cmd_vel
+                timeout: 0.5
+                priority: 20
+            navigation:
+                topic: cmd_vel_nav
+                timeout: 0.5
+                priority: 10
+        locks:
+            joystick:
+                topic: /remote/joy_mux_lock
+                timeout: 0.0
+                priority: 20

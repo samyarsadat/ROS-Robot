@@ -1,7 +1,6 @@
 #  The ROS robot project (general robot infrastructure bring-up)
-#  MicroROS agent(s) launch description
-#  Copyright 2024 Samyar Sadat Akhavi
-#  Written by Samyar Sadat Akhavi, 2024.
+#  Copyright 2024-2025 Samyar Sadat Akhavi.
+#  Written by Samyar Sadat Akhavi, 2024-2025.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -14,7 +13,7 @@
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <https: www.gnu.org/licenses/>.
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import launch
 from launch.actions import IncludeLaunchDescription, TimerAction, LogInfo, DeclareLaunchArgument, RegisterEventHandler, Shutdown
@@ -93,6 +92,12 @@ def generate_launch_description():
         condition=UnlessCondition(LaunchConfiguration("use_ekf"))
     )
 
+    twist_mux_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution([FindPackageShare(package_name), "launch", "twist_mux.launch.py"])
+        )
+    )
+
     remappings = load_remappings(package_name, "global_remaps.yaml")
     parameters = [
         SetParameter(name="use_sim", value="False"),
@@ -130,5 +135,6 @@ def generate_launch_description():
         lidar_filter_launch,
         localization_launch,
         tf_broadcaster_launch,
+        twist_mux_launch,
         status_ok
     ])

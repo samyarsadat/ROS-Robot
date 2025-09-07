@@ -11,6 +11,7 @@
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>ros_robot_driver_wrapper</exec_depend>
   <exec_depend>camera_ros</exec_depend>
+  <exec_depend>twist_mux</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_pep257</test_depend>
