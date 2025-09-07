@@ -38,31 +38,33 @@ class RosConfig:
 
 
 class RosNames:
+    PICO_NAMESPACE = "/"
+
     # Generic
-    EMERGENCY_STOP_TOPIC = "/e_stop"
-    DIAGNOSTICS_TOPIC = "/diagnostics"
+    EMERGENCY_STOP_TOPIC = f"{PICO_NAMESPACE}e_stop"
+    DIAGNOSTICS_TOPIC = f"{PICO_NAMESPACE}diagnostics"
 
     # Pico A
-    COMMAND_VEL_TOPIC = "/cmd_vel"
-    PICO_A_MISC_SENS_TOPIC = "sensors_raw/misc_a"
-    ULTRASONIC_SENS_TOPIC = "sensors_raw/ultrasonics"
-    CLIFF_SENS_TOPIC = "sensors_raw/falloff"
-    MOTOR_CTRL_STATE_R_TOPIC = "sensors_raw/mtr_ctrl_right"
-    MOTOR_CTRL_STATE_L_TOPIC = "sensors_raw/mtr_ctrl_left"
-    ENC_ODOMETRY_TOPIC = "sensors/enc_odom"
-    EN_MOTOR_CTRL_SRV = "enable_disable/motor_ctrl"
-    EN_EMITTERS_SRV = "enable_disable/emitters"
-    EN_RELAY_SRV = "enable_disable/pico_a_relay"
-    SET_MTR_PID_TUNINGS_SRV = "config/set_motor_pid_tunings"
-    PICO_A_RUN_SELFTEST_SRV = "self_test/pico_a"
-    PICO_A_RUN_CALIB_SRV = "calibrate/pico_a"
-    PICO_A_GET_CONFIG_SRV = "config/get_pico_a"
+    COMMAND_VEL_TOPIC = f"{PICO_NAMESPACE}cmd_vel"
+    PICO_A_MISC_SENS_TOPIC = f"{PICO_NAMESPACE}sensors_raw/misc_a"
+    ULTRASONIC_SENS_TOPIC = f"{PICO_NAMESPACE}sensors_raw/ultrasonics"
+    CLIFF_SENS_TOPIC = f"{PICO_NAMESPACE}sensors_raw/falloff"
+    MOTOR_CTRL_STATE_R_TOPIC = f"{PICO_NAMESPACE}sensors_raw/mtr_ctrl_right"
+    MOTOR_CTRL_STATE_L_TOPIC = f"{PICO_NAMESPACE}sensors_raw/mtr_ctrl_left"
+    ENC_ODOMETRY_TOPIC = f"{PICO_NAMESPACE}sensors/enc_odom"
+    EN_MOTOR_CTRL_SRV = f"{PICO_NAMESPACE}enable_disable/motor_ctrl"
+    EN_EMITTERS_SRV = f"{PICO_NAMESPACE}enable_disable/emitters"
+    EN_RELAY_SRV = f"{PICO_NAMESPACE}enable_disable/pico_a_relay"
+    SET_MTR_PID_TUNINGS_SRV = f"{PICO_NAMESPACE}config/set_motor_pid_tunings"
+    PICO_A_RUN_SELFTEST_SRV = f"{PICO_NAMESPACE}self_test/pico_a"
+    PICO_A_RUN_CALIB_SRV = f"{PICO_NAMESPACE}calibrate/pico_a"
+    PICO_A_GET_CONFIG_SRV = f"{PICO_NAMESPACE}config/get_pico_a"
 
     # Pico B
-    PICO_B_MISC_SENS_TOPIC = "sensors_raw/misc_b"
-    MICRO_SW_SENS_TOPIC = "sensors_raw/microswitches"
-    EN_CAMERA_LEDS_SRV = "enable_disable/camera_leds"
-    PICO_B_RUN_SELFTEST_SRV = "self_test/pico_b"
+    PICO_B_MISC_SENS_TOPIC = f"{PICO_NAMESPACE}sensors_raw/misc_b"
+    MICRO_SW_SENS_TOPIC = f"{PICO_NAMESPACE}sensors_raw/microswitches"
+    EN_CAMERA_LEDS_SRV = f"{PICO_NAMESPACE}enable_disable/camera_leds"
+    PICO_B_RUN_SELFTEST_SRV = f"{PICO_NAMESPACE}self_test/pico_b"
 
 
 # ---- Robot Config ----

@@ -1,4 +1,4 @@
 remappings:
     twist_mux:
-        - from: /cmd_vel_out
+        - from: cmd_vel_out
           to: cmd_vel
