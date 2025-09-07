@@ -18,7 +18,7 @@
 
 import concurrent.futures
 import rclpy
-from diagnostic_msgs.msg import DiagnosticStatus
+from diagnostic_msgs.msg import DiagnosticArray
 from diagnostic_msgs.srv import SelfTest
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
@@ -51,7 +51,7 @@ class RosNode(Node):
         self.joint_state_pub = self.create_publisher(JointState, "joint_states", qos_profile=RosConfig.QOS_RELIABLE)
         self.last_joint_state_time = self.get_clock().now()
 
-        self.diagnostics_pub = self.create_publisher(DiagnosticStatus, "diagnostics", qos_profile=RosConfig.QOS_RELIABLE, callback_group=self._reentrant_cb_group)
+        self.diagnostics_pub = self.create_publisher(DiagnosticArray, "diagnostics", qos_profile=RosConfig.QOS_RELIABLE, callback_group=self._reentrant_cb_group)
         self.ping_driver_srv = self.create_service(GetBool, "diagnostics/ping_driver", self._ping_driver_srv_call, qos_profile=RosConfig.QOS_RELIABLE, callback_group=self._reentrant_cb_group)
         self.enable_relay_srv = self.create_service(SetBool, "enable/set_relay", self._enable_relay_srv_call, qos_profile=RosConfig.QOS_RELIABLE)
         self.battery_info_pub = self.create_publisher(BatteryState, "electrical/battery_state", qos_profile=RosConfig.QOS_BEST_EFFORT, callback_group=self._reentrant_cb_group)

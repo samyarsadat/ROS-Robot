@@ -17,10 +17,9 @@
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
 import math
-from builtin_interfaces.msg import Time
-from geometry_msgs.msg import Twist, Pose, TransformStamped
+from geometry_msgs.msg import Twist, Pose
 from nav_msgs.msg import Odometry
-from ros2topic.verb import pub
+from diagnostic_msgs.msg import DiagnosticArray
 from ros_robot_driver.driver_impl import ros_robot_interface
 from ros_robot_driver.interface_data_structs.diagnostics_report import DiagnosticsReport
 from ros_robot_driver_wrapper.config import RosFrameIds
@@ -31,9 +30,11 @@ from ros_robot_driver_wrapper.utils import euler_to_quaternion
 
 
 # ---- Callbacks ----
-
 def diag_recv_callback(report: DiagnosticsReport) -> None:
-    get_ros_node().diagnostics_pub.publish(report.to_ros_message())
+    diag_msg = DiagnosticArray()
+    diag_msg.header.stamp = get_ros_node().get_clock().now().to_msg()
+    diag_msg.status = [report.to_ros_message()]
+    get_ros_node().diagnostics_pub.publish(diag_msg)
 
 
 def battery_info_callback() -> None:
