@@ -18,6 +18,7 @@ source_code/pico_ws/libmicroros/src/rrp_pico_coms/log
 source_code/ros_ws_robot_infra/install
 source_code/ros_ws_robot_infra/log
 source_code/ros_ws_robot_infra/build
+source_code/ros_ws_robot_infra/src/odom_calibration
 source_code/ros_camera_ws/install
 source_code/ros_camera_ws/log
 source_code/ros_camera_ws/build

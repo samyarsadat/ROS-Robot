@@ -62,19 +62,6 @@ def encoder_odometry_callback() -> None:
     msg.child_frame_id = ros_robot_interface.encoder_odometry.get_child_frame_id()
     msg.header.frame_id = ros_robot_interface.encoder_odometry.get_header_frame_id()
     msg.header.stamp = get_ros_node().get_clock().now().to_msg()
-
-    #transform = TransformStamped()
-    #transform.header.stamp = get_ros_node().get_clock().now().to_msg()
-    #transform.header.frame_id = ros_robot_interface.encoder_odometry.get_header_frame_id()
-    #transform.child_frame_id = ros_robot_interface.encoder_odometry.get_child_frame_id()
-    #transform.transform.translation.x = ros_robot_interface.encoder_odometry.get_position()[0]
-    #transform.transform.translation.y = ros_robot_interface.encoder_odometry.get_position()[1]
-    #transform.transform.translation.z = 0.0
-    #transform.transform.rotation.x = ros_robot_interface.encoder_odometry.get_orientation()[0]
-    #transform.transform.rotation.y = ros_robot_interface.encoder_odometry.get_orientation()[1]
-    #transform.transform.rotation.z = ros_robot_interface.encoder_odometry.get_orientation()[2]
-    #transform.transform.rotation.w = ros_robot_interface.encoder_odometry.get_orientation()[3]
-    #get_ros_node().base_odom_tf.sendTransform(transform)
     get_ros_node().encoder_odom_pub.publish(msg)
 
 

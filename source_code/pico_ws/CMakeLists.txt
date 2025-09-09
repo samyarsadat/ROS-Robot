@@ -41,7 +41,7 @@ include(FreeRTOS_Kernel_import.cmake)
 
 # FreeRTOS config
 set(FREERTOS_CONFIG_DIR "${CMAKE_CURRENT_LIST_DIR}/libfreertos/Config" CACHE STRING "FreeRTOS Config Path" FORCE)
-include_directories("${FREERTOS_CONFIG_DIR}") 
+include_directories("${FREERTOS_CONFIG_DIR}")
 
 # Include MicroROS
 set(MICRO_ROS_PATH "${CMAKE_CURRENT_LIST_DIR}/libmicroros/firmware/build" CACHE STRING "MicroROS Library Path" FORCE)

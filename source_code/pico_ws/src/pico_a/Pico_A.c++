@@ -242,7 +242,7 @@ void en_emitters_callback(const void *req, void *res)
     {
         write_log("Enabling ultrasonic and IR edge emitters.", LOG_LVL_INFO, FUNCNAME_ONLY);
         ultrasonic_ir_edge_rt_active = true;
-        alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, ultra_pub_rt_interval, publish_ultra_notify, NULL, &ultrasonic_publish_rt);
+        //alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, ultra_pub_rt_interval, publish_ultra_notify, NULL, &ultrasonic_publish_rt);
         alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, edge_ir_pub_rt_interval, publish_edge_ir_notify, NULL, &edge_ir_publish_rt);
     }
 
@@ -477,14 +477,8 @@ void publish_odom()
     enc_odom_msg.pose.position.y = enc_odom_y_pos / 1000.0f;   // Convert to meters
     enc_odom_msg.pose.orientation = quat_msg;
 
-    enc_odom_msg.twist.linear.x = ((r_enc_diff_mm / time_diff_ms) + (l_enc_diff_mm / time_diff_ms)) / 2;         // Linear velocity (m/s)
-    enc_odom_msg.twist.angular.z = ((r_enc_diff_mm - l_enc_diff_mm) * 1000.0f) / (track_width * time_diff_ms);   // Anglular velocity (rad/s)
-
-    // Alternate linear and angular velocity formulae
-    /*float r_vel_mms = (wheel_circumference * ((r_motors.get_encs_array()[0]->get_direction() == MotorEncoder::FORWARD) ? r_motors.get_avg_rpm() : r_motors.get_avg_rpm() * -1)) / 60;
-    float l_vel_mms = (wheel_circumference * ((l_motors.get_encs_array()[0]->get_direction() == MotorEncoder::FORWARD) ? l_motors.get_avg_rpm() : l_motors.get_avg_rpm() * -1)) / 60;
-    enc_odom_msg.twist.linear.x = ((r_vel_mms / 1000.0f) + (r_vel_mms / 1000.0f)) / 2;   // Linear velocity (m/s)
-    enc_odom_msg.twist.angular.z = (r_vel_mms - l_vel_mms) / track_width;                // Anglular velocity (rad/s)*/
+    enc_odom_msg.twist.linear.x = (((r_enc_diff_mm / time_diff_ms) + (l_enc_diff_mm / time_diff_ms)) / 2) * 1.0917;          // Linear velocity (m/s)
+    enc_odom_msg.twist.angular.z = (((r_enc_diff_mm - l_enc_diff_mm) * 1000.0f) / (track_width * time_diff_ms)) * 0.7989f;   // Anglular velocity (rad/s)
 
     // Publish
     uRosPublishingHandler::PublishItem_t enc_odom;
@@ -600,7 +594,7 @@ void start_timers()
     write_log("Starting hardware timers...", LOG_LVL_INFO, FUNCNAME_ONLY);
 
     alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, motor_odom_rt_interval, motor_odom_notify, NULL, &motor_odom_rt);
-    alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, ultra_pub_rt_interval, publish_ultra_notify, NULL, &ultrasonic_publish_rt);
+    //alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, ultra_pub_rt_interval, publish_ultra_notify, NULL, &ultrasonic_publish_rt);
     alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, edge_ir_pub_rt_interval, publish_edge_ir_notify, NULL, &edge_ir_publish_rt);
     alarm_pool_add_repeating_timer_ms(core_1_alarm_pool, sensors_pub_rt_interval, publish_misc_sens_notify, NULL, &other_sensors_publish_rt);
     add_repeating_timer_ms(motor_enc_method_2_rt_interval, motor_enc_timer_call, NULL, &motor_enc_rt);
@@ -693,9 +687,9 @@ void setup(void *parameters)
     write_log("Creating timer tasks...", LOG_LVL_INFO, FUNCNAME_ONLY);
     xTaskCreate(motor_ctrl_odom_task, "motor_odom", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 4, &motor_odom_th);
     xTaskCreate(publish_edge_ir, "publish_edge_ir", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 5, &edge_ir_publish_th);
-    xTaskCreate(publish_ultra, "publish_ultra", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 5, &ultrasonic_publish_th);
+    //xTaskCreate(publish_ultra, "publish_ultra", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 5, &ultrasonic_publish_th);
     xTaskCreate(publish_misc_sens, "publish_misc_sens", TIMER_TASK_STACK_DEPTH, NULL, configMAX_PRIORITIES - 5, &other_sensors_publish_th);
-    vTaskCoreAffinitySet(ultrasonic_publish_th, (1 << 1));      // Lock task to core 1
+    //vTaskCoreAffinitySet(ultrasonic_publish_th, (1 << 1));      // Lock task to core 1
     vTaskCoreAffinitySet(edge_ir_publish_th, (1 << 1));         // Lock task to core 1
     vTaskCoreAffinitySet(other_sensors_publish_th, (1 << 1));   // Lock task to core 1
 

@@ -80,3 +80,7 @@ class RobotConfig:
     SERVICE_CALL_FAILURE = "Service call failed!"
     SERVICE_CALL_REDUNDANT = "Value already set, redundant call."
 
+    # Odometry calibration coefficients
+    ROBOT_LINEAR_ODOM_COEFF = 1.0917
+    ROBOT_ANGULAR_ODOM_COEFF = 0.7989
+

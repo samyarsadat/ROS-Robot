@@ -32,7 +32,7 @@ def generate_launch_description():
     namespace_arg = DeclareLaunchArgument("namespace", default_value="")
     launch_camera_arg = DeclareLaunchArgument("launch_camera", default_value="True")
     launch_lidar_filter_arg = DeclareLaunchArgument("launch_lidar_filter", default_value="False")
-    use_ekf_arg = DeclareLaunchArgument("use_ekf", default_value="False")
+    use_ekf_arg = DeclareLaunchArgument("use_ekf", default_value="True")
     namespace_lc = LaunchConfiguration("namespace")
 
     rrp_camera_pkg = FindPackageShare("ros_robot_camera")

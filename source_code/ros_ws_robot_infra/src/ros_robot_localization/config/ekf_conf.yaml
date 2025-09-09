@@ -23,11 +23,11 @@
         odom0_nodelay: true
         odom0_differential: false
         odom0_relative: true
-        odom0_config: [true,  true,  false,   # X, Y, Z
-                       false, false, true,    # Roll, Pitch, Yaw
-                       true,  true,  false,   # Vel. X, Y, Z
-                       false, false, true,    # Vel. Roll, Pitch, Yaw
-                       false, false, false]   # Accel. X, Y, Z
+        odom0_config: [false, false, false,  # X, Y, Z
+                       false, false, false,  # Roll, Pitch, Yaw
+                       true,  true,  false,  # Vel. X, Y, Z
+                       false, false, true,   # Vel. Roll, Pitch, Yaw
+                       false, false, false]  # Accel. X, Y, Z
 
         #imu0: pos_data/imu
         #imu0_queue_size: 5
