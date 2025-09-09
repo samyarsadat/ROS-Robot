@@ -299,7 +299,7 @@ amcl:
         global_frame_id: map
         odom_frame_id: odom
         base_frame_id: base_link
-        scan_topic: <scan_topic>
+        scan_topic: <namespace>/<scan_topic>
         robot_model_type: nav2_amcl::DifferentialMotionModel
 
         tf_broadcast: true

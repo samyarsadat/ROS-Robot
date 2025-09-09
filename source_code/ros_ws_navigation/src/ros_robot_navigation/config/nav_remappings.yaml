@@ -1,12 +1,15 @@
 remappings:
     _:
-        - from: /map
-          to: map
         - from: /map_metadata
           to: map_metadata
         - from: /trajectories
           to: trajectories
         - from: cmd_vel
-          to: cmd_vel_nav
+          to: cmd_vel_nav_unsmoothed
         - from: cmd_vel_smoothed
-          to: cmd_vel
+          to: cmd_vel_nav
+        - from: /tf
+          to: tf
+        - from: /tf_static
+          to: tf_static
+    

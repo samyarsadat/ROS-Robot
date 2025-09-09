@@ -76,7 +76,7 @@ def generate_launch_description():
     container_name_full = (namespace_lc, "/", container_name)
 
     bringup_cmd_group = GroupAction(
-        #load_remappings(package_name, "nav_remappings.yaml") + 
+        load_remappings(package_name, "nav_remappings.yaml") + 
         [
         SetParameter("use_sim_time", use_sim_lc),
         SetParameter("autostart", autostart_lc),

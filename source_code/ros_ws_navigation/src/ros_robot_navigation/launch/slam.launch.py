@@ -16,11 +16,11 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription, LogInfo
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
-from launch_ros.actions import Node
+from launch_ros.actions import Node, SetRemap
 from launch_ros.descriptions import ParameterFile
 from nav2_common.launch import ReplaceString
 package_name = "ros_robot_navigation"
@@ -83,5 +83,6 @@ def generate_launch_description():
         params_file_arg,
         scan_topic_arg,
         use_sim_arg,
+        SetRemap("/map", "map"),
         bringup_cmd_group
     ])
