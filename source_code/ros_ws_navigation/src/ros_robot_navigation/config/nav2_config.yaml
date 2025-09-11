@@ -15,7 +15,7 @@ controller_server:
         progress_checker:
             plugin: nav2_controller::SimpleProgressChecker
             movement_time_allowance: 10.0
-            required_movement_radius: 0.5
+            required_movement_radius: 0.4
 
         goal_checker_plugins: [goal_checker]
         goal_checker:
@@ -33,8 +33,8 @@ controller_server:
             model_dt: 0.05
             batch_size: 2000
 
-            vx_std: 0.2
-            wz_std: 0.4
+            vx_std: 0.4
+            wz_std: 2.5
 
             vx_max: 0.62
             vx_min: -0.62
@@ -123,7 +123,7 @@ local_costmap:
             rolling_window: true
             width: 8
             height: 8
-            resolution: 0.04
+            resolution: 0.03
             always_send_full_costmap: true
             
             # 30cm x 26.5cm
@@ -135,8 +135,8 @@ local_costmap:
             
             inflation_layer:
                 plugin: nav2_costmap_2d::InflationLayer
-                cost_scaling_factor: 3.0
-                inflation_radius: 0.5
+                cost_scaling_factor: 1.0
+                inflation_radius: 0.2143
             
             obstacle_layer:
                 plugin: nav2_costmap_2d::ObstacleLayer
@@ -162,7 +162,7 @@ global_costmap:
 
             update_frequency: 5.0
             publish_frequency: 2.0
-            resolution: 0.05
+            resolution: 0.03
             always_send_full_costmap: true
             track_unknown_space: true
 
@@ -176,8 +176,8 @@ global_costmap:
             
             inflation_layer:
                 plugin: nav2_costmap_2d::InflationLayer
-                cost_scaling_factor: 3.0
-                inflation_radius: 0.25
+                cost_scaling_factor: 1.0
+                inflation_radius: 0.2143
                 inflate_around_unknown: false
                 inflate_unknown: false
             
@@ -253,9 +253,9 @@ behavior_server:
         simulate_ahead_time: 2.0
 
         # Spin
-        max_rotational_vel: 1.0
-        min_rotational_vel: 0.4
-        rotational_acc_lim: 3.2
+        max_rotational_vel: 5.0
+        min_rotational_vel: 2.0
+        rotational_acc_lim: 4.0
 
 waypoint_follower:
     ros__parameters:
