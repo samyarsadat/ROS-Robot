@@ -17,7 +17,8 @@
 
 ----
 > [!NOTE]
-> This project is still under development!
+> This project was completed and effectively reached its objective in September 2025.\
+> There will be no further development. I have moved my focus to the 2nd revision of The ROS Robot.
 
 <br>
 
